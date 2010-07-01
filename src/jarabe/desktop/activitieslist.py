@@ -235,7 +235,7 @@ class ListModel(Gtk.TreeModelSort):
                     '<span style="italic" weight="light">%s</span>' % \
                             (activity_info.get_name(), tags)
 
-        self._model.append([activity_info.get_bundle_id(),
+        self._model.prepend([activity_info.get_bundle_id(),
                             favorite,
                             activity_info.get_icon(),
                             title,
