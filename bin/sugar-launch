@@ -28,6 +28,13 @@ usage = "usage: %prog [options] activity"
 parser = OptionParser(usage)
 parser.add_option("-d", "--debug", action="store_true", dest="debug",
                   help="launch activity inside gdb")
+parser.add_option("-a", "--activity_id", action="store", dest="activity_id",
+                  help="unique id for the activity to be launched")
+parser.add_option("-o", "--object_id", action="store", dest="object_id",
+                  help="identity of the journal object associated with" \
+                  " the activity")
+parser.add_option("-u", "--uri", action="store", dest="uri",
+                  help="URI associated with the activity")
 (options, args) = parser.parse_args()
 
 if len(args) == 0:
@@ -42,7 +49,8 @@ if not path:
     sys.exit(1)
 
 activity = ActivityBundle(path)
-cmd_args = activityfactory.get_command(activity)
+cmd_args = activityfactory.get_command(activity, options.activity_id,
+                                options.object_id, options.uri)
 
 def _which(exec_file):
     if 'PATH' in os.environ:
