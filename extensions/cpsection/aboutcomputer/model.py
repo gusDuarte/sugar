@@ -104,7 +104,10 @@ def print_serial_number():
 
 
 def get_build_number():
-    build_no = _read_file('/boot/olpc_build')
+    if os.path.isfile('/boot/olpc_build'):
+        build_no = _read_file('/boot/olpc_build')
+    elif os.path.isfile('/bootpart/olpc_build'):
+        build_no = _read_file('/bootpart/olpc_build')
 
     if build_no is None:
         build_no = _read_file('/etc/redhat-release')
