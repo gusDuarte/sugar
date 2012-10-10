@@ -29,7 +29,6 @@ from gi.repository import GdkPixbuf
 
 from sugar3.graphics import style
 from sugar3.graphics.icon import Icon
-from sugar3.graphics.icon import EventIcon
 from sugar3.graphics.icon import CanvasIcon
 from sugar3.graphics.menuitem import MenuItem
 from sugar3.graphics.alert import Alert
@@ -547,9 +546,9 @@ class FavoritePalette(ActivityPalette):
             self.emit('entry-activate', entry)
 
 
-class CurrentActivityIcon(EventIcon):
+class CurrentActivityIcon(CanvasIcon):
     def __init__(self):
-        EventIcon.__init__(self, icon_name='activity-journal',
+        CanvasIcon.__init__(self, icon_name='activity-journal',
                             pixel_size=style.STANDARD_ICON_SIZE, cache=True)
         self._home_model = shell.get_model()
         self._home_activity = self._home_model.get_active_activity()
@@ -581,6 +580,7 @@ class CurrentActivityIcon(EventIcon):
             palette = JournalPalette(self._home_activity)
         else:
             palette = CurrentActivityPalette(self._home_activity)
+        self.connect_to_palette_pop_events(palette)
         return palette
 
     def __active_activity_changed_cb(self, home_model, home_activity):
