@@ -16,14 +16,19 @@
 
 from gettext import gettext as _
 import logging
+import os
 
 from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import Wnck
 
+from sugar3 import env
+
 from sugar3.graphics import style
 from sugar3.graphics.toolbutton import ToolButton
+
+from sugar3.datastore import datastore
 
 from jarabe.journal.listview import BaseListView
 from jarabe.journal.listmodel import ListModel
@@ -47,6 +52,7 @@ class ObjectChooser(Gtk.Window):
         self.set_border_width(style.LINE_WIDTH)
 
         self._selected_object_id = None
+        self._callback = None
 
         self.add_events(Gdk.EventMask.VISIBILITY_NOTIFY_MASK)
         self.connect('visibility-notify-event',
@@ -111,6 +117,15 @@ class ObjectChooser(Gtk.Window):
         self._selected_object_id = uid
         self.emit('response', Gtk.ResponseType.ACCEPT)
 
+        if self._callback is not None:
+            self._callback(self._selected_object_id)
+
+    def get_selected_object(self):
+        if self._selected_object_id is None:
+            return None
+        else:
+            return datastore.get(self._selected_object_id)
+
     def __delete_event_cb(self, chooser, event):
         self.emit('response', Gtk.ResponseType.DELETE_EVENT)
 
@@ -121,6 +136,8 @@ class ObjectChooser(Gtk.Window):
 
     def __close_button_clicked_cb(self, button):
         self.emit('response', Gtk.ResponseType.DELETE_EVENT)
+        if self._callback is not None:
+            self._callback(self._selected_object_id)
 
     def get_selected_object_id(self):
         return self._selected_object_id
@@ -139,6 +156,9 @@ class ObjectChooser(Gtk.Window):
 
     def __clear_clicked_cb(self, list_view):
         self._toolbar.clear_query()
+
+    def _set_callback(self, callback):
+        self._callback = callback
 
 
 class TitleBox(VolumesToolbar):
