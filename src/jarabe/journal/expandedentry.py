@@ -160,10 +160,29 @@ class ExpandedEntry(Gtk.EventBox):
         self._buddy_list.pack_start(self._create_buddy_list(), False, False,
                                     style.DEFAULT_SPACING)
 
-        description = metadata.get('description', '')
+        # TRANS: Do not translate the """%s""".
+        uploader_nick_text = self.__create_text_description(
+                _('Source XO Nick :: \n%s'), metadata.get('uploader-nick', ''))
+
+        # TRANS: Do not translate the """%s""".
+        uploader_serial_text = self.__create_text_description(
+                _('Source XO Serial Number :: \n%s'), metadata.get('uploader-serial', ''))
+
+        # TRANS: Do not translate the """%s""".
+        misc_info_text = self.__create_text_description(
+                _('Misellaneous Information :: \n%s'), metadata.get('description', ''))
+
+        description = uploader_nick_text + uploader_serial_text + misc_info_text
         self._description.get_buffer().set_text(description)
+
         tags = metadata.get('tags', '')
         self._tags.get_buffer().set_text(tags)
+
+    def __create_text_description(self, heading, value):
+        if (value == '') or (value is None):
+            return ''
+
+        return ((heading % value) + '\n\n')
 
     def _create_keep_icon(self):
         keep_icon = KeepIcon()
@@ -396,18 +415,20 @@ class ExpandedEntry(Gtk.EventBox):
             needs_update = True
 
         if needs_update:
-            if self._metadata.get('mountpoint', '/') == '/':
-                model.write(self._metadata, update_mtime=False)
-            else:
-                old_file_path = os.path.join(self._metadata['mountpoint'],
-                        model.get_file_name(old_title,
-                        self._metadata['mime_type']))
-                model.write(self._metadata, file_path=old_file_path,
-                        update_mtime=False)
+            from jarabe.journal.journalactivity import get_journal
+            self._metadata['mountpoint'] = \
+                    get_journal().get_detail_toolbox().get_mount_point()
+
+            model.update_only_metadata_and_preview_files_and_return_file_paths(self._metadata)
 
         self._update_title_sid = None
 
     def _keep_icon_toggled_cb(self, keep_icon):
+        # If it is a locally-mounted remote-share, return without doing
+        # any processing.
+        if model.is_current_mount_point_for_remote_share(model.DETAIL_VIEW):
+            return
+
         if keep_icon.get_active():
             self._metadata['keep'] = 1
         else:

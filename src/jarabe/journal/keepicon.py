@@ -22,6 +22,8 @@ from sugar3.graphics.icon import Icon
 from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor
 
+from jarabe.journal import model
+
 
 class KeepIcon(Gtk.ToggleButton):
     def __init__(self):
@@ -37,6 +39,9 @@ class KeepIcon(Gtk.ToggleButton):
         self.connect('enter-notify-event', self.__enter_notify_event_cb)
 
     def __toggled_cb(self, widget):
+        if model.is_current_mount_point_for_remote_share(model.DETAIL_VIEW):
+            return
+
         if self.get_active():
             client = GConf.Client.get_default()
             color = XoColor(client.get_string('/desktop/sugar/user/color'))
@@ -47,9 +52,15 @@ class KeepIcon(Gtk.ToggleButton):
             self._icon.props.fill_color = style.COLOR_TRANSPARENT.get_svg()
 
     def __enter_notify_event_cb(self, icon, event):
+        if model.is_current_mount_point_for_remote_share(model.DETAIL_VIEW):
+            return
+
         if not self.get_active():
             self._icon.props.fill_color = style.COLOR_BUTTON_GREY.get_svg()
 
     def __leave_notify_event_cb(self, icon, event):
+        if model.is_current_mount_point_for_remote_share(model.DETAIL_VIEW):
+            return
+
         if not self.get_active():
             self._icon.props.fill_color = style.COLOR_TRANSPARENT.get_svg()

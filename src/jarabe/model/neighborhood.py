@@ -929,6 +929,9 @@ class Neighborhood(GObject.GObject):
         if 'key' in properties:
             buddy.props.key = properties['key']
 
+        if 'ip4-address' in properties:
+            buddy.props.ip_address = properties['ip4-address']
+
         nick_key = CONNECTION_INTERFACE_ALIASING + '/alias'
         if nick_key in properties:
             buddy.props.nick = properties[nick_key]

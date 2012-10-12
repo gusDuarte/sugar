@@ -37,10 +37,13 @@ from sugar3.graphics.xocolor import XoColor
 from sugar3 import env
 
 from jarabe.journal import model
-from jarabe.view.palettes import VolumePalette
+from jarabe.view.palettes import VolumePalette, RemoteSharePalette
 
 
 _JOURNAL_0_METADATA_DIR = '.olpc.store'
+
+SHARE_TYPE_PEER = 1
+SHARE_TYPE_SCHOOL_SERVER = 2
 
 
 def _get_id(document):
@@ -193,6 +196,17 @@ class VolumesToolbar(Gtk.Toolbar):
     def _set_up_volumes(self):
         self._set_up_documents_button()
 
+        if model.is_peer_to_peer_sharing_available():
+            self._set_up_local_shares_button()
+
+        client = GConf.Client.get_default()
+        color = XoColor(client.get_string('/desktop/sugar/user/color'))
+
+        if model.is_school_server_present():
+            self._add_remote_share_button(_('School-Server Shares'),
+                                          model.SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME,
+                                          color, SHARE_TYPE_SCHOOL_SERVER)
+
         volume_monitor = Gio.VolumeMonitor.get()
         self._mount_added_hid = volume_monitor.connect('mount-added',
                                                        self.__mount_added_cb)
@@ -202,12 +216,11 @@ class VolumesToolbar(Gtk.Toolbar):
         for mount in volume_monitor.get_mounts():
             self._add_button(mount)
 
-    def _set_up_documents_button(self):
-        documents_path = model.get_documents_path()
-        if documents_path is not None:
-            button = DocumentsButton(documents_path)
+    def _set_up_directory_button(self, dir_path, icon_name, label_text):
+        if dir_path is not None:
+            button = DirectoryButton(dir_path, icon_name)
             button.props.group = self._volume_buttons[0]
-            label = glib.markup_escape_text(_('Documents'))
+            label = glib.markup_escape_text(label_text)
             button.set_palette(Palette(label))
             button.connect('toggled', self._button_toggled_cb)
             button.show()
@@ -216,6 +229,44 @@ class VolumesToolbar(Gtk.Toolbar):
             self.insert(button, position)
             self._volume_buttons.append(button)
             self.show()
+
+    def _set_up_documents_button(self):
+        documents_path = model.get_documents_path()
+        self._set_up_directory_button(documents_path,
+                                      'user-documents',
+                                      _('Documents'))
+
+    def _set_up_local_shares_button(self):
+        local_shares_path = model.LOCAL_SHARES_MOUNT_POINT
+        self._set_up_directory_button(local_shares_path,
+                                      'emblem-neighborhood-shared',
+                                      _('Local Shares'))
+
+    def _add_remote_share_button(self, primary_text,
+                                 ip_address_or_dns_name, color,
+                                 share_type):
+        button = RemoteSharesButton(primary_text, ip_address_or_dns_name,
+                                    color, share_type)
+        button._share_type = share_type
+        button.props.group = self._volume_buttons[0]
+
+        show_unmount_option = None
+        if share_type == SHARE_TYPE_PEER:
+            show_unmount_option = True
+        else:
+            show_unmount_option = False
+        button.set_palette(RemoteSharePalette(primary_text,
+                           ip_address_or_dns_name, button,
+                           show_unmount_option))
+        button.connect('toggled', self._button_toggled_cb)
+        button.show()
+
+        position = self.get_item_index(self._volume_buttons[-1]) + 1
+        self.insert(button, position)
+        self._volume_buttons.append(button)
+        self.show()
+
+        return button
 
     def __mount_added_cb(self, volume_monitor, mount):
         self._add_button(mount)
@@ -247,12 +298,35 @@ class VolumesToolbar(Gtk.Toolbar):
     def __volume_error_cb(self, button, strerror, severity):
         self.emit('volume-error', strerror, severity)
 
-    def _button_toggled_cb(self, button):
-        if button.props.active:
+    def _button_toggled_cb(self, button, force_toggle=False):
+        if button.props.active or force_toggle:
+            button.set_active(True)
+            from jarabe.journal.journalactivity import get_journal
+            journal = get_journal()
+
+            journal.hide_alert()
+            journal.get_list_view()._selected_entries = 0
+            journal.switch_to_editing_mode(False)
+            journal.get_list_view().inhibit_refresh(False)
+
             self.emit('volume-changed', button.mount_point)
+
+    def _unmount_activated_cb(self, menu_item, mount):
+        logging.debug('VolumesToolbar._unmount_activated_cb: %r', mount)
+        mount.unmount(self.__unmount_cb)
+
+    def __unmount_cb(self, source, result):
+        logging.debug('__unmount_cb %r %r', source, result)
 
     def _get_button_for_mount(self, mount):
         mount_point = mount.get_root().get_path()
+        for button in self.get_children():
+            if button.mount_point == mount_point:
+                return button
+        logging.error('Couldnt find button with mount_point %r', mount_point)
+        return None
+
+    def _get_button_for_mount_point(self, mount_point):
         for button in self.get_children():
             if button.mount_point == mount_point:
                 return button
@@ -268,9 +342,32 @@ class VolumesToolbar(Gtk.Toolbar):
         if len(self.get_children()) < 2:
             self.hide()
 
+    def _remove_remote_share_button(self, ip_address_or_dns_name):
+        for button in self.get_children():
+            if type(button) == RemoteSharesButton and \
+                    button.mount_point == (model.WEBDAV_MOUNT_POINT + ip_address_or_dns_name):
+                        self._volume_buttons.remove(button)
+                        self.remove(button)
+
+                        from jarabe.journal.webdavmanager import \
+                                unmount_share_from_backend
+                        unmount_share_from_backend(ip_address_or_dns_name)
+
+                        self.get_children()[0].props.active = True
+
+                        if len(self.get_children()) < 2:
+                            self.hide()
+                        break;
+
     def set_active_volume(self, mount):
         button = self._get_button_for_mount(mount)
         button.props.active = True
+
+    def get_journal_button(self):
+        return self._volume_buttons[0]
+
+    def get_button_toggled_cb(self):
+        return self._button_toggled_cb
 
 
 class BaseButton(RadioToolButton):
@@ -291,23 +388,36 @@ class BaseButton(RadioToolButton):
 
     def _drag_data_received_cb(self, widget, drag_context, x, y,
                                selection_data, info, timestamp):
-        object_id = selection_data.data
-        metadata = model.get(object_id)
-        file_path = model.get_file(metadata['uid'])
-        if not file_path or not os.path.exists(file_path):
-            logging.warn('Entries without a file cannot be copied.')
-            self.emit('volume-error',
-                      _('Entries without a file cannot be copied.'),
-                      _('Warning'))
+        # Disallow copying to mounted-shares for peers.
+        if (model.is_mount_point_for_locally_mounted_remote_share(self.mount_point)) and \
+           (model.is_mount_point_for_peer_share(self.mount_point)):
+            from jarabe.journal.journalactivity import get_journal
+
+            journal = get_journal()
+            journal._show_alert(_('Entries cannot be copied to Peer-Shares.'), _('Error'))
             return
 
-        try:
-            model.copy(metadata, self.mount_point)
-        except IOError, e:
-            logging.exception('Error while copying the entry. %s', e.strerror)
-            self.emit('volume-error',
-                      _('Error while copying the entry. %s') % e.strerror,
-                      _('Error'))
+        object_id = selection_data.data
+        metadata = model.get(object_id)
+
+        from jarabe.journal.palettes import CopyMenu, get_copy_menu_helper
+        copy_menu_helper = get_copy_menu_helper()
+
+        dummy_copy_menu = CopyMenu()
+        copy_menu_helper.insert_copy_to_menu_items(dummy_copy_menu,
+                                                   [metadata],
+                                                   False,
+                                                   False,
+                                                   False)
+
+        # Now, activate the menuitem, whose mount-point matches the
+        # mount-point of the button, upon whom the item has been
+        # dragged.
+        children_menu_items = dummy_copy_menu.get_children()
+        for child in children_menu_items:
+            if child.get_mount_point() == self.mount_point:
+                child.activate()
+                return
 
 
 class VolumeButton(BaseButton):
@@ -386,13 +496,35 @@ class JournalButtonPalette(Palette):
                 {'free_space': free_space / (1024 * 1024)}
 
 
-class DocumentsButton(BaseButton):
+class DirectoryButton(BaseButton):
 
-    def __init__(self, documents_path):
-        BaseButton.__init__(self, mount_point=documents_path)
+    def __init__(self, dir_path, icon_name):
+        BaseButton.__init__(self, mount_point=dir_path)
+        self._mount = dir_path
 
-        self.props.icon_name = 'user-documents'
+        self.props.icon_name = icon_name
 
         client = GConf.Client.get_default()
         color = XoColor(client.get_string('/desktop/sugar/user/color'))
         self.props.xo_color = color
+
+
+class RemoteSharesButton(BaseButton):
+
+    def __init__(self, primary_text, ip_address_or_dns_name, color,
+                 share_type):
+        BaseButton.__init__(self, mount_point=(model.WEBDAV_MOUNT_POINT + ip_address_or_dns_name))
+
+        self._primary_text = primary_text
+        self._ip_address_or_dns_name = ip_address_or_dns_name
+
+        if share_type == SHARE_TYPE_PEER:
+            self.props.icon_name = 'emblem-neighborhood-shared'
+        elif share_type == SHARE_TYPE_SCHOOL_SERVER:
+            self.props.icon_name = 'school-server'
+        self.props.xo_color = color
+
+    def create_palette(self):
+        palette = RemoteSharePalette(self._primary_text, self._ip_address_or_dns_name,
+                                     self, True)
+        return palette

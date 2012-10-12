@@ -268,3 +268,54 @@ class VolumePalette(Palette):
         self._progress_bar.props.fraction = fraction
         self._free_space_label.props.label = _('%(free_space)d MB Free') % \
                 {'free_space': free_space / (1024 * 1024)}
+
+
+class RemoteSharePalette(Palette):
+    def __init__(self, primary_text, ip_address_or_dns_name, button,
+                 show_unmount_option):
+        Palette.__init__(self, label=primary_text)
+        self._button = button
+        self._ip_address_or_dns_name = ip_address_or_dns_name
+
+        self.props.secondary_text = \
+                glib.markup_escape_text(self._ip_address_or_dns_name)
+
+        vbox = Gtk.VBox()
+        self.set_content(vbox)
+        vbox.show()
+
+        self.connect('popup', self.__popup_cb)
+
+        menu_item = PaletteMenuItem(pgettext('Share', _('Reload')))
+        icon = Icon(icon_name='system-restart', icon_size=Gtk.IconSize.MENU)
+        menu_item.set_image(icon)
+        icon.show()
+
+        menu_item.connect('activate', self.__reload_remote_share)
+        vbox.add(menu_item)
+        menu_item.show()
+
+
+        if show_unmount_option == True:
+            menu_item = PaletteMenuItem(pgettext('Share', 'Unmount'))
+            icon = Icon(icon_name='media-eject', icon_size=gtk.ICON_SIZE_MENU)
+            menu_item.set_image(icon)
+            icon.show()
+
+            menu_item.connect('activate', self.__unmount_activate_cb)
+            vbox.add(menu_item)
+            menu_item.show()
+
+    def __reload_remote_share(self, menu_item):
+        from jarabe.journal.journalactivity import get_journal
+        get_journal().hide_alert()
+        get_journal().get_list_view().refresh()
+
+    def __unmount_activate_cb(self, menu_item):
+        from jarabe.journal.journalactivity import get_journal
+
+        singleton_volumes_toolbar = get_journal().get_volumes_toolbar()
+        singleton_volumes_toolbar._remove_remote_share_button(self._ip_address_or_dns_name)
+
+    def __popup_cb(self, palette):
+        pass
