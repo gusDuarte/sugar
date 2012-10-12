@@ -77,6 +77,8 @@ src/jarabe/model/Makefile
 src/jarabe/util/Makefile
 src/jarabe/util/telepathy/Makefile
 src/jarabe/view/Makefile
+src/webdav/Makefile
+src/webdav/acp/Makefile
 src/Makefile
 ])
 
