@@ -1,4 +1,6 @@
 # Copyright (C) 2008 One Laptop Per Child
+# Copyright (C) 2010, Plan Ceibal <comunidad@plan.ceibal.edu.uy>
+# Copyright (C) 2010, Paraguay Educa <tecnologia@paraguayeduca.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +35,7 @@ from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor
 from sugar3.activity.i18n import pgettext
 
+from jarabe.journal.processdialog import VolumeBackupDialog, VolumeRestoreDialog
 from jarabe.model import shell
 from jarabe.view.viewsource import setup_view_source
 from jarabe.journal import misc
@@ -319,3 +322,46 @@ class RemoteSharePalette(Palette):
 
     def __popup_cb(self, palette):
         pass
+
+
+
+
+class JournalVolumePalette(VolumePalette):
+
+    __gtype_name__ = 'JournalVolumePalette'
+
+    def __init__(self, mount):
+        VolumePalette.__init__(self, mount)
+
+        journal_separator = gtk.SeparatorMenuItem()
+        journal_separator.show()
+
+        self.menu.prepend(journal_separator)
+
+        icon = Icon(icon_name='transfer-from', icon_size=gtk.ICON_SIZE_MENU)
+        icon.show()
+
+        menu_item_journal_restore = MenuItem(_('Restore Journal'))
+        menu_item_journal_restore.set_image(icon)
+        menu_item_journal_restore.connect('activate', self.__journal_restore_activate_cb, mount.get_root().get_path())
+        menu_item_journal_restore.show()
+
+        self.menu.prepend(menu_item_journal_restore)
+
+        icon = Icon(icon_name='transfer-to', icon_size=gtk.ICON_SIZE_MENU)
+        icon.show()
+
+        menu_item_journal_backup = MenuItem(_('Backup Journal'))
+        menu_item_journal_backup.set_image(icon)
+        menu_item_journal_backup.connect('activate', self.__journal_backup_activate_cb, mount.get_root().get_path())
+        menu_item_journal_backup.show()
+
+        self.menu.prepend(menu_item_journal_backup)
+
+    def __journal_backup_activate_cb(self, menu_item, mount_path):
+        dialog = VolumeBackupDialog(mount_path)
+        dialog.show()
+
+    def __journal_restore_activate_cb(self, menu_item, mount_path):
+        dialog = VolumeRestoreDialog(mount_path)
+        dialog.show()

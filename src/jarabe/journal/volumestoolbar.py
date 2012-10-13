@@ -37,7 +37,7 @@ from sugar3.graphics.xocolor import XoColor
 from sugar3 import env
 
 from jarabe.journal import model
-from jarabe.view.palettes import VolumePalette, RemoteSharePalette
+from jarabe.view.palettes import JournalVolumePalette, RemoteSharePalette
 
 
 _JOURNAL_0_METADATA_DIR = '.olpc.store'
@@ -445,7 +445,7 @@ class VolumeButton(BaseButton):
         self.props.xo_color = color
 
     def create_palette(self):
-        palette = VolumePalette(self._mount)
+        palette = JournalVolumePalette(self._mount)
         #palette.props.invoker = FrameWidgetInvoker(self)
         #palette.set_group_id('frame')
         return palette
