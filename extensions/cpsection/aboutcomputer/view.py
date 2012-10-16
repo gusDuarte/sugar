@@ -70,6 +70,11 @@ class AboutComputer(SectionView):
                                             self._model.get_serial_number(),
                                             vbox_identity)
 
+        self._setup_component_if_applicable(None,
+                                            _('Lease:'),
+                                            self._model.get_lease_days(),
+                                            vbox_identity)
+
         self._vbox.pack_start(vbox_identity, False, True, 0)
         vbox_identity.show()
 
