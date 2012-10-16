@@ -157,6 +157,28 @@ class AboutComputer(SectionView):
         box_software.pack_start(box_wireless_fw, False, True, 0)
         box_wireless_fw.show()
 
+        # Try to fetch "Last Updated On" field from the model.
+        # If the field is not empty, display it.
+        # At present, the field is returned empty, only if "root-access"
+        #    is disabled on the target-machine.
+        last_updated_on_field = self._model.get_last_updated_on_field()
+        if last_updated_on_field:
+            box_last_updated_on = Gtk.HBox(spacing=style.DEFAULT_SPACING)
+            label_last_updated_on  = Gtk.Label(_('Last Updated On:'))
+            label_last_updated_on.set_alignment(1, 0)
+            label_last_updated_on.modify_fg(Gtk.StateType.NORMAL,
+                                   style.COLOR_SELECTION_GREY.get_gdk_color())
+            box_last_updated_on.pack_start(label_last_updated_on, False, True, 0)
+            self._group.add_widget(label_last_updated_on)
+            label_last_updated_on.show()
+            label_last_updated_on_field = \
+                                   Gtk.Label(last_updated_on_field)
+            label_last_updated_on_field.set_alignment(0, 0)
+            box_last_updated_on.pack_start(label_last_updated_on_field, False, True, 0)
+            label_last_updated_on_field.show()
+            box_software.pack_start(box_last_updated_on, False, True, 0)
+            box_last_updated_on.show()
+
         self._vbox.pack_start(box_software, False, True, 0)
         box_software.show()
 
