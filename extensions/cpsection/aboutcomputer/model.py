@@ -126,6 +126,15 @@ def print_build_number():
     print get_build_number()
 
 
+def get_model_laptop():
+    from ceibal import laptop
+
+    model_laptop = laptops.get_model_laptop()
+    if model_laptop is None or not model_laptop:
+        model_laptop = _not_available
+    return model_laptop
+
+
 def _parse_firmware_number(firmware_no):
     if firmware_no is None:
         firmware_no = _not_available
@@ -309,3 +318,7 @@ def get_last_updated_on_field():
 
     # Everything should be fine (hopefully :-) )
     return last_update_readable_format
+
+
+def get_sugar_version():
+    return config.version

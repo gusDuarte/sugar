@@ -23,7 +23,6 @@ from gi.repository import Gdk
 
 from sugar3.graphics import style
 
-from jarabe import config
 from jarabe.controlpanel.sectionview import SectionView
 
 
@@ -67,24 +66,34 @@ class AboutComputer(SectionView):
 
         self._setup_component_if_applicable(None,
                                             _('Serial Number:'),
-                                            self._model.get_serial_number(),
+                                            self._model.get_serial_number,
                                             vbox_identity)
 
         self._setup_component_if_applicable(None,
                                             _('Lease:'),
-                                            self._model.get_lease_days(),
+                                            self._model.get_lease_days,
                                             vbox_identity)
 
         self._vbox.pack_start(vbox_identity, False, True, 0)
         vbox_identity.show()
 
     def _is_feature_to_be_shown(slf, gconf_key):
+        if gconf_key is None:
+            return True
+
         from gi.repository import GConf
         client = GConf.Client.get_default()
 
         return client.get_bool(gconf_key) is True
 
-    def _setup_component_if_applicable(self, gconf_key, key, value, packer):
+    def _setup_component_if_applicable(self, gconf_key, key, value_func, packer):
+        if not self._is_feature_to_be_shown(gconf_key):
+            return
+
+        # Now that we do need to show, fetch the value.
+        print value_func
+        value = value_func()
+
         box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         key_label = Gtk.Label(label=key)
         key_label.set_alignment(1, 0)
@@ -113,29 +122,34 @@ class AboutComputer(SectionView):
         box_software.set_border_width(style.DEFAULT_SPACING * 2)
         box_software.set_spacing(style.DEFAULT_SPACING)
 
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_model',
+                                            _('Model:'),
+                                            self._model.get_model_laptop,
+                                            box_software)
+
         self._setup_component_if_applicable(None,
                                             _('Build:'),
-                                            self._model.get_build_number(),
+                                            self._model.get_build_number,
                                             box_software)
 
         self._setup_component_if_applicable(None,
                                             _('Sugar:'),
-                                            config.version,
+                                            self._model.get_sugar_version,
                                             box_software)
 
         self._setup_component_if_applicable(None,
                                             _('Firmware:'),
-                                            self._model.get_firmware_number(),
+                                            self._model.get_firmware_number,
                                             box_software)
 
         self._setup_component_if_applicable(None,
                                             _('Wireless Firmware:'),
-                                            self._model.get_wireless_firmware(),
+                                            self._model.get_wireless_firmware,
                                             box_software)
 
         self._setup_component_if_applicable(None,
                                             _('Last Updated On:'),
-                                            self._model.get_last_updated_on_field(),
+                                            self._model.get_last_updated_on_field,
                                             box_software)
 
         self._vbox.pack_start(box_software, False, True, 0)
