@@ -128,6 +128,11 @@ class AboutComputer(SectionView):
                                             self._model.get_wireless_firmware(),
                                             box_software)
 
+        self._setup_component_if_applicable(None,
+                                            _('Last Updated On:'),
+                                            self._model.get_last_updated_on_field(),
+                                            box_software)
+
         self._vbox.pack_start(box_software, False, True, 0)
         box_software.show()
 
