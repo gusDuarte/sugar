@@ -90,11 +90,22 @@ class PulsingIcon(Icon):
         self._pulse_color = None
         self._paused = False
         self._pulsing = False
+        self._timeout = 0
+        self._pulsing_sid = None
 
         Icon.__init__(self, **kwargs)
 
         self._palette = None
         self.connect('destroy', self.__destroy_cb)
+
+    def set_timeout(self, timeout):
+        self._timeout = timeout
+
+    def get_timeout(self):
+        return self._timeout
+
+    timeout = GObject.property(
+        type=int, getter=get_timeout, setter=set_timeout)
 
     def set_pulse_color(self, pulse_color):
         self._pulse_color = pulse_color
@@ -142,10 +153,20 @@ class PulsingIcon(Icon):
         type=bool, default=False, getter=get_paused, setter=set_paused)
 
     def set_pulsing(self, pulsing):
+        if self._pulsing == pulsing:
+            return
+
+        if self._pulsing_sid is not None:
+            GObject.source_remove(self._pulsing_sid)
+            self._pulsing_sid = None
+
         self._pulsing = pulsing
 
         if self._pulsing:
             self._pulser.start(restart=True)
+            if self.props.timeout > 0:
+                self._pulsing_sid = GObject.timeout_add_seconds(
+                        self.props.timeout, self.__timeout_cb)
         else:
             self._pulser.stop()
 
@@ -164,6 +185,9 @@ class PulsingIcon(Icon):
         self._palette = palette
 
     palette = property(_get_palette, _set_palette)
+
+    def __timeout_cb(self):
+        self.props.pulsing = False
 
     def __destroy_cb(self, icon):
         self._pulser.stop()
