@@ -69,7 +69,7 @@ class AboutComputer(SectionView):
                                             self._model.get_serial_number,
                                             vbox_identity)
 
-        self._setup_component_if_applicable(None,
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_lease',
                                             _('Lease:'),
                                             self._model.get_lease_days,
                                             vbox_identity)
@@ -142,9 +142,19 @@ class AboutComputer(SectionView):
                                             self._model.get_firmware_number,
                                             box_software)
 
-        self._setup_component_if_applicable(None,
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_wireless_firmware',
                                             _('Wireless Firmware:'),
                                             self._model.get_wireless_firmware,
+                                            box_software)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_plazo',
+                                            _('Plazo:'),
+                                            self._model.get_plazo,
+                                            box_software)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_version_de_actual',
+                                            _('Versión de Actualización:'),
+                                            self._model.get_act,
                                             box_software)
 
         self._setup_component_if_applicable(None,

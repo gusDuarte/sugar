@@ -1,4 +1,5 @@
 # Copyright (C) 2008 One Laptop Per Child
+# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +19,8 @@
 import os
 import logging
 import re
+import ConfigParser
+import time
 import subprocess
 from gettext import gettext as _
 import errno
@@ -322,3 +325,28 @@ def get_last_updated_on_field():
 
 def get_sugar_version():
     return config.version
+
+
+def get_plazo():
+    from ceibal import env
+    path_plazo = env.get_security_root()
+    try:
+        plazo = _read_file(os.path.join(path_plazo, "blacklist")).split("\n")[0].strip()
+        plazo = time.strftime( "%d-%m-%Y",time.strptime(plazo,'%Y%m%d'))
+    except:
+        plazo = _not_available
+
+    return plazo
+
+def get_act():
+    from ceibal import env
+    path_act = env.get_updates_root()
+    parser = ConfigParser.ConfigParser()
+    salida = parser.read(os.path.join(path_act, "mi_version"))
+    if salida == []:
+        version = _not_available
+    else:
+        version = ''
+        for seccion in parser.sections():
+            version = "%s%s: %s\n" %(version,seccion,parser.get(seccion,'version'))
+    return version
