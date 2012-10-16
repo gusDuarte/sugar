@@ -20,7 +20,9 @@ import logging
 import re
 import subprocess
 from gettext import gettext as _
+
 import errno
+from datetime import datetime
 
 import dbus
 
@@ -39,6 +41,9 @@ _DMI_DIRECTORY = '/sys/class/dmi/id'
 _SN = 'serial-number'
 _MODEL = 'openprom/model'
 
+_XO_1_0_LEASE_PATH = '/security/lease.sig'
+_XO_1_5_LEASE_PATH = '/bootpart/boot/security/lease.sig'
+
 _logger = logging.getLogger('ControlPanel - AboutComputer')
 _not_available = _('Not available')
 
@@ -51,6 +56,31 @@ def get_aboutcomputer():
 
 def print_aboutcomputer():
     print get_aboutcomputer()
+
+
+def _get_lease_path():
+    if os.path.exists(_XO_1_0_LEASE_PATH):
+        return _XO_1_0_LEASE_PATH
+    elif os.path.exists(_XO_1_5_LEASE_PATH):
+        return _XO_1_5_LEASE_PATH
+    else:
+        return ''
+
+
+def get_lease_days():
+    lease_file = _read_file(_get_lease_path())
+    if lease_file is None:
+        return _not_available
+
+    encoded_date = str(str.split(lease_file)[3])
+    expiry_date = datetime.strptime(encoded_date
+            , '%Y%m%dT%H%M%SZ')
+    current_date = datetime.today()
+    days_remaining = (expiry_date - current_date).days
+
+    # TRANS: Do not translate %d.
+    str_days_remaining = _('%d days remaining.' % days_remaining)
+    return str_days_remaining
 
 
 def get_serial_number():
