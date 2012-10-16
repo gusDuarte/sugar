@@ -246,6 +246,24 @@ class ActivitiesTray(HTray):
         button.connect('clicked', self.__activity_clicked_cb, home_activity)
         button.show()
 
+        # JournalActivity is always the first activity to be added.
+        # Broadcast the signal-of-its-creation.
+        if group is None:
+            self._signal_addition_of_journal_activity()
+
+    def _signal_addition_of_journal_activity(self):
+        monitor_file = os.path.expanduser('~/.sugar/journal_created')
+
+        # Remove the file, if it exists.
+        # This is important, since we are checking for the
+        # FILE_CREATED event in the monitor.
+        if os.path.exists(monitor_file):
+            os.remove(monitor_file)
+
+        # Now, create the file.
+        f = open(monitor_file, 'w')
+        f.close()
+
     def __activity_removed_cb(self, home_model, home_activity):
         logging.debug('__activity_removed_cb: %r', home_activity)
         button = self._buttons[home_activity]
