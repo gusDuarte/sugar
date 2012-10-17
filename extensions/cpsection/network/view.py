@@ -17,6 +17,7 @@
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GObject
+from gi.repository import GConf
 from gettext import gettext as _
 
 from sugar3.graphics import style
@@ -30,6 +31,9 @@ ICON = 'module-network'
 TITLE = _('Network')
 
 _APPLY_TIMEOUT = 3000
+EXPLICIT_REBOOT_MESSAGE = _('Please restart your computer for changes to take effect.')
+
+gconf_client = GConf.Client.get_default()
 
 
 class Network(SectionView):
@@ -51,6 +55,7 @@ class Network(SectionView):
 
         self._radio_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         self._jabber_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
+        self._nm_connection_editor_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
 
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -178,7 +183,53 @@ class Network(SectionView):
         workspace.pack_start(box_mesh, False, True, 0)
         box_mesh.show()
 
+        if gconf_client.get_bool('/desktop/sugar/extensions/network/show_nm_connection_editor') is True:
+            box_nm_connection_editor = self.add_nm_connection_editor_launcher(workspace)
+
         self.setup()
+
+    def add_nm_connection_editor_launcher(self, workspace):
+        separator_nm_connection_editor = Gtk.HSeparator()
+        workspace.pack_start(separator_nm_connection_editor, False, True, 0)
+        separator_nm_connection_editor.show()
+
+        label_nm_connection_editor = Gtk.Label(_('Advanced Network Settings'))
+        label_nm_connection_editor.set_alignment(0, 0)
+        workspace.pack_start(label_nm_connection_editor, False, True, 0)
+        label_nm_connection_editor.show()
+
+        box_nm_connection_editor = Gtk.VBox()
+        box_nm_connection_editor.set_border_width(style.DEFAULT_SPACING * 2)
+        box_nm_connection_editor.set_spacing(style.DEFAULT_SPACING)
+
+        info = Gtk.Label(_("For more specific network settings, use "
+                              "the NetworkManager Connection Editor."))
+
+        info.set_alignment(0, 0)
+        info.set_line_wrap(True)
+        box_nm_connection_editor.pack_start(info, False, True, 0)
+
+        self._nm_connection_editor_alert = InlineAlert()
+        self._nm_connection_editor_alert.props.msg = EXPLICIT_REBOOT_MESSAGE
+        self._nm_connection_editor_alert_box.pack_start(self._nm_connection_editor_alert,
+                False, True, 0)
+        box_nm_connection_editor.pack_end(self._nm_connection_editor_alert_box,
+                False, True, 0)
+        self._nm_connection_editor_alert_box.show()
+        self._nm_connection_editor_alert.show()
+
+        launch_button = Gtk.Button()
+        launch_button.set_alignment(0, 0)
+        launch_button.set_label(_('Launch'))
+        launch_button.connect('clicked', self.__launch_button_clicked_cb)
+        box_launch_button = Gtk.HBox()
+        box_launch_button.set_homogeneous(False)
+        box_launch_button.pack_start(launch_button, False, True, 0)
+        box_launch_button.show_all()
+
+        box_nm_connection_editor.pack_start(box_launch_button, False, True, 0)
+        workspace.pack_start(box_nm_connection_editor, False, True, 0)
+        box_nm_connection_editor.show_all()
 
     def setup(self):
         self._entry.set_text(self._model.get_jabber())
@@ -260,3 +311,7 @@ class Network(SectionView):
         self._model.clear_networks()
         if not self._model.have_networks():
             self._clear_history_button.set_sensitive(False)
+
+    def __launch_button_clicked_cb(self, launch_button):
+        self._model.launch_nm_connection_editor()
+

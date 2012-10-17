@@ -16,6 +16,7 @@
 
 import logging
 import os
+import stat
 import errno
 import subprocess
 from datetime import datetime
@@ -37,6 +38,8 @@ from sugar3 import dispatch
 from sugar3 import mime
 from sugar3 import util
 
+from jarabe.journal import webdavmanager
+
 
 DS_DBUS_SERVICE = 'org.laptop.sugar.DataStore'
 DS_DBUS_INTERFACE = 'org.laptop.sugar.DataStore'
@@ -50,12 +53,97 @@ PROPERTIES = ['activity', 'activity_id', 'buddies', 'bundle_id',
 MIN_PAGES_TO_CACHE = 3
 MAX_PAGES_TO_CACHE = 5
 
+WEBDAV_MOUNT_POINT   = '/tmp/'
+LOCAL_SHARES_MOUNT_POINT = '/var/www/web1/web/'
+
 JOURNAL_METADATA_DIR = '.Sugar-Metadata'
+
+LIST_VIEW = 1
+DETAIL_VIEW = 2
 
 _datastore = None
 created = dispatch.Signal()
 updated = dispatch.Signal()
 deleted = dispatch.Signal()
+
+
+SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME_PATH = \
+        '/desktop/sugar/network/school_server_ip_address_or_dns_name'
+IS_PEER_TO_PEER_SHARING_AVAILABLE_PATH    = \
+        '/desktop/sugar/network/is_peer_to_peer_sharing_available'
+
+client = GConf.Client.get_default()
+SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME = client.get_string(SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME_PATH) or ''
+IS_PEER_TO_PEER_SHARING_AVAILABLE    = client.get_bool(IS_PEER_TO_PEER_SHARING_AVAILABLE_PATH)
+
+
+
+def is_school_server_present():
+    return not (SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME is '')
+
+
+def is_peer_to_peer_sharing_available():
+    return IS_PEER_TO_PEER_SHARING_AVAILABLE == True
+
+
+def _get_mount_point(path):
+    dir_path = os.path.dirname(path)
+    while dir_path:
+        if os.path.ismount(dir_path):
+            return dir_path
+        else:
+            dir_path = dir_path.rsplit(os.sep, 1)[0]
+    return None
+
+
+def _check_remote_sharing_mount_point(mount_point, share_type):
+    from jarabe.journal.journalactivity import get_journal
+
+    mount_point_button = get_journal().get_volumes_toolbar()._get_button_for_mount_point(mount_point)
+    if mount_point_button._share_type == share_type:
+        return True
+    return False
+
+
+def is_mount_point_for_school_server(mount_point):
+    from jarabe.journal.volumestoolbar import SHARE_TYPE_SCHOOL_SERVER
+    return _check_remote_sharing_mount_point(mount_point, SHARE_TYPE_SCHOOL_SERVER)
+
+
+def is_mount_point_for_peer_share(mount_point):
+    from jarabe.journal.volumestoolbar import SHARE_TYPE_PEER
+    return _check_remote_sharing_mount_point(mount_point, SHARE_TYPE_PEER)
+
+
+def is_current_mount_point_for_remote_share(view_type):
+    from jarabe.journal.journalactivity import get_journal, get_mount_point
+    if view_type == LIST_VIEW:
+        current_mount_point = get_mount_point()
+    elif view_type == DETAIL_VIEW:
+        current_mount_point = get_journal().get_detail_toolbox().get_mount_point()
+
+    if is_mount_point_for_locally_mounted_remote_share(current_mount_point):
+        return True
+    return False
+
+
+def extract_ip_address_or_dns_name_from_locally_mounted_remote_share_path(path):
+    """
+    Path is of type ::
+
+        /tmp/1.2.3.4/webdav/a.txt; OR
+        /tmp/this.is.dns.name/a.txt
+    """
+    return path.split('/')[2]
+
+
+def is_mount_point_for_locally_mounted_remote_share(mount_point):
+    """
+    The mount-point can be either of the ip-Address, or the DNS name.
+    More importantly, whatever the "name" be, it does NOT have a
+    forward-slash.
+    """
+    return mount_point.find(WEBDAV_MOUNT_POINT) == 0
 
 
 class _Cache(object):
@@ -422,6 +510,127 @@ class InplaceResultSet(BaseResultSet):
         return
 
 
+class RemoteShareResultSet(object):
+    def __init__(self, ip_address_or_dns_name, query):
+        self._ip_address_or_dns_name = ip_address_or_dns_name
+        self._file_list = []
+
+        self.ready = dispatch.Signal()
+        self.progress = dispatch.Signal()
+
+        # First time, query is none.
+        if query is None:
+            return
+
+        query_text = query.get('query', '')
+        if query_text.startswith('"') and query_text.endswith('"'):
+            self._regex = re.compile('*%s*' % query_text.strip(['"']))
+        elif query_text:
+            expression = ''
+            for word in query_text.split(' '):
+                expression += '(?=.*%s.*)' % word
+            self._regex = re.compile(expression, re.IGNORECASE)
+        else:
+            self._regex = None
+
+        if query.get('timestamp', ''):
+            self._date_start = int(query['timestamp']['start'])
+            self._date_end = int(query['timestamp']['end'])
+        else:
+            self._date_start = None
+            self._date_end = None
+
+        self._mime_types = query.get('mime_type', [])
+
+        self._sort = query.get('order_by', ['+timestamp'])[0]
+
+    def setup(self):
+        try:
+            metadata_list_complete = webdavmanager.get_remote_webdav_share_metadata(self._ip_address_or_dns_name)
+        except Exception, e:
+            metadata_list_complete = []
+
+        for metadata in metadata_list_complete:
+
+            add_to_list = False
+            if self._regex is not None:
+                for f in ['fulltext', 'title',
+                          'description', 'tags']:
+                    if f in metadata and \
+                            self._regex.match(metadata[f]):
+                        add_to_list = True
+                        break
+            else:
+                add_to_list = True
+            if not add_to_list:
+                continue
+
+            add_to_list = False
+            if self._date_start is not None:
+                if metadata['timestamp'] > self._date_start:
+                    add_to_list = True
+            else:
+                add_to_list = True
+            if not add_to_list:
+                continue
+
+            add_to_list = False
+            if self._date_end is not None:
+                if metadata['timestamp'] < self._date_end:
+                    add_to_list = True
+            else:
+                add_to_list = True
+            if not add_to_list:
+                continue
+
+            add_to_list = False
+            if self._mime_types:
+                mime_type = metadata['mime_type']
+                if mime_type in self._mime_types:
+                    add_to_list = True
+            else:
+                add_to_list = True
+            if not add_to_list:
+                continue
+
+            # If control reaches here, the current metadata has passed
+            # out all filter-tests.
+            file_info = (metadata['timestamp'],
+                         metadata['creation_time'],
+                         metadata['filesize'],
+                         metadata)
+            self._file_list.append(file_info)
+
+        if self._sort[1:] == 'filesize':
+            keygetter = itemgetter(2)
+        elif self._sort[1:] == 'creation_time':
+            keygetter = itemgetter(1)
+        else:
+            # timestamp
+            keygetter = itemgetter(0)
+
+        self._file_list.sort(lambda a, b: cmp(b, a),
+                             key=keygetter,
+                             reverse=(self._sort[0] == '-'))
+
+        self.ready.send(self)
+
+    def get_length(self):
+        return len(self._file_list)
+
+    length = property(get_length)
+
+    def seek(self, position):
+        self._position = position
+
+    def read(self):
+        modified_timestamp, creation_timestamp, filesize, metadata =  self._file_list[self._position]
+        return  metadata
+
+    def stop(self):
+        self._stopped = True
+
+
 def _get_file_metadata(path, stat, fetch_preview=True):
     """Return the metadata from the corresponding file.
 
@@ -434,8 +643,12 @@ def _get_file_metadata(path, stat, fetch_preview=True):
     metadata = _get_file_metadata_from_json(dir_path, filename, fetch_preview)
     if metadata:
         if 'filesize' not in metadata:
-            metadata['filesize'] = stat.st_size
+            if stat is not None:
+                metadata['filesize'] = stat.st_size
         return metadata
+
+    if stat is None:
+        raise ValueError('File does not exist')
 
     mime_type, uncertain_result_ = Gio.content_type_guess(filename=path,
                                                           data=None)
@@ -457,10 +670,17 @@ def _get_file_metadata_from_json(dir_path, filename, fetch_preview):
     If the metadata is corrupted we do remove it and the preview as well.
 
     """
+
+    # In case of nested mount-points, (eg. ~/Documents/in1/in2/in3.txt),
+    # "dir_path = ~/Documents/in1/in2"; while
+    # "metadata_dir_path = ~/Documents".
+    from jarabe.journal.journalactivity import get_mount_point
+    metadata_dir_path = get_mount_point()
+
     metadata = None
-    metadata_path = os.path.join(dir_path, JOURNAL_METADATA_DIR,
+    metadata_path = os.path.join(metadata_dir_path, JOURNAL_METADATA_DIR,
                                  filename + '.metadata')
-    preview_path = os.path.join(dir_path, JOURNAL_METADATA_DIR,
+    preview_path = os.path.join(metadata_dir_path, JOURNAL_METADATA_DIR,
                                 filename + '.preview')
 
     if not os.path.exists(metadata_path):
@@ -529,6 +749,9 @@ def find(query_, page_size):
 
     if mount_points[0] == '/':
         return DatastoreResultSet(query, page_size)
+    elif is_mount_point_for_locally_mounted_remote_share(mount_points[0]):
+        ip_address = extract_ip_address_or_dns_name_from_locally_mounted_remote_share_path(mount_points[0])
+        return RemoteShareResultSet(ip_address, query)
     else:
         return InplaceResultSet(query, page_size, mount_points[0])
 
@@ -546,8 +769,12 @@ def _get_mount_point(path):
 def get(object_id):
     """Returns the metadata for an object
     """
-    if os.path.exists(object_id):
-        stat = os.stat(object_id)
+    if (object_id[0] == '/'):
+        if os.path.exists(object_id):
+            stat = os.stat(object_id)
+        else:
+            stat = None
+
         metadata = _get_file_metadata(object_id, stat)
         metadata['mountpoint'] = _get_mount_point(object_id)
     else:
@@ -620,7 +847,21 @@ def delete(object_id):
 def copy(metadata, mount_point):
     """Copies an object to another mount point
     """
+    # In all cases (except one), "copy" means the actual duplication of
+    # the content.
+    # Only in case of remote downloading, the content is first copied
+    # to "/tmp" folder. In those cases, copying would refer to a mere
+    # renaming.
+    transfer_ownership = False
+
+    from jarabe.journal.journalactivity import get_mount_point
+    current_mount_point = get_mount_point()
+
+    if is_mount_point_for_locally_mounted_remote_share(current_mount_point):
+        transfer_ownership = True
+
     metadata = get(metadata['uid'])
+
     if mount_point == '/' and metadata['icon-color'] == '#000000,#ffffff':
         client = GConf.Client.get_default()
         metadata['icon-color'] = client.get_string('/desktop/sugar/user/color')
@@ -631,7 +872,7 @@ def copy(metadata, mount_point):
     metadata['mountpoint'] = mount_point
     del metadata['uid']
 
-    return write(metadata, file_path, transfer_ownership=False)
+    return write(metadata, file_path, transfer_ownership=transfer_ownership)
 
 
 def write(metadata, file_path='', update_mtime=True, transfer_ownership=True):
@@ -653,22 +894,113 @@ def write(metadata, file_path='', update_mtime=True, transfer_ownership=True):
             object_id = _get_datastore().create(dbus.Dictionary(metadata),
                                                  file_path,
                                                  transfer_ownership)
+    elif metadata.get('mountpoint', '/') == (WEBDAV_MOUNT_POINT + SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME):
+        filename = metadata['title']
+
+        ip_address_or_dns_name = SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME
+        webdavmanager.get_remote_webdav_share_metadata(ip_address_or_dns_name)
+
+        data_webdav_manager = \
+                webdavmanager.get_data_webdav_manager(ip_address_or_dns_name)
+        metadata_webdav_manager = \
+                webdavmanager.get_metadata_webdav_manager(ip_address_or_dns_name)
+
+
+        # If we get a resource by this name, there is already an entry
+        # on the server with this name; we do not want to do any
+        # overwrites.
+        data_resource = webdavmanager.get_resource_by_resource_key(data_webdav_manager,
+                '/webdav/' + filename)
+        metadata_resource = webdavmanager.get_resource_by_resource_key(metadata_webdav_manager,
+                '/webdav/.Sugar-Metadata/' + filename + '.metadata')
+        if (data_resource is not None) or (metadata_resource is not None):
+            raise Exception(_('Entry already present on the server with '
+                              'this name. Try again after renaming.'))
+
+        # No entry for this name present.
+        # So, first write the metadata- and preview-file to temporary
+        # locations.
+        metadata_file_path, preview_file_path = \
+                _write_metadata_and_preview_files_and_return_file_paths(metadata,
+                                                                        filename)
+
+        # Finally,
+        # Upload the data file.
+        webdavmanager.add_resource_by_resource_key(data_webdav_manager,
+                                                   filename,
+                                                   file_path)
+
+        # Upload the preview file.
+        if preview_file_path is not None:
+            webdavmanager.add_resource_by_resource_key(metadata_webdav_manager,
+                                                       filename + '.preview',
+                                                       preview_file_path)
+
+        # Upload the metadata file.
+        #
+        # Note that this needs to be the last step. If there was any
+        # error uploading the data- or the preview-file, control would
+        # not reach here.
+        #
+        # In other words, the control reaches here only if the data-
+        # and the preview- files have been uploaded. Finally, IF this
+        # file is successfully uploaded, we have the guarantee that all
+        # files for a particular journal entry are in place.
+        webdavmanager.add_resource_by_resource_key(metadata_webdav_manager,
+                                                   filename + '.metadata',
+                                                   metadata_file_path)
+
+
+        object_id = 'doesn\'t matter'
+
     else:
-        object_id = _write_entry_on_external_device(metadata, file_path)
+        object_id = _write_entry_on_external_device(metadata,
+                                                    file_path,
+                                                    transfer_ownership)
 
     return object_id
 
 
-def _rename_entry_on_external_device(file_path, destination_path,
-                                     metadata_dir_path):
+def make_file_fully_permissible(file_path):
+    fd = os.open(file_path, os.O_RDONLY)
+    os.fchmod(fd, stat.S_IRWXU | stat.S_IRWXG |stat.S_IRWXO)
+    os.close(fd)
+
+
+def _rename_entry_on_external_device(file_path, destination_path):
     """Rename an entry with the associated metadata on an external device."""
     old_file_path = file_path
     if old_file_path != destination_path:
-        os.rename(file_path, destination_path)
+        # Strangely, "os.rename" works fine on sugar-jhbuild, but fails
+        # on XOs, wih the OSError 13 ("invalid cross-device link"). So,
+        # using the system call "mv".
+        os.system('mv "%s" "%s"' % (file_path, destination_path))
+        make_file_fully_permissible(destination_path)
+
+
+        # In renaming, we want to delete the metadata-, and preview-
+        # files of the current mount-point, and not the destination
+        # mount-point.
+        # But we also need to ensure that the directory of
+        # 'old_file_path' and 'destination_path' are not same.
+        if os.path.dirname(old_file_path) == os.path.dirname(destination_path):
+            return
+
+        from jarabe.journal.journalactivity import get_mount_point
+
+        # Also, as a special case, the metadata- and preview-files of
+        # the remote-shares must never be deleted. For them, only the
+        # data-file needs to be moved.
+        if is_mount_point_for_locally_mounted_remote_share(get_mount_point()):
+            return
+
+
+        source_metadata_dir_path = get_mount_point() + '/.Sugar-Metadata'
+
         old_fname = os.path.basename(file_path)
-        old_files = [os.path.join(metadata_dir_path,
+        old_files = [os.path.join(source_metadata_dir_path,
                                   old_fname + '.metadata'),
-                     os.path.join(metadata_dir_path,
+                     os.path.join(source_metadata_dir_path,
                                   old_fname + '.preview')]
         for ofile in old_files:
             if os.path.exists(ofile):
@@ -679,7 +1011,79 @@ def _rename_entry_on_external_device(file_path, destination_path,
                                   'for file=%s', ofile, old_fname)
 
 
-def _write_entry_on_external_device(metadata, file_path):
+def _write_metadata_and_preview_files_and_return_file_paths(metadata,
+                                                            file_name):
+    metadata_copy = metadata.copy()
+    metadata_copy.pop('mountpoint', None)
+    metadata_copy.pop('uid', None)
+
+
+    # For copying to School-Server, we need to retain this  property.
+    # Else wise, I have no idea why this property is being removed !!
+    if (is_mount_point_for_locally_mounted_remote_share(metadata.get('mountpoint', '/')) == False) and \
+       (metadata.get('mountpoint', '/') != LOCAL_SHARES_MOUNT_POINT):
+        metadata_copy.pop('filesize', None)
+
+    # For journal case, there is the special treatment.
+    if metadata.get('mountpoint', '/') == '/':
+        if metadata.get('uid', ''):
+            object_id = _get_datastore().update(metadata['uid'],
+                                                dbus.Dictionary(metadata),
+                                                '',
+                                                False)
+        else:
+            object_id = _get_datastore().create(dbus.Dictionary(metadata),
+                                                '',
+                                                False)
+        return
+
+
+    metadata_dir_path = os.path.join(metadata['mountpoint'],
+                                     JOURNAL_METADATA_DIR)
+    if not os.path.exists(metadata_dir_path):
+        os.mkdir(metadata_dir_path)
+
+    preview = None
+    if 'preview' in metadata_copy:
+        preview = metadata_copy['preview']
+        preview_fname = file_name + '.preview'
+        metadata_copy.pop('preview', None)
+
+    try:
+        metadata_json = simplejson.dumps(metadata_copy)
+    except (UnicodeDecodeError, EnvironmentError):
+        logging.error('Could not convert metadata to json.')
+    else:
+        (fh, fn) = tempfile.mkstemp(dir=metadata['mountpoint'])
+        os.write(fh, metadata_json)
+        os.close(fh)
+        os.rename(fn, os.path.join(metadata_dir_path, file_name + '.metadata'))
+
+        if preview:
+            (fh, fn) = tempfile.mkstemp(dir=metadata['mountpoint'])
+            os.write(fh, preview)
+            os.close(fh)
+            os.rename(fn, os.path.join(metadata_dir_path, preview_fname))
+
+    metadata_destination_path = os.path.join(metadata_dir_path, file_name + '.metadata')
+    make_file_fully_permissible(metadata_destination_path)
+    if preview:
+        preview_destination_path =  os.path.join(metadata_dir_path, preview_fname)
+        make_file_fully_permissible(preview_destination_path)
+    else:
+        preview_destination_path = None
+
+    return (metadata_destination_path, preview_destination_path)
+
+
+def update_only_metadata_and_preview_files_and_return_file_paths(metadata):
+    file_name = get_file_name(metadata['title'], metadata['mime_type'])
+    _write_metadata_and_preview_files_and_return_file_paths(metadata,
+                                                            file_name)
+
+
+def _write_entry_on_external_device(metadata, file_path,
+                                    transfer_ownership):
     """Create and update an entry copied from the
     DS to an external storage device.
 
@@ -710,43 +1114,15 @@ def _write_entry_on_external_device(metadata, file_path):
         clean_name, extension_ = os.path.splitext(file_name)
         metadata['title'] = clean_name
 
-    metadata_copy = metadata.copy()
-    metadata_copy.pop('mountpoint', None)
-    metadata_copy.pop('uid', None)
-    metadata_copy.pop('filesize', None)
+    _write_metadata_and_preview_files_and_return_file_paths(metadata,
+                                                            file_name)
 
-    metadata_dir_path = os.path.join(metadata['mountpoint'],
-                                     JOURNAL_METADATA_DIR)
-    if not os.path.exists(metadata_dir_path):
-        os.mkdir(metadata_dir_path)
-
-    preview = None
-    if 'preview' in metadata_copy:
-        preview = metadata_copy['preview']
-        preview_fname = file_name + '.preview'
-        metadata_copy.pop('preview', None)
-
-    try:
-        metadata_json = simplejson.dumps(metadata_copy)
-    except (UnicodeDecodeError, EnvironmentError):
-        logging.error('Could not convert metadata to json.')
+    if (os.path.dirname(destination_path) == os.path.dirname(file_path)) or \
+       (transfer_ownership == True):
+        _rename_entry_on_external_device(file_path, destination_path)
     else:
-        (fh, fn) = tempfile.mkstemp(dir=metadata['mountpoint'])
-        os.write(fh, metadata_json)
-        os.close(fh)
-        os.rename(fn, os.path.join(metadata_dir_path, file_name + '.metadata'))
-
-        if preview:
-            (fh, fn) = tempfile.mkstemp(dir=metadata['mountpoint'])
-            os.write(fh, preview)
-            os.close(fh)
-            os.rename(fn, os.path.join(metadata_dir_path, preview_fname))
-
-    if not os.path.dirname(destination_path) == os.path.dirname(file_path):
         shutil.copy(file_path, destination_path)
-    else:
-        _rename_entry_on_external_device(file_path, destination_path,
-                                         metadata_dir_path)
+        make_file_fully_permissible(destination_path)
 
     object_id = destination_path
     created.send(None, object_id=object_id)
@@ -796,7 +1172,17 @@ def is_editable(metadata):
     if metadata.get('mountpoint', '/') == '/':
         return True
     else:
-        return os.access(metadata['mountpoint'], os.W_OK)
+        # sl#3605: Instead of relying on mountpoint property being
+        #          present in the metadata, use journalactivity api.
+        #          This would work seamlessly, as "Details View' is
+        #          called, upon an entry in the context of a singular
+        #          mount-point.
+        from jarabe.journal.journalactivity import get_mount_point
+        mount_point = get_mount_point()
+
+        if is_mount_point_for_locally_mounted_remote_share(mount_point):
+            return False
+        return os.access(mount_point, os.W_OK)
 
 
 def get_documents_path():

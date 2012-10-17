@@ -22,6 +22,7 @@ import time
 import subprocess
 import shutil
 
+
 # Change the default encoding to avoid UnicodeDecodeError
 # http://lists.sugarlabs.org/archive/sugar-devel/2012-August/038928.html
 reload(sys)
@@ -43,6 +44,10 @@ from gi.repository import GObject
 from gi.repository import Gst
 import dbus.glib
 from gi.repository import Wnck
+from gi.repository import Gio
+
+MONITORS = []
+MONITOR_ACTION_TAKEN = False
 
 _USE_XKL = False
 try:
@@ -143,6 +148,15 @@ def setup_notification_service_cb():
     from jarabe.model import notifications
     notifications.init()
 
+def show_notifications_cb():
+    client = GConf.Client.get_default()
+    if not client.get_bool('/desktop/sugar/frame/show_notifications'):
+        return
+
+    from ceibal.notifier import Notifier
+    n = Notifier()
+    n.show_messages_from_shell()
+
 def setup_file_transfer_cb():
     from jarabe.model import filetransfer
     filetransfer.init()
@@ -218,14 +232,31 @@ def setup_window_manager():
             shell=True):
         logging.warning('Can not disable metacity mouse button modifiers')
 
+def file_monitor_changed_cb(monitor, one_file, other_file, event_type):
+    global MONITOR_ACTION_TAKEN
+    if (not MONITOR_ACTION_TAKEN) and \
+       (one_file.get_path() == os.path.expanduser('~/.sugar/journal_created')):
+        if event_type == Gio.FileMonitorEvent.CREATED:
+            GObject.idle_add(show_notifications_cb)
+            GObject.idle_add(setup_frame_cb)
+            MONITOR_ACTION_TAKEN = True
+
+def arrange_for_setup_frame_cb():
+    path = Gio.File.new_for_path(os.path.expanduser('~/.sugar/journal_created'))
+    monitor = path.monitor_file(Gio.FileMonitorFlags.NONE, None)
+    monitor.connect('changed', file_monitor_changed_cb)
+    MONITORS.append(monitor)
+
 def bootstrap():
     setup_window_manager()
 
     from jarabe.view import launcher
     launcher.setup()
 
-    GObject.idle_add(setup_frame_cb)
     GObject.idle_add(setup_keyhandler_cb)
+
+    arrange_for_setup_frame_cb()
+
     GObject.idle_add(setup_gesturehandler_cb)
     GObject.idle_add(setup_cursortracker_cb)
     GObject.idle_add(setup_journal_cb)

@@ -19,6 +19,7 @@ import logging
 from gettext import gettext as _
 import uuid
 
+from gi.repository import GObject
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GdkX11
@@ -27,7 +28,8 @@ import statvfs
 import os
 
 from sugar3.graphics.window import Window
-from sugar3.graphics.alert import ErrorAlert
+from sugar3.graphics.icon import Icon
+from sugar3.graphics.alert import Alert, ErrorAlert, ConfirmationAlert
 
 from sugar3.bundle.bundle import ZipExtractException, RegistrationException
 from sugar3 import env
@@ -37,7 +39,9 @@ from gi.repository import SugarExt
 
 from jarabe.model import bundleregistry
 from jarabe.journal.journaltoolbox import MainToolbox, DetailToolbox
+from jarabe.journal.journaltoolbox import EditToolbox
 from jarabe.journal.listview import ListView
+from jarabe.journal.listmodel import ListModel
 from jarabe.journal.detailview import DetailView
 from jarabe.journal.volumestoolbar import VolumesToolbar
 from jarabe.journal import misc
@@ -46,6 +50,7 @@ from jarabe.journal.objectchooser import ObjectChooser
 from jarabe.journal.modalalert import ModalAlert
 from jarabe.journal import model
 from jarabe.journal.journalwindow import JournalWindow
+from jarabe.journal.journalwindow import show_normal_cursor
 
 
 J_DBUS_SERVICE = 'org.laptop.Journal'
@@ -56,6 +61,7 @@ _SPACE_TRESHOLD = 52428800
 _BUNDLE_ID = 'org.laptop.JournalActivity'
 
 _journal = None
+_mount_point = None
 
 
 class JournalActivityDBusService(dbus.service.Object):
@@ -124,8 +130,33 @@ class JournalActivity(JournalWindow):
         self._list_view = None
         self._detail_view = None
         self._main_toolbox = None
+        self._edit_toolbox = None
         self._detail_toolbox = None
         self._volumes_toolbar = None
+        self._editing_mode = False
+        self._alert = Alert()
+
+        self._error_alert = Alert()
+        icon = Icon(icon_name='dialog-ok')
+        self._error_alert.add_button(Gtk.ResponseType.OK, _('Ok'), icon)
+        icon.show()
+
+        self._confirmation_alert = Alert()
+        icon = Icon(icon_name='dialog-cancel')
+        self._confirmation_alert.add_button(Gtk.ResponseType.CANCEL, _('Stop'), icon)
+        icon.show()
+        icon = Icon(icon_name='dialog-ok')
+        self._confirmation_alert.add_button(Gtk.ResponseType.OK, _('Continue'), icon)
+        icon.show()
+
+        self._current_alert = None
+        self.setup_handlers_for_alert_actions()
+
+        self._info_alert = None
+        self._selected_entries = []
+        self._bundle_installation_allowed = True
+
+        set_mount_point('/')
 
         self._setup_main_view()
         self._setup_secondary_view()
@@ -151,10 +182,17 @@ class JournalActivity(JournalWindow):
         self._check_available_space()
 
     def __volume_error_cb(self, gobject, message, severity):
-        alert = ErrorAlert(title=severity, msg=message)
-        alert.connect('response', self.__alert_response_cb)
-        self.add_alert(alert)
-        alert.show()
+        self.update_title_and_message(self._error_alert, severity,
+                                      message)
+        self._callback = None
+        self._data = None
+        self.update_alert(self._error_alert)
+
+    def _show_alert(self, message, severity):
+        self.__volume_error_cb(None, message, severity)
+
+    def _volume_error_cb(self, gobject, message, severity):
+        self.update_error_alert(severity, message, None, None)
 
     def __alert_response_cb(self, alert, response_id):
         self.remove_alert(alert)
@@ -196,11 +234,14 @@ class JournalActivity(JournalWindow):
         self._main_toolbox.search_entry.connect('icon-press',
                                                 self.__search_icon_pressed_cb)
         self._main_toolbox.set_mount_point('/')
+        #search_toolbar.set_mount_point('/')
+        set_mount_point('/')
 
     def _setup_secondary_view(self):
         self._secondary_view = Gtk.VBox()
 
         self._detail_toolbox = DetailToolbox()
+        self._detail_toolbox.set_mount_point('/')
         self._detail_toolbox.connect('volume-error',
                                      self.__volume_error_cb)
 
@@ -240,9 +281,16 @@ class JournalActivity(JournalWindow):
         self.connect('key-press-event', self._key_press_event_cb)
 
     def show_main_view(self):
-        if self.toolbar_box != self._main_toolbox:
-            self.set_toolbar_box(self._main_toolbox)
-            self._main_toolbox.show()
+        if self._editing_mode:
+            self._toolbox = EditToolbox()
+
+            # TRANS: Do not translate the "%d"
+            self._toolbox.set_total_number_of_entries(self.get_total_number_of_entries())
+        else:
+            self._toolbox = self._main_toolbox
+
+        self.set_toolbar_box(self._toolbox)
+        self._toolbox.show()
 
         if self.canvas != self._main_view:
             self.set_canvas(self._main_view)
@@ -277,6 +325,10 @@ class JournalActivity(JournalWindow):
     def __volume_changed_cb(self, volume_toolbar, mount_point):
         logging.debug('Selected volume: %r.', mount_point)
         self._main_toolbox.set_mount_point(mount_point)
+        set_mount_point(mount_point)
+
+        # Also, need to update the mount-point for Detail-View.
+        self._detail_toolbox.set_mount_point(mount_point)
 
     def __model_created_cb(self, sender, **kwargs):
         self._check_for_bundle(kwargs['object_id'])
@@ -301,6 +353,9 @@ class JournalActivity(JournalWindow):
         self._list_view.update_dates()
 
     def _check_for_bundle(self, object_id):
+        if not self._bundle_installation_allowed:
+            return
+
         registry = bundleregistry.get_registry()
 
         metadata = model.get(object_id)
@@ -335,6 +390,9 @@ class JournalActivity(JournalWindow):
 
         metadata['bundle_id'] = bundle.get_bundle_id()
         model.write(metadata)
+
+    def set_bundle_installation_allowed(self, allowed):
+        self._bundle_installation_allowed = allowed
 
     def __window_state_event_cb(self, window, event):
         logging.debug('window_state_event_cb %r', self)
@@ -378,6 +436,105 @@ class JournalActivity(JournalWindow):
         self.reveal()
         self.show_main_view()
 
+    def switch_to_editing_mode(self, switch):
+        # (re)-switch, only if not already.
+        if (switch) and (not self._editing_mode):
+            self._editing_mode = True
+            self.get_list_view().disable_drag_and_copy()
+            self.show_main_view()
+        elif (not switch) and (self._editing_mode):
+            self._editing_mode = False
+            self.get_list_view().enable_drag_and_copy()
+            self.show_main_view()
+
+    def get_list_view(self):
+        return self._list_view
+
+    def setup_handlers_for_alert_actions(self):
+        self._error_alert.connect('response',
+                                   self.__check_for_alert_action)
+        self._confirmation_alert.connect('response',
+                                   self.__check_for_alert_action)
+
+    def __check_for_alert_action(self, alert, response_id):
+        self.hide_alert()
+        if self._callback is not None:
+            GObject.idle_add(self._callback, self._data,
+                             response_id)
+
+    def update_title_and_message(self, alert, title, message):
+        alert.props.title = title
+        alert.props.msg = message
+
+    def update_alert(self, alert):
+        if self._current_alert is None:
+            self.add_alert(alert)
+        elif self._current_alert != alert:
+            self.remove_alert(self._current_alert)
+            self.add_alert(alert)
+
+        self.remove_alert(self._current_alert)
+        self.add_alert(alert)
+        self._current_alert = alert
+        self._current_alert.show()
+        show_normal_cursor()
+
+    def hide_alert(self):
+        if self._current_alert is not None:
+            self._current_alert.hide()
+
+    def update_info_alert(self, title, message):
+        self.get_toolbar_box().display_running_status_in_multi_select(title, message)
+
+    def update_error_alert(self, title, message, callback, data):
+        self.update_title_and_message(self._error_alert, title,
+                                       message)
+        self._callback = callback
+        self._data = data
+        self.update_alert(self._error_alert)
+
+    def update_confirmation_alert(self, title, message, callback,
+                                  data):
+        self.update_title_and_message(self._confirmation_alert, title,
+                                       message)
+        self._callback = callback
+        self._data = data
+        self.update_alert(self._confirmation_alert)
+
+    def update_progress(self, fraction):
+        self.get_toolbar_box().update_progress(fraction)
+
+    def get_metadata_list(self, selected_state):
+        metadata_list = []
+
+        list_view_model = self.get_list_view().get_model()
+        for index in range(0, len(list_view_model)):
+            metadata = list_view_model.get_metadata(index)
+            metadata_selected = \
+                    list_view_model.get_selected_value(metadata['uid'])
+
+            if ( (selected_state and metadata_selected) or \
+                    ((not selected_state) and (not metadata_selected)) ):
+                metadata_list.append(metadata)
+
+        return metadata_list
+
+    def get_total_number_of_entries(self):
+        list_view_model = self.get_list_view().get_model()
+        return len(list_view_model)
+
+    def is_editing_mode_present(self):
+        return self._editing_mode
+
+    def get_volumes_toolbar(self):
+        return self._volumes_toolbar
+
+    def get_toolbar_box(self):
+        return self._toolbox
+
+    def get_detail_toolbox(self):
+        return self._detail_toolbox
+
 
 def get_journal():
     global _journal
@@ -389,3 +546,11 @@ def get_journal():
 
 def start():
     get_journal()
+
+
+def set_mount_point(mount_point):
+    global _mount_point
+    _mount_point = mount_point
+
+def get_mount_point():
+    return _mount_point

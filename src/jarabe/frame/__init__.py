@@ -14,13 +14,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-from jarabe.frame.frame import Frame
-
 
 _view = None
 
 
 def get_view():
+    from jarabe.frame.frame import Frame
+
     global _view
     if not _view:
         _view = Frame()

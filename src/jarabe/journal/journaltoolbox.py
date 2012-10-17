@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 from gettext import gettext as _
+from gettext import ngettext
 import logging
 from datetime import datetime, timedelta
 import os
@@ -26,6 +27,7 @@ from gi.repository import GObject
 from gi.repository import Gio
 import glib
 from gi.repository import Gtk
+from gi.repository import Gdk
 
 from sugar3.graphics.palette import Palette
 from sugar3.graphics.toolbarbox import ToolbarBox
@@ -45,8 +47,9 @@ from jarabe.journal import misc
 from jarabe.journal import model
 from jarabe.journal.palettes import ClipboardMenu
 from jarabe.journal.palettes import VolumeMenu
-from jarabe.journal import journalwindow
+from jarabe.journal import journalwindow, palettes
 
+COPY_MENU_HELPER = palettes.get_copy_menu_helper()
 
 _AUTOSEARCH_TIMEOUT = 1000
 
@@ -73,6 +76,10 @@ class MainToolbox(ToolbarBox):
 
     def __init__(self):
         ToolbarBox.__init__(self)
+
+        self._info_widget = MultiSelectEntriesInfoWidget()
+        self.add(self._info_widget)
+        self._info_widget.hide()
 
         self._mount_point = None
 
@@ -122,6 +129,12 @@ class MainToolbox(ToolbarBox):
         self._query = self._build_query()
 
         self.refresh_filters()
+
+    def update_progress(self, fraction):
+        self._info_widget.update_progress(fraction)
+
+    def hide_info_widget(self):
+        self._info_widget.hide()
 
     def _get_when_search_combo(self):
         when_search = ComboBox()
@@ -390,10 +403,29 @@ class DetailToolbox(ToolbarBox):
         separator.show()
 
         erase_button = ToolButton('list-remove')
+        self._erase_button = erase_button
         erase_button.set_tooltip(_('Erase'))
         erase_button.connect('clicked', self._erase_button_clicked_cb)
         self.toolbar.insert(erase_button, -1)
         erase_button.show()
+
+    def set_mount_point(self, mount_point):
+        self._mount_point = mount_point
+        self.set_sensitivity_of_icons()
+
+    def get_mount_point(self):
+        return self._mount_point
+
+    def set_sensitivity_of_icons(self):
+        mount_point = self.get_mount_point()
+        if model.is_mount_point_for_locally_mounted_remote_share(mount_point):
+            sensitivity = False
+        else:
+            sensitivity = True
+
+        self._resume.set_sensitive(sensitivity)
+        self._duplicate.set_sensitive(sensitivity)
+        self._erase_button.set_sensitive(sensitivity)
 
     def set_metadata(self, metadata):
         self._metadata = metadata
@@ -452,39 +484,11 @@ class DetailToolbox(ToolbarBox):
             palette.menu.remove(menu_item)
             menu_item.destroy()
 
-        clipboard_menu = ClipboardMenu(self._metadata)
-        clipboard_menu.set_image(Icon(icon_name='toolbar-edit',
-                                      icon_size=Gtk.IconSize.MENU))
-        clipboard_menu.connect('volume-error', self.__volume_error_cb)
-        palette.menu.append(clipboard_menu)
-        clipboard_menu.show()
-
-        if self._metadata['mountpoint'] != '/':
-            client = GConf.Client.get_default()
-            color = XoColor(client.get_string('/desktop/sugar/user/color'))
-            journal_menu = VolumeMenu(self._metadata, _('Journal'), '/')
-            journal_menu.set_image(Icon(icon_name='activity-journal',
-                                        xo_color=color,
-                                        icon_size=Gtk.IconSize.MENU))
-            journal_menu.connect('volume-error', self.__volume_error_cb)
-            palette.menu.append(journal_menu)
-            journal_menu.show()
-
-        volume_monitor = Gio.VolumeMonitor.get()
-        icon_theme = Gtk.IconTheme.get_default()
-        for mount in volume_monitor.get_mounts():
-            if self._metadata['mountpoint'] == mount.get_root().get_path():
-                continue
-            volume_menu = VolumeMenu(self._metadata, mount.get_name(),
-                                     mount.get_root().get_path())
-            for name in mount.get_icon().props.names:
-                if icon_theme.has_icon(name):
-                    volume_menu.set_image(Icon(icon_name=name,
-                                               icon_size=Gtk.IconSize.MENU))
-                    break
-            volume_menu.connect('volume-error', self.__volume_error_cb)
-            palette.menu.append(volume_menu)
-            volume_menu.show()
+        COPY_MENU_HELPER.insert_copy_to_menu_items(palette.menu,
+                                                   [self._metadata],
+                                                   show_editing_alert=False,
+                                                   show_progress_info_alert=False,
+                                                   batch_mode=False)
 
     def _refresh_duplicate_palette(self):
         color = misc.get_icon_color(self._metadata)
@@ -522,6 +526,270 @@ class DetailToolbox(ToolbarBox):
                                 activity_info.get_bundle_id())
             palette.menu.append(menu_item)
             menu_item.show()
+
+
+class EditToolbox(ToolbarBox):
+    def __init__(self):
+        ToolbarBox.__init__(self)
+
+        self.toolbar.add(SelectNoneButton())
+        self.toolbar.add(SelectAllButton())
+
+        self.toolbar.add(Gtk.SeparatorToolItem())
+
+        self.toolbar.add(BatchEraseButton())
+        self.toolbar.add(BatchCopyButton())
+
+        self.toolbar.add(Gtk.SeparatorToolItem())
+
+        self._multi_select_info_widget = MultiSelectEntriesInfoWidget()
+        self.toolbar.add(self._multi_select_info_widget)
+
+        self.show_all()
+        self.toolbar.show_all()
+
+    def process_new_selected_entry_in_multi_select(self):
+        GObject.idle_add(self._multi_select_info_widget.update_text,
+                         '', '', True, True)
+
+    def process_new_deselected_entry_in_multi_select(self):
+        GObject.idle_add(self._multi_select_info_widget.update_text,
+                         '', '', False, True)
+
+    def display_running_status_in_multi_select(self, primary_info,
+                                               secondary_info):
+        GObject.idle_add(self._multi_select_info_widget.update_text,
+                         primary_info, secondary_info,
+                         None, None)
+
+    def display_already_selected_entries_status(self):
+        GObject.idle_add(self._multi_select_info_widget.update_text,
+                         '', '', True, False)
+
+    def set_total_number_of_entries(self, total):
+        self._multi_select_info_widget.set_total_number_of_entries(total)
+
+    def get_current_entry_number(self):
+        return self._multi_select_info_widget.get_current_entry_number()
+
+    def update_progress(self, fraction):
+        self._multi_select_info_widget.update_progress(fraction)
+
+
+class SelectNoneButton(ToolButton):
+    def __init__(self):
+        ToolButton.__init__(self, 'select-none')
+        self.props.tooltip = _('Deselect all')
+
+        self.connect('clicked', self.__do_deselect_all)
+
+    def __do_deselect_all(self, widget_clicked):
+        from jarabe.journal.journalactivity import get_journal
+        journal = get_journal()
+
+        journal.get_list_view()._selected_entries = 0
+        journal.switch_to_editing_mode(False)
+        journal.get_list_view().inhibit_refresh(False)
+        journal.get_list_view().refresh()
+
+
+class SelectAllButton(ToolButton, palettes.ActionItem):
+    def __init__(self):
+        ToolButton.__init__(self, 'select-all')
+        palettes.ActionItem.__init__(self, '', [],
+                                     show_editing_alert=False,
+                                     show_progress_info_alert=False,
+                                     batch_mode=True,
+                                     auto_deselect_source_entries=True,
+                                     need_to_popup_options=False,
+                                     operate_on_deselected_entries=True,
+                                     show_not_completed_ops_info=False)
+        self.props.tooltip = _('Select all')
+
+    def _get_actionable_signal(self):
+        return 'clicked'
+
+    def _get_editing_alert_operation(self):
+        return _('Select all')
+
+    def _get_info_alert_title(self):
+        return _('Selecting')
+
+    def _get_post_selection_alert_message_entries_len(self):
+        return self._model_len
+
+    def _get_post_selection_alert_message(self, entries_len):
+        from jarabe.journal.journalactivity import get_journal
+        journal = get_journal()
+
+        return ngettext('You have selected %d entry.',
+                        'You have selected %d entries.',
+                         entries_len) % (entries_len,)
+
+    def _operate(self, metadata):
+        # Nothing specific needs to be done.
+        # The checkboxes are unchecked as part of the toggling of any
+        # operation that operates on selected entries.
+
+        # This is sync-operation. Thus, call the callback.
+        self._post_operate_per_metadata_per_action(metadata)
+
+
+class BatchEraseButton(ToolButton, palettes.ActionItem):
+    def __init__(self):
+        ToolButton.__init__(self, 'edit-delete')
+        palettes.ActionItem.__init__(self, '', [],
+                                     show_editing_alert=True,
+                                     show_progress_info_alert=True,
+                                     batch_mode=True,
+                                     auto_deselect_source_entries=True,
+                                     need_to_popup_options=False,
+                                     operate_on_deselected_entries=False,
+                                     show_not_completed_ops_info=True)
+        self.props.tooltip = _('Erase')
+
+        # De-sensitize Batch-Erase button, for locally-mounted-remote-shares.
+        from jarabe.journal.journalactivity import get_mount_point
+        current_mount_point = get_mount_point()
+
+        if model.is_mount_point_for_locally_mounted_remote_share(current_mount_point):
+            self.set_sensitive(False)
+
+    def _get_actionable_signal(self):
+        return 'clicked'
+
+    def _get_editing_alert_title(self):
+        return _('Erase')
+
+    def _get_editing_alert_message(self, entries_len):
+        return ngettext('Do you want to erase %d entry?',
+                        'Do you want to erase %d entries?',
+                         entries_len) % (entries_len)
+
+    def _get_editing_alert_operation(self):
+        return _('Erase')
+
+    def _get_info_alert_title(self):
+        return _('Erasing')
+
+    def _operate(self, metadata):
+        model.delete(metadata['uid'])
+
+        # This is sync-operation. Thus, call the callback.
+        self._post_operate_per_metadata_per_action(metadata)
+
+
+class BatchCopyButton(ToolButton, palettes.ActionItem):
+    def __init__(self):
+        ToolButton.__init__(self, 'edit-copy')
+        palettes.ActionItem.__init__(self, '', [],
+                                     show_editing_alert=True,
+                                     show_progress_info_alert=True,
+                                     batch_mode=True,
+                                     auto_deselect_source_entries=False,
+                                     need_to_popup_options=True,
+                                     operate_on_deselected_entries=False,
+                                     show_not_completed_ops_info=False)
+
+        self.props.tooltip = _('Copy')
+
+        self._metadata_list = None
+        self._fill_and_pop_up_options(None)
+
+    def _get_actionable_signal(self):
+        return 'clicked'
+
+    def _fill_and_pop_up_options(self, widget_clicked):
+        for child in self.props.palette.menu.get_children():
+            self.props.palette.menu.remove(child)
+
+        COPY_MENU_HELPER.insert_copy_to_menu_items(self.props.palette.menu,
+                                                   [],
+                                                   show_editing_alert=True,
+                                                   show_progress_info_alert=True,
+                                                   batch_mode=True)
+        if widget_clicked is not None:
+            self.props.palette.popup(immediate=True, state=1)
+
+
+class MultiSelectEntriesInfoWidget(Gtk.ToolItem):
+    def __init__(self):
+        Gtk.ToolItem.__init__(self)
+
+        self._box = Gtk.VBox()
+        self._selected_entries = 0
+
+        self._label = Gtk.Label()
+        self._box.pack_start(self._label, True, True, 0)
+
+        self._progress_label = Gtk.Label()
+        self._box.pack_start(self._progress_label, True, True, 0)
+
+        self.add(self._box)
+
+        self.show_all()
+        self._box.show_all()
+        self._progress_label.hide()
+
+    def set_total_number_of_entries(self, total):
+        self._total = total
+
+    def update_progress(self, fraction):
+        percent = '%.02f' % (fraction * 100)
+
+        # TRANS: Do not translate %.02f
+        text = '%.02f%% complete' % (fraction * 100)
+        if (str(percent) != '100.00') and (str(percent).endswith('00')):
+            self._progress_label.set_text(text)
+            self._progress_label.show()
+            self.show_all()
+            Gdk.Window.process_all_updates()
+        else:
+            self._progress_label.hide()
+            from jarabe.journal.journalactivity import get_journal
+            if not get_journal().is_editing_mode_present():
+                self.hide()
+
+    def update_text(self, primary_text, secondary_text, special_action,
+                    update_selected_entries):
+        # If "special_action" is None,
+        #       we need to display the info, conveyed by
+        #       "primary_message" and "secondary_message"
+        #
+        # If "special_action" is True,
+        #       a new entry has been selected.
+        #
+        # If "special_action" is False,
+        #       an enrty has been deselected.
+        if special_action == None:
+            self._label.set_text(primary_text + secondary_text)
+            self._label.show()
+        else:
+            if update_selected_entries:
+                if special_action == True:
+                    self._selected_entries = self._selected_entries + 1
+                elif special_action == False:
+                    self._selected_entries = self._selected_entries - 1
+
+            # TRANS: Do not translate the two "%d".
+            message = _('Selected %d of %d') % (self._selected_entries,
+                                                self._total)
+
+            # Only show the "selected x of y" for "Select All", or
+            # "Deselect All", or if the user checked/unchecked a
+            # checkbox.
+            from jarabe.journal.palettes import get_current_action_item
+            current_action_item = get_current_action_item()
+            if current_action_item == None or \
+               isinstance(current_action_item, SelectAllButton) or \
+               isinstance(current_action_item, SelectNoneButton):
+                   self._label.set_text(message)
+                   self._label.show()
+
+        Gdk.Window.process_all_updates()
+
+    def get_current_entry_number(self):
+        return self._selected_entries
 
 
 class SortingButton(ToolButton):

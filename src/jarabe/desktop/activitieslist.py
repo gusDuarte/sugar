@@ -215,6 +215,15 @@ class ListModel(Gtk.TreeModelSort):
                 self._model.remove(row.iter)
                 return
 
+    def _is_activity_bundle_in_model_already(self, activity_info):
+        bundle_id = activity_info.get_bundle_id()
+        version = activity_info.get_activity_version()
+        for row in self._model:
+            if row[ListModel.COLUMN_BUNDLE_ID] == bundle_id and \
+                    row[ListModel.COLUMN_VERSION] == version:
+                        return True
+        return False
+
     def _add_activity(self, activity_info):
         if activity_info.get_bundle_id() == 'org.laptop.JournalActivity':
             return
@@ -223,6 +232,12 @@ class ListModel(Gtk.TreeModelSort):
         version = activity_info.get_activity_version()
 
         registry = bundleregistry.get_registry()
+
+        # If the activity bundle is already a part of
+        # activities-list, do not re-add it.
+        if self._is_activity_bundle_in_model_already(activity_info):
+            return
+
         favorite = registry.is_bundle_favorite(activity_info.get_bundle_id(),
                                                version)
 
@@ -235,7 +250,7 @@ class ListModel(Gtk.TreeModelSort):
                     '<span style="italic" weight="light">%s</span>' % \
                             (activity_info.get_name(), tags)
 
-        self._model.append([activity_info.get_bundle_id(),
+        self._model.prepend([activity_info.get_bundle_id(),
                             favorite,
                             activity_info.get_icon(),
                             title,

@@ -208,6 +208,10 @@ class ControlPanel(Gtk.Window):
                                      self.__accept_clicked_cb)
 
     def show_section_view(self, option):
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        GObject.idle_add(self._finally_show_section_view, option)
+
+    def _finally_show_section_view(self, option):
         self._set_toolbar(self._section_toolbar)
 
         icon = self._section_toolbar.get_icon()
@@ -291,6 +295,7 @@ class ControlPanel(Gtk.Window):
         self._show_main_view()
 
     def __accept_clicked_cb(self, widget):
+        self._section_view.perform_accept_actions()
         if self._section_view.needs_restart:
             self._section_toolbar.accept_button.set_sensitive(False)
             self._section_toolbar.cancel_button.set_sensitive(False)

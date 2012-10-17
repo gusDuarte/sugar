@@ -492,6 +492,7 @@ class Settings(object):
         self.connection = ConnectionSettings()
         self.ip4_config = None
         self.wireless_security = None
+        self.wpa_eap_setting = None
 
         if wireless_cfg is not None:
             self.wireless = wireless_cfg
@@ -507,6 +508,8 @@ class Settings(object):
                 self.wireless_security.get_dict()
         if self.ip4_config is not None:
             settings['ipv4'] = self.ip4_config.get_dict()
+        if self.wpa_eap_setting is not None:
+            settings['802-1x'] = self.wpa_eap_setting
         return settings
 
 
@@ -907,12 +910,14 @@ def activate_connection_by_path(connection, device_o,
                                      error_handler=error_handler)
 
 
-def add_and_activate_connection(device_o, settings, specific_object):
+def add_and_activate_connection(device_o, settings, specific_object,
+                                reply_handler=_add_and_activate_reply_cb,
+                                error_handler=_add_and_activate_error_cb):
     manager = get_manager()
     manager.AddAndActivateConnection(settings.get_dict(), device_o,
                                      specific_object,
-                                     reply_handler=_add_and_activate_reply_cb,
-                                     error_handler=_add_and_activate_error_cb)
+                                     reply_handler=reply_handler,
+                                     error_handler=error_handler)
 
 
 def _migrate_old_wifi_connections():

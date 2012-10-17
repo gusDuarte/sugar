@@ -427,7 +427,8 @@ class _Account(GObject.GObject):
 
     def __buddy_info_updated_cb(self, handle, properties):
         logging.debug('_Account.__buddy_info_updated_cb %r', handle)
-        self.emit('buddy-updated', self._buddy_handles[handle], properties)
+        if handle in self._buddy_handles:
+            self.emit('buddy-updated', self._buddy_handles[handle], properties)
 
     def __current_activity_changed_cb(self, contact_handle, activity_id,
                                       room_handle):
@@ -928,6 +929,9 @@ class Neighborhood(GObject.GObject):
 
         if 'key' in properties:
             buddy.props.key = properties['key']
+
+        if 'ip4-address' in properties:
+            buddy.props.ip_address = properties['ip4-address']
 
         nick_key = CONNECTION_INTERFACE_ALIASING + '/alias'
         if nick_key in properties:

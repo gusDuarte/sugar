@@ -52,3 +52,7 @@ class SectionView(Gtk.VBox):
     def undo(self):
         """Undo here the changes that have been made in this section."""
         pass
+
+    def perform_accept_actions(self):
+        """Perform additional actions, when the "Ok" button is clicked."""
+        pass

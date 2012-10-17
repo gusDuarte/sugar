@@ -40,6 +40,7 @@ from jarabe.journal.journalentrybundle import JournalEntryBundle
 from jarabe.journal import model
 from jarabe.journal import journalwindow
 
+_NOT_AVAILABLE = _('Not available')
 
 def _get_icon_for_mime(mime_type):
     generic_types = mime.get_all_generic_types()
@@ -312,3 +313,48 @@ def get_icon_color(metadata):
         return XoColor(client.get_string('/desktop/sugar/user/color'))
     else:
         return XoColor(metadata['icon-color'])
+
+
+def get_xo_serial():
+    _OFW_TREE = '/ofw'
+    _PROC_TREE = '/proc/device-tree'
+    _SN = 'serial-number'
+
+    serial_no = None
+    if os.path.exists(os.path.join(_OFW_TREE, _SN)):
+        serial_no = read_file(os.path.join(_OFW_TREE, _SN))
+    elif os.path.exists(os.path.join(_PROC_TREE, _SN)):
+        serial_no = read_file(os.path.join(_PROC_TREE, _SN))
+
+    if serial_no is None:
+        serial_no = _NOT_AVAILABLE
+
+    # Remove the trailing binary character, else DBUS will crash.
+    return serial_no.rstrip('\x00')
+
+
+def read_file(path):
+    if os.access(path, os.R_OK) == 0:
+        return None
+
+    fd = open(path, 'r')
+    value = fd.read()
+    fd.close()
+    if value:
+        value = value.strip('\n')
+        return value
+    else:
+        logging.debug('No information in file or directory: %s', path)
+        return None
+
+
+def get_nick():
+    client = GConf.Client.get_default()
+    return client.get_string("/desktop/sugar/user/nick")
+
+
+def get_backup_identifier():
+    serial_number = get_xo_serial()
+    if serial_number is _NOT_AVAILABLE:
+        serial_number = get_nick()
+    return serial_number

@@ -3,7 +3,9 @@ python_scripts =		\
 	sugar-emulator		\
 	sugar-install-bundle	\
 	sugar-launch		\
-	sugar-session
+	sugar-session           \
+	journal-backup-volume	\
+	journal-restore-volume
 
 bin_SCRIPTS = 			\
 	sugar			\

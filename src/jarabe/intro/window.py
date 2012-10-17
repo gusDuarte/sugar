@@ -34,12 +34,30 @@ from sugar3.graphics.xocolor import XoColor
 from jarabe.intro import colorpicker
 
 
-def create_profile(name, color=None):
+def create_profile(name, age, color=None):
     if not color:
         color = XoColor()
 
     client = GConf.Client.get_default()
     client.set_string('/desktop/sugar/user/nick', name)
+
+
+    # Algorithm to generate the timestamp of the birthday of the
+    # XO-user ::
+    #
+    # timestamp = current_timestamp - [age * (365 * 24 * 60 * 60)]
+    #
+    # Note that, this timestamp may actually (in worst-case) be
+    # off-target by 1 year, but that is ok, since we want an
+    # "approximate" age of the XO-user (for statistics-collection).
+    import time
+    current_timestamp = time.time()
+    xo_user_age_as_timestamp = int(age) * 365 * 24 * 60 * 60
+
+    approx_timestamp_at_user_birthday = current_timestamp - xo_user_age_as_timestamp
+    client.set_int('/desktop/sugar/user/birth_timestamp', int(approx_timestamp_at_user_birthday))
+    # Done.
+
     client.set_string('/desktop/sugar/user/color', color.to_string())
     client.suggest_sync()
 
@@ -125,6 +143,46 @@ class _NamePage(_Page):
         self._entry.grab_focus()
 
 
+class _AgePage(_Page):
+    def __init__(self, intro):
+        _Page.__init__(self)
+        self._intro = intro
+        self._max_age = 1000
+
+        alignment = Gtk.Alignment.new(0.5, 0.5, 0, 0)
+        self.pack_start(alignment, expand=True, fill=True, padding=0)
+
+        hbox = Gtk.HBox(spacing=style.DEFAULT_SPACING)
+        alignment.add(hbox)
+
+        label = Gtk.Label(_('Age:'))
+        hbox.pack_start(label, False, True, 0)
+
+        adjustment = Gtk.Adjustment(0, 0, self._max_age, 1, 0, 0)
+        self._entry = Gtk.SpinButton(adjustment=adjustment)
+        self._entry.props.editable = True
+        self._entry.connect('notify::text', self._text_changed_cb)
+        self._entry.set_max_length(15)
+        hbox.pack_start(self._entry, False, True, 0)
+
+        label = Gtk.Label(_('years'))
+        hbox.pack_start(label, False, True, 0)
+
+
+    def _text_changed_cb(self, entry, pspec):
+        valid = False
+        if entry.props.text.isdigit():
+            int_value = int(entry.props.text)
+            valid = ((int_value > 0) and (int_value <= self._max_age))
+        self.set_valid(valid)
+
+    def get_age(self):
+        return int(self._entry.props.text)
+
+    def activate(self):
+        self._entry.grab_focus()
+
+
 class _ColorPage(_Page):
     def __init__(self):
         _Page.__init__(self)
@@ -148,11 +206,12 @@ class _ColorPage(_Page):
 class _IntroBox(Gtk.VBox):
     __gsignals__ = {
         'done': (GObject.SignalFlags.RUN_FIRST, None,
-                 ([GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT])),
+                 ([GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT])),
     }
 
     PAGE_NAME = 0
-    PAGE_COLOR = 1
+    PAGE_AGE = 1
+    PAGE_COLOR = 2
 
     PAGE_FIRST = PAGE_NAME
     PAGE_LAST = PAGE_COLOR
@@ -163,6 +222,7 @@ class _IntroBox(Gtk.VBox):
 
         self._page = self.PAGE_NAME
         self._name_page = _NamePage(self)
+        self._age_page = _AgePage(self)
         self._color_page = _ColorPage()
         self._current_page = None
         self._next_button = None
@@ -185,6 +245,8 @@ class _IntroBox(Gtk.VBox):
 
         if self._page == self.PAGE_NAME:
             self._current_page = self._name_page
+        if self._page == self.PAGE_AGE:
+            self._current_page = self._age_page
         elif self._page == self.PAGE_COLOR:
             self._current_page = self._color_page
 
@@ -253,9 +315,10 @@ class _IntroBox(Gtk.VBox):
 
     def done(self):
         name = self._name_page.get_name()
+        age = self._age_page.get_age()
         color = self._color_page.get_color()
 
-        self.emit('done', name, color)
+        self.emit('done', name, age, color)
 
 
 class IntroWindow(Gtk.Window):
@@ -274,12 +337,12 @@ class IntroWindow(Gtk.Window):
         self._intro_box.show()
         self.connect('key-press-event', self.__key_press_cb)
 
-    def _done_cb(self, box, name, color):
+    def _done_cb(self, box, name, age, color):
         self.hide()
-        GObject.idle_add(self._create_profile_cb, name, color)
+        GObject.idle_add(self._create_profile_cb, name, age, color)
 
-    def _create_profile_cb(self, name, color):
-        create_profile(name, color)
+    def _create_profile_cb(self, name, age, color):
+        create_profile(name, age, color)
         Gtk.main_quit()
 
         return False

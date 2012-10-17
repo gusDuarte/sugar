@@ -23,7 +23,6 @@ from gi.repository import Gdk
 
 from sugar3.graphics import style
 
-from jarabe import config
 from jarabe.controlpanel.sectionview import SectionView
 
 
@@ -65,23 +64,50 @@ class AboutComputer(SectionView):
         vbox_identity.set_border_width(style.DEFAULT_SPACING * 2)
         vbox_identity.set_spacing(style.DEFAULT_SPACING)
 
-        box_identity = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        label_serial = Gtk.Label(label=_('Serial Number:'))
-        label_serial.set_alignment(1, 0)
-        label_serial.modify_fg(Gtk.StateType.NORMAL,
-                               style.COLOR_SELECTION_GREY.get_gdk_color())
-        box_identity.pack_start(label_serial, False, True, 0)
-        self._group.add_widget(label_serial)
-        label_serial.show()
-        label_serial_no = Gtk.Label(label=self._model.get_serial_number())
-        label_serial_no.set_alignment(0, 0)
-        box_identity.pack_start(label_serial_no, False, True, 0)
-        label_serial_no.show()
-        vbox_identity.pack_start(box_identity, False, True, 0)
-        box_identity.show()
+        self._setup_component_if_applicable(None,
+                                            _('Serial Number:'),
+                                            self._model.get_serial_number,
+                                            vbox_identity)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_lease',
+                                            _('Lease:'),
+                                            self._model.get_lease_days,
+                                            vbox_identity)
 
         self._vbox.pack_start(vbox_identity, False, True, 0)
         vbox_identity.show()
+
+    def _is_feature_to_be_shown(slf, gconf_key):
+        if gconf_key is None:
+            return True
+
+        from gi.repository import GConf
+        client = GConf.Client.get_default()
+
+        return client.get_bool(gconf_key) is True
+
+    def _setup_component_if_applicable(self, gconf_key, key, value_func, packer):
+        if not self._is_feature_to_be_shown(gconf_key):
+            return
+
+        # Now that we do need to show, fetch the value.
+        print value_func
+        value = value_func()
+
+        box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
+        key_label = Gtk.Label(label=key)
+        key_label.set_alignment(1, 0)
+        key_label.modify_fg(Gtk.StateType.NORMAL,
+                            style.COLOR_SELECTION_GREY.get_gdk_color())
+        box.pack_start(key_label, False, True, 0)
+        self._group.add_widget(key_label)
+        key_label.show()
+        value_label = Gtk.Label(label=value)
+        value_label.set_alignment(0, 0)
+        box.pack_start(value_label, False, True, 0)
+        value_label.show()
+        packer.pack_start(box, False, True, 0)
+        box.show()
 
     def _setup_software(self):
         separator_software = Gtk.HSeparator()
@@ -96,66 +122,45 @@ class AboutComputer(SectionView):
         box_software.set_border_width(style.DEFAULT_SPACING * 2)
         box_software.set_spacing(style.DEFAULT_SPACING)
 
-        box_build = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        label_build = Gtk.Label(label=_('Build:'))
-        label_build.set_alignment(1, 0)
-        label_build.modify_fg(Gtk.StateType.NORMAL,
-                              style.COLOR_SELECTION_GREY.get_gdk_color())
-        box_build.pack_start(label_build, False, True, 0)
-        self._group.add_widget(label_build)
-        label_build.show()
-        label_build_no = Gtk.Label(label=self._model.get_build_number())
-        label_build_no.set_alignment(0, 0)
-        box_build.pack_start(label_build_no, False, True, 0)
-        label_build_no.show()
-        box_software.pack_start(box_build, False, True, 0)
-        box_build.show()
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_model',
+                                            _('Model:'),
+                                            self._model.get_model_laptop,
+                                            box_software)
 
-        box_sugar = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        label_sugar = Gtk.Label(label=_('Sugar:'))
-        label_sugar.set_alignment(1, 0)
-        label_sugar.modify_fg(Gtk.StateType.NORMAL,
-                              style.COLOR_SELECTION_GREY.get_gdk_color())
-        box_sugar.pack_start(label_sugar, False, True, 0)
-        self._group.add_widget(label_sugar)
-        label_sugar.show()
-        label_sugar_ver = Gtk.Label(label=config.version)
-        label_sugar_ver.set_alignment(0, 0)
-        box_sugar.pack_start(label_sugar_ver, False, True, 0)
-        label_sugar_ver.show()
-        box_software.pack_start(box_sugar, False, True, 0)
-        box_sugar.show()
+        self._setup_component_if_applicable(None,
+                                            _('Build:'),
+                                            self._model.get_build_number,
+                                            box_software)
 
-        box_firmware = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        label_firmware = Gtk.Label(label=_('Firmware:'))
-        label_firmware.set_alignment(1, 0)
-        label_firmware.modify_fg(Gtk.StateType.NORMAL,
-                                 style.COLOR_SELECTION_GREY.get_gdk_color())
-        box_firmware.pack_start(label_firmware, False, True, 0)
-        self._group.add_widget(label_firmware)
-        label_firmware.show()
-        label_firmware_no = Gtk.Label(label=self._model.get_firmware_number())
-        label_firmware_no.set_alignment(0, 0)
-        box_firmware.pack_start(label_firmware_no, False, True, 0)
-        label_firmware_no.show()
-        box_software.pack_start(box_firmware, False, True, 0)
-        box_firmware.show()
+        self._setup_component_if_applicable(None,
+                                            _('Sugar:'),
+                                            self._model.get_sugar_version,
+                                            box_software)
 
-        box_wireless_fw = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        label_wireless_fw = Gtk.Label(label=_('Wireless Firmware:'))
-        label_wireless_fw.set_alignment(1, 0)
-        label_wireless_fw.modify_fg(Gtk.StateType.NORMAL,
-                                    style.COLOR_SELECTION_GREY.get_gdk_color())
-        box_wireless_fw.pack_start(label_wireless_fw, False, True, 0)
-        self._group.add_widget(label_wireless_fw)
-        label_wireless_fw.show()
-        wireless_fw_no = self._model.get_wireless_firmware()
-        label_wireless_fw_no = Gtk.Label(label=wireless_fw_no)
-        label_wireless_fw_no.set_alignment(0, 0)
-        box_wireless_fw.pack_start(label_wireless_fw_no, False, True, 0)
-        label_wireless_fw_no.show()
-        box_software.pack_start(box_wireless_fw, False, True, 0)
-        box_wireless_fw.show()
+        self._setup_component_if_applicable(None,
+                                            _('Firmware:'),
+                                            self._model.get_firmware_number,
+                                            box_software)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_wireless_firmware',
+                                            _('Wireless Firmware:'),
+                                            self._model.get_wireless_firmware,
+                                            box_software)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_plazo',
+                                            _('Plazo:'),
+                                            self._model.get_plazo,
+                                            box_software)
+
+        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_version_de_actual',
+                                            _('Versión de Actualización:'),
+                                            self._model.get_act,
+                                            box_software)
+
+        self._setup_component_if_applicable(None,
+                                            _('Last Updated On:'),
+                                            self._model.get_last_updated_on_field,
+                                            box_software)
 
         self._vbox.pack_start(box_software, False, True, 0)
         box_software.show()

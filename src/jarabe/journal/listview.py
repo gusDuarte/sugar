@@ -67,7 +67,8 @@ class BaseListView(Gtk.Bin):
         'clear-clicked': (GObject.SignalFlags.RUN_FIRST, None, ([])),
     }
 
-    def __init__(self):
+    def __init__(self, is_object_chooser):
+        self._is_object_chooser = is_object_chooser
         self._query = {}
         self._model = None
         self._progress_bar = None
@@ -100,11 +101,11 @@ class BaseListView(Gtk.Bin):
         self._title_column = None
         self.sort_column = None
         self._add_columns()
+        self._inhibit_refresh = False
+        self._selected_entries = 0
 
-        self.tree_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
-                                                [('text/uri-list', 0, 0),
-                                                 ('journal-object-id', 0, 0)],
-                                                Gdk.DragAction.COPY)
+        self.enable_drag_and_copy()
+
 
         # Auto-update stuff
         self._fully_obscured = True
@@ -115,6 +116,15 @@ class BaseListView(Gtk.Bin):
         model.created.connect(self.__model_created_cb)
         model.updated.connect(self.__model_updated_cb)
         model.deleted.connect(self.__model_deleted_cb)
+
+    def enable_drag_and_copy(self):
+        self.tree_view.enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK,
+                                                [('text/uri-list', 0, 0),
+                                                 ('journal-object-id', 0, 0)],
+                                                Gdk.DragAction.COPY)
+
+    def disable_drag_and_copy(self):
+        self.tree_view.unset_rows_drag_source()
 
     def __model_created_cb(self, sender, signal, object_id):
         if self._is_new_item_visible(object_id):
@@ -136,6 +146,17 @@ class BaseListView(Gtk.Bin):
             return object_id.startswith(self._query['mountpoints'][0])
 
     def _add_columns(self):
+        if not self._is_object_chooser:
+            cell_select = CellRendererToggle(self.tree_view)
+            cell_select.connect('clicked', self.__cell_select_clicked_cb)
+
+            column = Gtk.TreeViewColumn()
+            column.props.sizing = Gtk.TreeViewColumnSizing.FIXED
+            column.props.fixed_width = cell_select.props.width
+            column.pack_start(cell_select, True)
+            column.set_cell_data_func(cell_select, self.__select_set_data_cb)
+            self.tree_view.append_column(column)
+
         cell_favorite = CellRendererFavorite(self.tree_view)
         cell_favorite.connect('clicked', self.__favorite_clicked_cb)
 
@@ -248,8 +269,30 @@ class BaseListView(Gtk.Bin):
 
     def __favorite_set_data_cb(self, column, cell, tree_model,
                                tree_iter, data):
-        favorite = tree_model[tree_iter][ListModel.COLUMN_FAVORITE]
-        if favorite:
+        # Instead of querying the favorite-status from the "cached"
+        # entries in listmodel, hit the DS, and retrieve the persisted
+        # favorite-status.
+        # This solves the issue in  "Multi-Select", wherein the
+        # listview is inhibited from refreshing. Now, if the user
+        # clicks favorite-star-icon(s), the change(s) is(are) written
+        # to the DS, but no refresh takes place. Thus, in order to have
+        # the change(s) reflected on the UI, we need to hit the DS for
+        # querying the favorite-status (instead of relying on the
+        # cached-listmodel.
+        uid = tree_model[tree_iter][ListModel.COLUMN_UID]
+        if uid is None:
+            return
+
+        try:
+            metadata = model.get(uid)
+        except:
+            return
+
+        favorite = None
+        if 'keep' in metadata.keys():
+            favorite = str(metadata['keep'])
+
+        if favorite == '1':
             client = GConf.Client.get_default()
             color = XoColor(client.get_string('/desktop/sugar/user/color'))
             cell.props.xo_color = color
@@ -257,6 +300,11 @@ class BaseListView(Gtk.Bin):
             cell.props.xo_color = None
 
     def __favorite_clicked_cb(self, cell, path):
+        # If this is a remote-share, return without doing any
+        # processing.
+        if model.is_current_mount_point_for_remote_share(model.LIST_VIEW):
+            return
+
         row = self._model[path]
         metadata = model.get(row[ListModel.COLUMN_UID])
         if not model.is_editable(metadata):
@@ -265,7 +313,94 @@ class BaseListView(Gtk.Bin):
             metadata['keep'] = '0'
         else:
             metadata['keep'] = '1'
-        model.write(metadata, update_mtime=False)
+
+        from jarabe.journal.journalactivity import get_mount_point
+        metadata['mountpoint'] = get_mount_point()
+
+        model.update_only_metadata_and_preview_files_and_return_file_paths(metadata)
+        self.__redraw_view_if_necessary()
+
+    def __select_set_data_cb(self, column, cell, tree_model, tree_iter,
+                             data):
+        uid = tree_model[tree_iter][ListModel.COLUMN_UID]
+        if uid is None:
+            return
+
+        # Hack to associate the cell with the metadata, so that it (the
+        # cell) is available offline as well (example during
+        # batch-operations, when the processing has to be done, without
+        # actually clicking any cell.
+        try:
+            metadata = model.get(uid)
+        except:
+            # https://dev.laptop.org.au/issues/1119
+            # http://bugs.sugarlabs.org/ticket/3344
+            # Occurs, when copying entries from journal to pen-drive.
+            # Simply swallow the exception, and return, as this too,
+            # like the above case, does not have any impact on the
+            # functionality.
+            return
+
+        metadata['cell'] = cell
+        tree_model.update_uid_metadata_assoc(uid, metadata)
+
+        self.do_ui_select_change(metadata)
+
+    def __cell_select_clicked_cb(self, cell, path):
+        row = self._model[path]
+        treeiter = self._model.get_iter(path)
+        metadata = model.get(row[ListModel.COLUMN_UID])
+        self.do_backend_select_change(metadata)
+
+    def do_ui_select_change(self, metadata):
+        tree_model = self.get_model()
+        selected = tree_model.get_selected_value(metadata['uid'])
+
+        if 'cell' in metadata.keys():
+            cell = metadata['cell']
+            if selected:
+                cell.props.icon_name = 'emblem-checked'
+            else:
+                cell.props.icon_name = 'emblem-unchecked'
+
+    def do_backend_select_change(self, metadata):
+        uid = metadata['uid']
+        selected = self._model.get_selected_value(uid)
+
+        self._model.set_selected_value(uid, not selected)
+        self._process_new_selected_status(not selected)
+
+    def _process_new_selected_status(self, new_status):
+        from jarabe.journal.journalactivity import get_journal
+        journal = get_journal()
+        journal_toolbar_box = journal.get_toolbar_box()
+
+        self.__redraw_view_if_necessary()
+
+        if new_status == False:
+            self._selected_entries = self._selected_entries - 1
+            journal_toolbar_box.process_new_deselected_entry_in_multi_select()
+            GObject.idle_add(self._post_backend_processing)
+        else:
+            self._selected_entries = self._selected_entries + 1
+            journal.get_list_view().inhibit_refresh(True)
+            journal.switch_to_editing_mode(True)
+
+            # For the case, when we are switching to editing-mode.
+            # The previous call won't actually redraw, as we are not in
+            # editing-mode that time.
+            self.__redraw_view_if_necessary()
+
+            journal.get_toolbar_box().process_new_selected_entry_in_multi_select()
+
+    def _post_backend_processing(self):
+        from jarabe.journal.journalactivity import get_journal
+        journal = get_journal()
+
+        if self._selected_entries == 0:
+            journal.switch_to_editing_mode(False)
+            journal.get_list_view().inhibit_refresh(False)
+            journal.get_list_view().refresh()
 
     def update_with_query(self, query_dict):
         logging.debug('ListView.update_with_query')
@@ -282,6 +417,11 @@ class BaseListView(Gtk.Bin):
         self.refresh()
 
     def refresh(self):
+        if not self._inhibit_refresh:
+            self.set_sensitive(True)
+            self.proceed_with_refresh()
+
+    def proceed_with_refresh(self):
         logging.debug('ListView.refresh query %r', self._query)
         self._stop_progress_bar()
 
@@ -482,6 +622,64 @@ class BaseListView(Gtk.Bin):
         self.update_dates()
         return True
 
+    def get_model(self):
+        return self._model
+
+    def inhibit_refresh(self, inhibit):
+        self._inhibit_refresh = inhibit
+
+    def __redraw_view_if_necessary(self):
+        from jarabe.journal.journalactivity import get_journal
+        if not get_journal().is_editing_mode_present():
+            return
+
+        # First, get the total number of entries, for which the
+        # batch-operation is under progress.
+        from jarabe.journal.palettes import get_current_action_item
+
+        current_action_item = get_current_action_item()
+        if current_action_item is None:
+            # A single checkbox has been clicked/unclicked.
+            self.__redraw()
+            return
+
+        total_items = current_action_item.get_number_of_entries_to_operate_upon()
+
+        # Then, get the current entry being processed.
+        from jarabe.journal.journalactivity import get_journal
+        journal = get_journal()
+        current_entry_number = journal.get_toolbar_box().get_current_entry_number()
+
+        # Redraw, if "current_entry_number" is 10.
+        if current_entry_number == 10:
+            self.__log(current_entry_number, total_items)
+            self.__redraw()
+            return
+
+        # Redraw, if this is the last entry.
+        if current_entry_number == total_items:
+            self.__log(current_entry_number, total_items)
+            self.__redraw()
+            return
+
+        # Redraw, if this is the 20% interval.
+        twenty_percent_of_total_items = total_items / 5
+        if twenty_percent_of_total_items < 10:
+            return
+
+        if (current_entry_number % twenty_percent_of_total_items) == 0:
+            self.__log(current_entry_number, total_items)
+            self.__redraw()
+            return
+
+    def __log(self, current_entry_number, total_items):
+        pass
+
+    def __redraw(self):
+        tree_view_window = self.tree_view.get_bin_window()
+        tree_view_window.hide()
+        tree_view_window.show()
+
 
 class ListView(BaseListView):
     __gtype_name__ = 'JournalListView'
@@ -497,8 +695,8 @@ class ListView(BaseListView):
                                 ([])),
     }
 
-    def __init__(self):
-        BaseListView.__init__(self)
+    def __init__(self, is_object_chooser=False):
+        BaseListView.__init__(self, is_object_chooser)
         self._is_dragging = False
 
         self.tree_view.connect('drag-begin', self.__drag_begin_cb)
@@ -559,11 +757,25 @@ class ListView(BaseListView):
         self.emit('volume-error', message, severity)
 
     def __icon_clicked_cb(self, cell, path):
+        # For locally-mounted remote shares, we do not want to launch
+        # by clicking on the icons.
+        # So, check if this is a part of locally-mounted-remote share,
+        # and if yes, return, without doing anything.
+        from jarabe.journal.journalactivity import get_mount_point
+        current_mount_point = get_mount_point()
+        if model.is_mount_point_for_locally_mounted_remote_share(current_mount_point):
+            return
+
         row = self.tree_view.get_model()[path]
         metadata = model.get(row[ListModel.COLUMN_UID])
         misc.resume(metadata)
 
     def __cell_title_edited_cb(self, cell, path, new_text):
+        from jarabe.journal.journalactivity import get_journal, \
+                                                   get_mount_point
+        if get_journal().is_editing_mode_present():
+            return
+
         row = self._model[path]
         metadata = model.get(row[ListModel.COLUMN_UID])
         metadata['title'] = new_text
@@ -591,6 +803,25 @@ class CellRendererFavorite(CellRendererIcon):
         prelit_color = XoColor(client.get_string('/desktop/sugar/user/color'))
         self.props.prelit_stroke_color = prelit_color.get_stroke_color()
         self.props.prelit_fill_color = prelit_color.get_fill_color()
+
+    def do_render(self, cr, widget, background_area, cell_area, flags):
+        # If this is a remote-share, mask the "PRELIT" flag.
+        if model.is_current_mount_point_for_remote_share(model.LIST_VIEW):
+            flags = flags & (~(Gtk.CellRendererState.PRELIT))
+
+        CellRendererIcon.do_render(self, cr, widget, background_area, cell_area, flags)
+
+class CellRendererToggle(CellRendererIcon):
+    __gtype_name__ = 'JournalCellRendererSelect'
+
+    def __init__(self, tree_view):
+        CellRendererIcon.__init__(self, tree_view)
+
+        self.props.width = style.GRID_CELL_SIZE
+        self.props.height = style.GRID_CELL_SIZE
+        self.props.size = style.SMALL_ICON_SIZE
+        self.props.icon_name = 'checkbox-unchecked'
+        self.props.mode = Gtk.CellRendererMode.ACTIVATABLE
 
 
 class CellRendererDetail(CellRendererIcon):
@@ -634,6 +865,11 @@ class CellRendererActivityIcon(CellRendererIcon):
 
     def create_palette(self):
         if not self._show_palette:
+            return None
+
+        # Also, if we are in batch-operations mode, return 'None'
+        from jarabe.journal.journalactivity import get_journal
+        if get_journal().is_editing_mode_present():
             return None
 
         tree_model = self.tree_view.get_model()
