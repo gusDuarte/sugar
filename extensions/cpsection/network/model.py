@@ -18,6 +18,10 @@
 import logging
 
 import dbus
+import os
+import subprocess
+import logging
+
 from gettext import gettext as _
 from gi.repository import GConf
 
@@ -29,6 +33,8 @@ _NM_PATH = '/org/freedesktop/NetworkManager'
 _NM_IFACE = 'org.freedesktop.NetworkManager'
 
 KEYWORDS = ['network', 'jabber', 'radio', 'server']
+
+_logger = logging.getLogger('ControlPanel - Network')
 
 
 class ReadError(Exception):
@@ -154,3 +160,14 @@ def set_publish_information(value):
     client = GConf.Client.get_default()
     client.set_bool('/desktop/sugar/collaboration/publish_gadget', value)
     return 0
+
+
+def launch_nm_connection_editor():
+    environment = os.environ.copy()
+    environment['PATH'] = '%s:/usr/sbin' % (environment['PATH'], )
+
+    try:
+        subprocess.Popen(['-c', 'sudo nm-connection-editor --type=802-11-wireless'],
+                         shell=True)
+    except:
+        _logger.exception('Error running nm-connection-editor')
