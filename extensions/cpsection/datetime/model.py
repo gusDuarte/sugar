@@ -21,10 +21,57 @@
 #
 
 import os
+import logging
+
 from gettext import gettext as _
 from gi.repository import GConf
 
 _zone_tab = '/usr/share/zoneinfo/zone.tab'
+NTPDATE_PATH = '/usr/sbin/ntpdate'
+NTP_SERVER_CONFIG_FILENAME = '/etc/ntp/step-tickers'
+
+_logger = logging.getLogger('ControlPanel - TimeZone')
+
+
+def is_ntp_servers_config_feature_available():
+    return os.path.exists(NTPDATE_PATH)
+
+
+def get_ntp_servers():
+    servers = []
+
+    # If the file does not exist, return.
+    if not os.path.exists(NTP_SERVER_CONFIG_FILENAME):
+        return servers
+
+    f = open(NTP_SERVER_CONFIG_FILENAME, 'r')
+    for server in f.readlines():
+        servers.append(server.rstrip('\n'))
+    f.close()
+
+    return servers
+
+
+def set_ntp_servers(servers):
+
+    # First remove the old ssid-file, if it exists.
+    if os.path.exists(NTP_SERVER_CONFIG_FILENAME):
+        try:
+            os.remove(NTP_SERVER_CONFIG_FILENAME)
+        except:
+            _logger.exception('Error removing file.')
+            return
+
+    # Do nothing and return, if the values-list is empty
+    if len(servers) == 0:
+        return
+
+    # If we reach here, we have a non-empty ssid-values-list.
+    f = open(NTP_SERVER_CONFIG_FILENAME, 'w')
+    for server in servers:
+        if len(server) > 0:
+            f.write(server + '\n')
+    f.close()
 
 
 def _initialize():
