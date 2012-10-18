@@ -1,6 +1,5 @@
 # Copyright (C) 2006-2007 Red Hat, Inc.
 # Copyright (C) 2008 One Laptop Per Child
-# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -556,7 +555,7 @@ class FavoritePalette(ActivityPalette):
         ActivityPalette.__init__(self, activity_info)
 
         if not journal_entries:
-            xo_color = XoColor('%s,%s' % (style.COLOR_WHITE.get_svg(),
+            xo_color = XoColor('%s,%s' % (style.COLOR_BUTTON_GREY.get_svg(),
                                           style.COLOR_TRANSPARENT.get_svg()))
         else:
             xo_color = misc.get_icon_color(journal_entries[0])

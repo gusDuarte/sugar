@@ -8,14 +8,6 @@ sugar-100.gtkrc: gtkrc.em
 	$(srcdir)/em.py -D scaling=\'100\' $(srcdir)/gtkrc.em > \
 		$(top_builddir)/data/sugar-100.gtkrc
 
-sugar-100-contrast.gtkrc: gtkrc-contrast.em
-	$(srcdir)/em.py -D scaling=\'100\' $(srcdir)/gtkrc-contrast.em > \
-		$(top_builddir)/data/sugar-100-contrast.gtkrc
-
-sugar-72-contrast.gtkrc: gtkrc-contrast.em
-	$(srcdir)/em.py -D scaling=\'100\' $(srcdir)/gtkrc-contrast.em > \
-		$(top_builddir)/data/sugar-72-contrast.gtkrc
-
 sugardir = $(pkgdatadir)/data
 sugar_DATA =			\
 	activities.defaults	\
@@ -26,9 +18,7 @@ sugar_DATA =			\
 
 GTKRC_FILES =		\
 	sugar-72.gtkrc	\
-	sugar-100.gtkrc \
-	sugar-100-contrast.gtkrc \
-	sugar-72-contrast.gtkrc
+	sugar-100.gtkrc
 
 xsessionsdir = $(datadir)/xsessions
 xsessions_DATA = sugar.desktop
@@ -74,5 +64,5 @@ endif
 icondir = $(datadir)/icons/hicolor/scalable/apps
 icon_DATA = sugar-xo.svg
 
-EXTRA_DIST = $(sugar_DATA) $(xsessions_DATA) $(nmservice_DATA) $(mime_xml_in_files) em.py gtkrc.em gtkrc-contrast.em $(schema_in_files) $(icon_DATA)
+EXTRA_DIST = $(sugar_DATA) $(xsessions_DATA) $(nmservice_DATA) $(mime_xml_in_files) em.py gtkrc.em $(schema_in_files) $(icon_DATA)
 CLEANFILES = $(GTKRC_FILES) $(mime_xml_files) $(schema_DATA)
