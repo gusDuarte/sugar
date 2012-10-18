@@ -1,5 +1,6 @@
 # Copyright (C) 2008 One Laptop Per Child
 # Copyright (C) 2009 Tomeu Vizoso
+# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -297,7 +298,7 @@ class CellRendererActivityIcon(CellRendererIcon):
         self.props.width = style.GRID_CELL_SIZE
         self.props.height = style.GRID_CELL_SIZE
         self.props.size = style.STANDARD_ICON_SIZE
-        self.props.stroke_color = style.COLOR_BUTTON_GREY.get_svg()
+        self.props.stroke_color = style.COLOR_DESKTOP_ICON.get_svg()
         self.props.fill_color = style.COLOR_TRANSPARENT.get_svg()
         self.props.mode = Gtk.CellRendererMode.ACTIVATABLE
 

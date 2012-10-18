@@ -1,4 +1,5 @@
 # Copyright (C) 2008 One Laptop Per Child
+# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -247,7 +248,7 @@ class ControlPanel(Gtk.Window):
         self._section_view.connect('request-close',
                                    self.__close_request_cb)
         self._main_view.modify_bg(Gtk.StateType.NORMAL,
-                                  style.COLOR_WHITE.get_gdk_color())
+                                  style.COLOR_BG_CP.get_gdk_color())
 
     def set_section_view_auto_close(self):
         """Automatically close the control panel if there is "nothing to do"
