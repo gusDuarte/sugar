@@ -45,7 +45,18 @@ if test -z "$SUGAR_SCALING"; then
     export SUGAR_SCALING=100
 fi
 
-export GTK2_RC_FILES="@prefix@/share/sugar/data/sugar-$SUGAR_SCALING.gtkrc"
+if gconftool-2 --dir-exists=/desktop/sugar/interface ; then
+    THEME="$(gconftool-2 --get /desktop/sugar/interface/gtk_theme)"
+    if [ "$THEME" = 'sugar-contrast' ]; then
+        GTK2_THEME="sugar-$SUGAR_SCALING-contrast"
+    else
+        GTK2_THEME="sugar-$SUGAR_SCALING"
+    fi
+else
+    GTK2_THEME="sugar-$SUGAR_SCALING"
+fi
+
+export GTK2_RC_FILES="@prefix@/share/sugar/data/$GTK2_THEME.gtkrc"
 
 # Needed for executing wpa_passphrase
 export PATH="$PATH":/sbin:/usr/sbin
@@ -70,7 +81,15 @@ if [ -f ~/.sugar/debug ]; then
         . ~/.sugar/debug
 fi
 
-echo Xcursor.theme: sugar | xrdb -merge
+
+if gconftool-2 --dir-exists=/desktop/sugar/peripherals/mouse ; then
+    CURSOR_THEME="$(gconftool-2 --get /desktop/sugar/peripherals/mouse/cursor_theme)"
+else
+    CURSOR_THEME="sugar"
+fi
+
+
+echo Xcursor.theme: $CURSOR_THEME | xrdb -merge
 metacity --no-force-fullscreen -d $DISPLAY &
 
 exec sugar-session

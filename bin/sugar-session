@@ -257,6 +257,7 @@ def bootstrap():
     GObject.idle_add(setup_notification_service_cb)
     GObject.idle_add(setup_file_transfer_cb)
     GObject.idle_add(show_software_updates_cb)
+    GObject.idle_add(setup_accessibility_cb)
 
     if _USE_XKL:
         GObject.idle_add(setup_keyboard_cb)
@@ -276,6 +277,11 @@ def set_theme():
             sugar_theme = 'sugar-100'
     settings.set_property('gtk-theme-name', sugar_theme)
     settings.set_property('gtk-icon-theme-name', 'sugar')
+
+def setup_accessibility_cb():
+    from jarabe.model import accessibility
+    accessibility_manager = accessibility.AccessibilityManager()
+    accessibility_manager.setup_accessibility()
 
 
 def main():
