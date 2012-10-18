@@ -4,7 +4,7 @@ if scaling == '72':
 else:
     icon_sizes = 'gtk-large-toolbar=55,55'
 }@
-gtk-theme-name = "sugar-@scaling"
+gtk-theme-name = "sugar-@scaling-contrast"
 gtk-icon-theme-name = "sugar"
 gtk-toolbar-style = GTK_TOOLBAR_ICONS
 gtk-icon-sizes = "@icon_sizes"
