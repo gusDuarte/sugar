@@ -59,15 +59,18 @@ class BundleRegistry(GObject.GObject):
         self._bundles = []
         # hold a reference to the monitors so they don't get disposed
         self._gio_monitors = []
+        self._monitor = {}
+        self._handler_id = {}
+        self._allow_file_monitoring = True
 
         user_path = env.get_user_activities_path()
         for activity_dir in [user_path, config.activities_path]:
             self._scan_directory(activity_dir)
             directory = Gio.File.new_for_path(activity_dir)
-            monitor = directory.monitor_directory( \
-                flags=Gio.FileMonitorFlags.NONE, cancellable=None)
-            monitor.connect('changed', self.__file_monitor_changed_cb)
-            self._gio_monitors.append(monitor)
+            self._monitor = directory.monitor_directory( \
+               flags=Gio.FileMonitorFlags.NONE, cancellable=None)
+            self._handler_id = self._monitor.connect('changed', self.__file_monitor_changed_cb)
+            self._gio_monitors.append(self._monitor)
 
         self._last_defaults_mtime = -1
         self._favorite_bundles = {}
@@ -94,12 +97,31 @@ class BundleRegistry(GObject.GObject):
 
     def __file_monitor_changed_cb(self, monitor, one_file, other_file,
                                   event_type):
-        if not one_file.get_path().endswith('.activity'):
-            return
-        if event_type == Gio.FileMonitorEvent.CREATED:
-            self.add_bundle(one_file.get_path(), install_mime_type=True)
-        elif event_type == Gio.FileMonitorEvent.DELETED:
-            self.remove_bundle(one_file.get_path())
+        if self._allow_file_monitoring:
+            if not one_file.get_path().endswith('.activity'):
+                return
+            if event_type == Gio.FileMonitorEvent.CREATED:
+                if self.get_bundle_by_path(one_file.get_path()) is None:
+                    self.add_bundle(one_file.get_path(),install_mime_type=True)
+            elif event_type == Gio.FileMonitorEvent.DELETED:
+                self.remove_bundle(one_file.get_path())
+
+    # I tried 2 hours, trying to make the following mechanisms for
+    # event-blocking, work ::
+    #
+    # a. disconnect
+    # b. handler_disconnect
+    # c. handler_block/handler_unblock
+    # d. handler_block_by_func/handler_unblock_by_func
+    #
+    # I could not.
+    #
+    # In the end, I had to revert to using the oldy-goldy boolean flag.
+    def disable_directory_monitoring(self):
+        self._allow_file_monitoring = False
+
+    def enable_directory_monitoring(self):
+        self._allow_file_monitoring = True
 
     def _load_mime_defaults(self):
         defaults = {}
@@ -186,6 +208,12 @@ class BundleRegistry(GObject.GObject):
                 return bundle
         return None
 
+    def get_bundle_by_path(self, bundle_path):
+        for bundle in self._bundles:
+            if bundle.get_path() == bundle_path:
+                return bundle
+        return None
+
     def __iter__(self):
         return self._bundles.__iter__()
 
@@ -213,7 +241,13 @@ class BundleRegistry(GObject.GObject):
         bundle_dirs.sort(lambda d1, d2: cmp(bundles[d1], bundles[d2]))
         for folder in bundle_dirs:
             try:
-                self._add_bundle(folder)
+                # sl#2818
+                #
+                # Add meta-info, to indicate that this is a startup
+                # operation.
+                #
+                # See 'elif not startup' notes in 'self._add_bundle()'
+                self._add_bundle(folder, False, True)
             except:
                 # pylint: disable=W0702
                 logging.exception('Error while processing installed activity'
@@ -222,15 +256,13 @@ class BundleRegistry(GObject.GObject):
     def add_bundle(self, bundle_path, install_mime_type=False):
         bundle = self._add_bundle(bundle_path, install_mime_type)
         if bundle is not None:
-            self._set_bundle_favorite(bundle.get_bundle_id(),
-                                      bundle.get_activity_version(),
-                                      True)
             self.emit('bundle-added', bundle)
             return True
         else:
             return False
 
-    def _add_bundle(self, bundle_path, install_mime_type=False):
+    def _add_bundle(self, bundle_path, install_mime_type=False,
+                    startup=False):
         logging.debug('STARTUP: Adding bundle %r', bundle_path)
         try:
             bundle = ActivityBundle(bundle_path)
@@ -250,17 +282,90 @@ class BundleRegistry(GObject.GObject):
                 return None
             else:
                 logging.debug('Upgrade %s', bundle_id)
+
+                # Query if the bundle is a favorite...
+                self._is_bundle_favorite = \
+                        self.is_bundle_favorite(installed.get_bundle_id(),
+                                                installed.get_activity_version())
+
+                # ...and then, remove the old bundle (we have the new
+                #    one !!)
                 self.remove_bundle(installed.get_path())
 
-        self._bundles.append(bundle)
+                # Check, if this bundle-id is a favorite.
+                if self._is_bundle_favorite:
+
+                    # Mark the (new) bundle with this bundle-id, as
+                    # favorite.
+                    self.set_bundle_favorite(bundle.get_bundle_id(),
+                                             bundle.get_activity_version(),
+                                             True,
+                                             True)
+
+                    # This (new) bundle is new (!!), and is also a
+                    # favorite. Add this to Favorites-View.
+                    self.emit('bundle-added', bundle)
+
+        elif not startup:
+
+            # Ticket sl#2818
+
+            # Sub-case
+            # --------
+            #       The bundle is newly added; so set it as favorite as
+            #       default, so that it is promptly available to the
+            #       user.
+            #       Note that, any newly added bundles during system
+            #       startup, are not new-bundles-as-such. They were
+            #       new, when they were first added, and their
+            #       favorite-status set at that time.
+            #       However, from code point of view, control reaches
+            #       here, only if the bundle IS newly added by
+            #       user-discretion.
+            self.set_bundle_favorite(bundle.get_bundle_id(),
+                                     bundle.get_activity_version(),
+                                     True,
+                                     True)
+
+            # Emit 'bundle-added' (of course, this bundle is new !!),
+            # so that it is added in Favorites-View.
+            self.emit('bundle-added', bundle)
+
+
+        # In either case,
+        #            a. Startup
+        #            b. Upgrade of bundle
+        #            c, Addition of new bundle, by user-discretion.
+        # add the bundle to bundles-list.
+        self.add_bundle_to_bundlelist(bundle)
         return bundle
+
+    def add_bundle_to_bundlelist(self, bundle):
+        for bundle_in_list in self._bundles:
+            if bundle_in_list.get_path() == \
+               bundle.get_path():
+                return False
+
+        self._bundles.append(bundle)
+        return True
 
     def remove_bundle(self, bundle_path):
         for bundle in self._bundles:
             if bundle.get_path() == bundle_path:
+                # This bundle is going.
+                # Remove it from bundles list...
                 self._bundles.remove(bundle)
+
+                # ... and remove it from Favorites-List...
+                self.set_bundle_favorite(bundle.get_bundle_id(),
+                                         bundle.get_activity_version(),
+                                         False,
+                                         True)
+
+                # ...and remove its trace from Favorites-View.
                 self.emit('bundle-removed', bundle)
                 return True
+
         return False
 
     def get_activities_for_type(self, mime_type):
@@ -293,14 +398,22 @@ class BundleRegistry(GObject.GObject):
             if bundle.get_bundle_id() == bundle_id and \
                     bundle.get_activity_version() == version:
                 return bundle
-        raise ValueError('No bundle %r with version %r exists.' % \
-                (bundle_id, version))
+        return None
 
-    def set_bundle_favorite(self, bundle_id, version, favorite):
+    def set_bundle_favorite(self, bundle_id, version, favorite,
+                            force=False):
+        # Return if file monitoring is not allowed, and the previous
+        # bundle is not a favorite.
+        if not force:
+            if not self._allow_file_monitoring:
+                if not self._is_bundle_favorite:
+                    return
+
         changed = self._set_bundle_favorite(bundle_id, version, favorite)
         if changed:
             bundle = self._find_bundle(bundle_id, version)
-            self.emit('bundle-changed', bundle)
+            if bundle is not None:
+                self.emit('bundle-changed', bundle)
 
     def _set_bundle_favorite(self, bundle_id, version, favorite):
         key = self._get_favorite_key(bundle_id, version)
@@ -425,9 +538,6 @@ class BundleRegistry(GObject.GObject):
         install_path = act.get_path()
 
         bundle.uninstall(install_path, force, delete_profile)
-
-        if not self.remove_bundle(install_path):
-            raise RegistrationException
 
     def upgrade(self, bundle):
         act = self.get_bundle(bundle.get_bundle_id())

@@ -140,7 +140,8 @@ class ActivitiesTreeView(Gtk.TreeView):
         registry = bundleregistry.get_registry()
         registry.set_bundle_favorite(row[ListModel.COLUMN_BUNDLE_ID],
                                      row[ListModel.COLUMN_VERSION],
-                                     not row[ListModel.COLUMN_FAVORITE])
+                                     not row[ListModel.COLUMN_FAVORITE],
+                                     True)
 
     def __icon_clicked_cb(self, cell, path):
         row = self.get_model()[path]
@@ -559,7 +560,8 @@ class ActivityListPalette(ActivityPalette):
         registry = bundleregistry.get_registry()
         registry.set_bundle_favorite(self._bundle_id,
                                      self._version,
-                                     not self._favorite)
+                                     not self._favorite,
+                                     True)
 
     def __activity_changed_cb(self, activity_registry, activity_info):
         if activity_info.get_bundle_id() == self._bundle_id and \

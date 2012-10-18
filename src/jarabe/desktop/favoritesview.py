@@ -272,11 +272,17 @@ class FavoritesView(ViewContainer):
     def _add_activity(self, activity_info):
         if activity_info.get_bundle_id() == 'org.laptop.JournalActivity':
             return
-        icon = ActivityIcon(activity_info)
-        icon.props.pixel_size = style.STANDARD_ICON_SIZE
-        #icon.set_resume_mode(self._resume_mode)
-        self.add(icon)
-        icon.show()
+
+        # Add icon, if not already present (for the same combination of
+        # activity-id and activity-version)
+        icon = self._find_activity_icon(activity_info.get_bundle_id(),
+                                        activity_info.get_activity_version())
+        if icon is None:
+            icon = ActivityIcon(activity_info)
+            icon.props.pixel_size = style.STANDARD_ICON_SIZE
+            #icon.set_resume_mode(self._resume_mode)
+            self.add(icon)
+            icon.show()
 
     def __activity_added_cb(self, activity_registry, activity_info):
         registry = bundleregistry.get_registry()
