@@ -332,7 +332,7 @@ class FavoritesView(ViewContainer):
         try:
             schoolserver.register_laptop()
         except RegisterError, e:
-            alert.props.title = _('Registration Failed')
+            alert.props.title = _('No School Server found on the network')
             alert.props.msg = '%s' % e
         else:
             alert.props.title = _('Registration Successful')
