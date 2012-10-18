@@ -667,6 +667,14 @@ class OwnerIcon(BuddyIcon):
         palette = BuddyMenu(get_owner_instance())
 
         client = GConf.Client.get_default()
+        show_register = client.get_bool('/desktop/sugar/show_register')
+
+        if show_register:
+            self._create_register_menu(palette, client)
+
+        return palette
+
+    def _create_register_menu(self, palette, client):
         backup_url = client.get_string('/desktop/sugar/backup_url')
 
         if not backup_url:
@@ -678,8 +686,6 @@ class OwnerIcon(BuddyIcon):
         self._register_menu.connect('activate', self.__register_activate_cb)
         palette.menu.append(self._register_menu)
         self._register_menu.show()
-
-        return palette
 
     def __register_activate_cb(self, menuitem):
         self.emit('register-activate')
