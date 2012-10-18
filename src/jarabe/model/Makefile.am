@@ -1,7 +1,6 @@
 sugardir = $(pythondir)/jarabe/model
 sugar_PYTHON =			\
 	adhoc.py		\
-	accessibility.py	\
 	__init__.py		\
 	buddy.py		\
 	bundleregistry.py	\

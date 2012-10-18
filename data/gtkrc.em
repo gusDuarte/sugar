@@ -6,6 +6,7 @@ else:
 }@
 gtk-theme-name = "sugar-@scaling"
 gtk-icon-theme-name = "sugar"
+gtk-cursor-theme-name = "sugar"
 gtk-toolbar-style = GTK_TOOLBAR_ICONS
 gtk-icon-sizes = "@icon_sizes"
 gtk-cursor-blink-timeout = 3
