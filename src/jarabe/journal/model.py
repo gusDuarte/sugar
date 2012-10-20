@@ -289,6 +289,14 @@ class BaseResultSet(object):
 
         return self._cache[self._position - self._offset]
 
+    def is_favorite_compatible(self, metadata):
+        if self._favorite == '0':
+            return True
+
+        return ((metadata is not None) and \
+                ('keep' in metadata.keys()) and \
+                (str(metadata['keep']) == '1'))
+
 
 class DatastoreResultSet(BaseResultSet):
     """Encapsulates the result of a query on the datastore
@@ -351,6 +359,8 @@ class InplaceResultSet(BaseResultSet):
         self._mime_types = query.get('mime_type', [])
 
         self._sort = query.get('order_by', ['+timestamp'])[0]
+
+        self._favorite = str(query.get('keep', 0))
 
     def setup(self):
         self._file_list = []
@@ -459,10 +469,13 @@ class InplaceResultSet(BaseResultSet):
         if S_IFMT(stat.st_mode) != S_IFREG:
             return
 
+        metadata = _get_file_metadata(full_path, stat,
+                                      fetch_preview=False)
+
+        if not self.is_favorite_compatible(metadata):
+            return
         if self._regex is not None and \
                 not self._regex.match(full_path):
-            metadata = _get_file_metadata(full_path, stat,
-                                          fetch_preview=False)
             if not metadata:
                 return
             add_to_list = False
@@ -510,7 +523,7 @@ class InplaceResultSet(BaseResultSet):
         return
 
 
-class RemoteShareResultSet(object):
+class RemoteShareResultSet(BaseResultSet):
     def __init__(self, ip_address_or_dns_name, query):
         self._ip_address_or_dns_name = ip_address_or_dns_name
         self._file_list = []
@@ -544,6 +557,8 @@ class RemoteShareResultSet(object):
 
         self._sort = query.get('order_by', ['+timestamp'])[0]
 
+        self._favorite = str(query.get('keep', 0))
+
     def setup(self):
         try:
             metadata_list_complete = webdavmanager.get_remote_webdav_share_metadata(self._ip_address_or_dns_name)
@@ -551,6 +566,9 @@ class RemoteShareResultSet(object):
             metadata_list_complete = []
 
         for metadata in metadata_list_complete:
+
+            if not self.is_favorite_compatible(metadata):
+                continue
 
             add_to_list = False
             if self._regex is not None:
@@ -1111,8 +1129,7 @@ def _write_entry_on_external_device(metadata, file_path,
     if destination_path != file_path:
         file_name = get_unique_file_name(metadata['mountpoint'], file_name)
         destination_path = os.path.join(metadata['mountpoint'], file_name)
-        clean_name, extension_ = os.path.splitext(file_name)
-        metadata['title'] = clean_name
+        metadata['title'] = file_name
 
     _write_metadata_and_preview_files_and_return_file_paths(metadata,
                                                             file_name)
@@ -1131,28 +1148,7 @@ def _write_entry_on_external_device(metadata, file_path,
 
 
 def get_file_name(title, mime_type):
-    file_name = title
-
-    extension = mime.get_primary_extension(mime_type)
-    if extension is not None and extension:
-        extension = '.' + extension
-        if not file_name.endswith(extension):
-            file_name += extension
-
-    # Invalid characters in VFAT filenames. From
-    # http://en.wikipedia.org/wiki/File_Allocation_Table
-    invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '\x7F']
-    invalid_chars.extend([chr(x) for x in range(0, 32)])
-    for char in invalid_chars:
-        file_name = file_name.replace(char, '_')
-
-    # FAT limit is 255, leave some space for uniqueness
-    max_len = 250
-    if len(file_name) > max_len:
-        name, extension = os.path.splitext(file_name)
-        file_name = name[0:max_len - len(extension)] + extension
-
-    return file_name
+    return title
 
 
 def get_unique_file_name(mount_point, file_name):
