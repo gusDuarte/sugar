@@ -1,5 +1,6 @@
 # Copyright (C) 2006-2007 Red Hat, Inc.
 # Copyright (C) 2008 One Laptop Per Child
+# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -271,11 +272,17 @@ class FavoritesView(ViewContainer):
     def _add_activity(self, activity_info):
         if activity_info.get_bundle_id() == 'org.laptop.JournalActivity':
             return
-        icon = ActivityIcon(activity_info)
-        icon.props.pixel_size = style.STANDARD_ICON_SIZE
-        #icon.set_resume_mode(self._resume_mode)
-        self.add(icon)
-        icon.show()
+
+        # Add icon, if not already present (for the same combination of
+        # activity-id and activity-version)
+        icon = self._find_activity_icon(activity_info.get_bundle_id(),
+                                        activity_info.get_activity_version())
+        if icon is None:
+            icon = ActivityIcon(activity_info)
+            icon.props.pixel_size = style.STANDARD_ICON_SIZE
+            #icon.set_resume_mode(self._resume_mode)
+            self.add(icon)
+            icon.show()
 
     def __activity_added_cb(self, activity_registry, activity_info):
         registry = bundleregistry.get_registry()
@@ -325,7 +332,7 @@ class FavoritesView(ViewContainer):
         try:
             schoolserver.register_laptop()
         except RegisterError, e:
-            alert.props.title = _('Registration Failed')
+            alert.props.title = _('No School Server found on the network')
             alert.props.msg = '%s' % e
         else:
             alert.props.title = _('Registration Successful')
@@ -499,7 +506,7 @@ class FavoritePalette(ActivityPalette):
         ActivityPalette.__init__(self, activity_info)
 
         if not journal_entries:
-            xo_color = XoColor('%s,%s' % (style.COLOR_BUTTON_GREY.get_svg(),
+            xo_color = XoColor('%s,%s' % (style.COLOR_WHITE.get_svg(),
                                           style.COLOR_TRANSPARENT.get_svg()))
         else:
             xo_color = misc.get_icon_color(journal_entries[0])
@@ -605,6 +612,14 @@ class OwnerIcon(BuddyIcon):
         palette = BuddyMenu(get_owner_instance())
 
         client = GConf.Client.get_default()
+        show_register = client.get_bool('/desktop/sugar/show_register')
+
+        if show_register:
+            self._create_register_menu(palette, client)
+
+        return palette
+
+    def _create_register_menu(self, palette, client):
         backup_url = client.get_string('/desktop/sugar/backup_url')
 
         if not backup_url:

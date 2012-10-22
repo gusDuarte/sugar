@@ -1,5 +1,6 @@
 # Copyright (C) 2008 One Laptop Per Child
 # Copyright (C) 2009 Tomeu Vizoso
+# Copyright (C) 2010 Plan Ceibal <comunidad@plan.ceibal.edu.uy>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -139,7 +140,8 @@ class ActivitiesTreeView(Gtk.TreeView):
         registry = bundleregistry.get_registry()
         registry.set_bundle_favorite(row[ListModel.COLUMN_BUNDLE_ID],
                                      row[ListModel.COLUMN_VERSION],
-                                     not row[ListModel.COLUMN_FAVORITE])
+                                     not row[ListModel.COLUMN_FAVORITE],
+                                     True)
 
     def __icon_clicked_cb(self, cell, path):
         row = self.get_model()[path]
@@ -297,7 +299,7 @@ class CellRendererActivityIcon(CellRendererIcon):
         self.props.width = style.GRID_CELL_SIZE
         self.props.height = style.GRID_CELL_SIZE
         self.props.size = style.STANDARD_ICON_SIZE
-        self.props.stroke_color = style.COLOR_BUTTON_GREY.get_svg()
+        self.props.stroke_color = style.COLOR_DESKTOP_ICON.get_svg()
         self.props.fill_color = style.COLOR_TRANSPARENT.get_svg()
         self.props.mode = Gtk.CellRendererMode.ACTIVATABLE
 
@@ -558,7 +560,8 @@ class ActivityListPalette(ActivityPalette):
         registry = bundleregistry.get_registry()
         registry.set_bundle_favorite(self._bundle_id,
                                      self._version,
-                                     not self._favorite)
+                                     not self._favorite,
+                                     True)
 
     def __activity_changed_cb(self, activity_registry, activity_info):
         if activity_info.get_bundle_id() == self._bundle_id and \

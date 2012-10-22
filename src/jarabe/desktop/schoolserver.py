@@ -140,7 +140,9 @@ def register_laptop(url=_REGISTER_URL):
         data = server.register(sn, nick, uuid_, profile.pubkey)
     except (xmlrpclib.Error, TypeError, socket.error):
         logging.exception('Registration: cannot connect to server')
-        raise RegisterError(_('Cannot connect to the server.'))
+        raise RegisterError(_('Please ensure that you are connected '   \
+                              'to the correct network and that the '    \
+                              'server is available.'))
     finally:
         socket.setdefaulttimeout(None)
 

@@ -16,6 +16,7 @@
 
 from gettext import gettext as _
 import logging
+import dbus
 
 from gi.repository import GObject
 from gi.repository import Gtk
@@ -32,12 +33,20 @@ from jarabe.desktop.transitionbox import TransitionBox
 from jarabe.desktop.viewtoolbar import ViewToolbar
 from jarabe.model.shell import ShellModel
 from jarabe.model import shell
+from jarabe.model import notifications
 
 
 _HOME_PAGE = 0
 _GROUP_PAGE = 1
 _MESH_PAGE = 2
 _TRANSITION_PAGE = 3
+
+_DBUS_SYSTEM_IFACE = 'org.sugarlabs.system'
+_DBUS_SYSTEM_PATH = '/org/sugarlabs/system'
+_SYSTEM_REBOOT_ID = -1
+_SYSTEM_RELOGIN_ID = -2
+_SYSTEM_TIMEOUT = 5
+
 
 _instance = None
 
@@ -98,6 +107,33 @@ class HomeWindow(Gtk.Window):
 
         shell.get_model().zoom_level_changed.connect(
                                      self.__zoom_level_changed_cb)
+
+        try:
+            systembus = dbus.SystemBus()
+        except dbus.DBusException:
+            logging.error('DBus SystemBus is not available')
+        else:
+            systembus.add_signal_receiver(self.__reboot_cb, 'Reboot',
+                                          _DBUS_SYSTEM_IFACE)
+            systembus.add_signal_receiver(self.__relogin_cb, 'Relogin',
+                                          _DBUS_SYSTEM_IFACE)
+
+    def _system_alert(self, replaces_id, app_icon, message):
+        service = notifications.get_service()
+        service.notification_received.send(self,app_name='system',
+                replaces_id=replaces_id, app_icon=app_icon,
+                summary=_('System alert'), body=message,
+                actions=[], hints={})
+
+    def __reboot_cb(self):
+        self._system_alert(_SYSTEM_REBOOT_ID, 'system-restart',
+                _('Please, reboot your computer to take into account ' \
+                        'new updates'))
+
+    def __relogin_cb(self):
+        self._system_alert(_SYSTEM_RELOGIN_ID, 'system-logout',
+                _('Please, restart Sugar to take into account ' \
+                        'new updates'))
 
     def _deactivate_view(self, level):
         group = palettegroup.get_group('default')
