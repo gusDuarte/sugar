@@ -31,6 +31,8 @@ from sugar3.graphics import style
 from sugar3.graphics.icon import Icon
 from sugar3.graphics.icon import CanvasIcon
 from sugar3.graphics.menuitem import MenuItem
+from sugar3.graphics.palettemenuitem import PaletteMenuItem
+from sugar3.graphics.palettemenuitem import PaletteMenuItemSeparator
 from sugar3.graphics.alert import Alert
 from sugar3.graphics.xocolor import XoColor
 from sugar3.activity import activityfactory
@@ -495,8 +497,6 @@ class ActivityIcon(CanvasIcon):
 class FavoritePalette(ActivityPalette):
     __gtype_name__ = 'SugarFavoritePalette'
 
-    _PALETTE_LABEL_OFFSET = 2
-
     __gsignals__ = {
         'entry-activate': (GObject.SignalFlags.RUN_FIRST,
                            None, ([object])),
@@ -524,22 +524,20 @@ class FavoritePalette(ActivityPalette):
                 icon_file_name = misc.get_icon_name(entry)
                 color = misc.get_icon_color(entry)
 
-                menu_item = MenuItem(text_label=entry['title'],
-                                     file_name=icon_file_name,
-                                     xo_color=color)
+                menu_item = PaletteMenuItem(text_label=entry['title'],
+                                            file_name=icon_file_name,
+                                            xo_color=color)
                 menu_item.connect('activate', self.__resume_entry_cb, entry)
                 menu_items.append(menu_item)
                 menu_item.show()
 
             if journal_entries:
-                separator = Gtk.SeparatorMenuItem()
+                separator = PaletteMenuItemSeparator()
                 menu_items.append(separator)
                 separator.show()
 
             for i in range(0, len(menu_items)):
-                # the first menu_item is the label and the second is a
-                # separator so we need the offset
-                self.menu.insert(menu_items[i], i + self._PALETTE_LABEL_OFFSET)
+                self.menu_box.pack_start(menu_items[i], True, True, 0)
 
     def __resume_entry_cb(self, menu_item, entry):
         if entry is not None:
