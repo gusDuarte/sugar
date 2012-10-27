@@ -184,7 +184,7 @@ class TimeZone(SectionView):
         self._treeview.set_search_equal_func(self._search, None)
         self._treeview.set_search_column(0)
         self._timezone_box = Gtk.VBox()
-        self._scrolled_window.add(self._timezone_box)
+        self._scrolled_window.add_with_viewport(self._timezone_box)
         self._timezone_box.show_all()
         self._timezone_box.add(self._treeview)
         self._treeview.show()
