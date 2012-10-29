@@ -4,7 +4,7 @@ Summary: Constructionist learning platform
 Name: sugar
 Epoch: 1
 Version: 0.97.7
-Release: 1.dx4
+Release: 2.dx4
 URL: http://sugarlabs.org/
 Source0: http://download.sugarlabs.org/sources/sucrose/glucose/%{name}/%{name}-%{version}.tar.bz2
 License: GPLv2+
