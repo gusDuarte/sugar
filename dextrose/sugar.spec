@@ -2,6 +2,7 @@
 
 Summary: Constructionist learning platform
 Name: sugar
+Epoch: 1
 Version: 0.97.7
 Release: 1.dx4
 URL: http://sugarlabs.org/
