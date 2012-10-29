@@ -43,6 +43,7 @@ class BaseBuddyModel(GObject.GObject):
         self._color = None
         self._tags = None
         self._current_activity = None
+        self._ip_address = None
 
         GObject.GObject.__init__(self, **kwargs)
 
@@ -86,6 +87,17 @@ class BaseBuddyModel(GObject.GObject):
     current_activity = GObject.property(type=object,
                                         getter=get_current_activity,
                                         setter=set_current_activity)
+
+    def get_ip_address(self):
+        return self._ip_address
+
+    def set_ip_address(self, ip_address):
+        if self._ip_address != ip_address:
+            self._ip_address = ip_address
+
+    ip_address = GObject.property(type=object,
+                                  getter=get_ip_address,
+                                  setter=set_ip_address)
 
     def is_owner(self):
         raise NotImplementedError
