@@ -118,20 +118,23 @@ class HomeWindow(Gtk.Window):
             systembus.add_signal_receiver(self.__relogin_cb, 'Relogin',
                                           _DBUS_SYSTEM_IFACE)
 
-    def _system_alert(self, replaces_id, app_icon, message):
+    def _system_alert(self, replaces_id, app_icon, summary, message):
         service = notifications.get_service()
         service.notification_received.send(self,app_name='system',
                 replaces_id=replaces_id, app_icon=app_icon,
-                summary=_('System alert'), body=message,
+                summary=summary, body=message,
                 actions=[], hints={})
 
     def __reboot_cb(self):
         self._system_alert(_SYSTEM_REBOOT_ID, 'system-restart',
-                _('Please, reboot your computer to take into account ' \
-                        'new updates'))
+                _('Please restart your computer'),
+                _('System updates have been installed. Restarting ' \
+                  'your computer will ensure that they are ' \
+                  'applied correctly.'))
 
     def __relogin_cb(self):
         self._system_alert(_SYSTEM_RELOGIN_ID, 'system-logout',
+                _('Please restart Sugar'),
                 _('Please, restart Sugar to take into account ' \
                         'new updates'))
 

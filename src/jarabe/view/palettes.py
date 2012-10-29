@@ -301,7 +301,7 @@ class RemoteSharePalette(Palette):
 
         if show_unmount_option == True:
             menu_item = PaletteMenuItem(pgettext('Share', 'Unmount'))
-            icon = Icon(icon_name='media-eject', icon_size=gtk.ICON_SIZE_MENU)
+            icon = Icon(icon_name='media-eject', icon_size=Gtk.IconSize.MENU)
             menu_item.set_image(icon)
             icon.show()
 
@@ -333,30 +333,30 @@ class JournalVolumePalette(VolumePalette):
     def __init__(self, mount):
         VolumePalette.__init__(self, mount)
 
-        journal_separator = gtk.SeparatorMenuItem()
+        journal_separator = PaletteMenuItemSeparator()
         journal_separator.show()
 
-        self.menu.prepend(journal_separator)
+        self.content_box.pack_start(journal_separator, True, True, 0)
 
-        icon = Icon(icon_name='transfer-from', icon_size=gtk.ICON_SIZE_MENU)
+        icon = Icon(icon_name='transfer-from', icon_size=Gtk.IconSize.MENU)
         icon.show()
 
-        menu_item_journal_restore = MenuItem(_('Restore Journal'))
+        menu_item_journal_restore = PaletteMenuItem(_('Restore Journal'))
         menu_item_journal_restore.set_image(icon)
         menu_item_journal_restore.connect('activate', self.__journal_restore_activate_cb, mount.get_root().get_path())
         menu_item_journal_restore.show()
 
-        self.menu.prepend(menu_item_journal_restore)
+        self.content_box.pack_start(menu_item_journal_restore, True, True, 0)
 
-        icon = Icon(icon_name='transfer-to', icon_size=gtk.ICON_SIZE_MENU)
+        icon = Icon(icon_name='transfer-to', icon_size=Gtk.IconSize.MENU)
         icon.show()
 
-        menu_item_journal_backup = MenuItem(_('Backup Journal'))
+        menu_item_journal_backup = PaletteMenuItem(_('Backup Journal'))
         menu_item_journal_backup.set_image(icon)
         menu_item_journal_backup.connect('activate', self.__journal_backup_activate_cb, mount.get_root().get_path())
         menu_item_journal_backup.show()
 
-        self.menu.prepend(menu_item_journal_backup)
+        self.content_box.pack_start(menu_item_journal_backup, True, True, 0)
 
     def __journal_backup_activate_cb(self, menu_item, mount_path):
         dialog = VolumeBackupDialog(mount_path)

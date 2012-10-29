@@ -289,6 +289,35 @@ def setup_accessibility_cb():
     accessibility_manager = accessibility.AccessibilityManager()
     accessibility_manager.setup_accessibility()
 
+def export_proxy_settings():
+    """
+    Export manual proxy settings from GConf as environment variables
+
+    Some applications and tools and even some parts of Sugar will use
+    the http_proxy environment variable if set, but don't use the Gnome
+    (GConf) proxy settings.
+    """
+    client = GConf.Client.get_default()
+
+    # Note: See https://dev.laptop.org.au/issues/1179#note-9
+    if client.get_string('/system/proxy/mode') == 'none':
+        return
+
+    http_host = client.get_string('/system/http_proxy/host')
+    http_port = client.get_int('/system/http_proxy/port')
+    use_auth = client.get_bool('/system/http_proxy/use_authentication')
+    if use_auth:
+        user = client.get_string('/system/http_proxy/authentication_user')
+        pw = client.get_string('/system/http_proxy/authentication_password')
+        http_proxy = 'http://%s:%s@%s:%d/' % (user, pw, http_host, http_port)
+    else:
+        http_proxy = 'http://%s:%d/' % (http_host, http_port)
+
+    os.environ['http_proxy'] = http_proxy
+    ignore_hosts = client.get_list('/system/http_proxy/ignore_hosts',
+                                   gconf.VALUE_STRING)
+    os.environ['no_proxy'] = ','.join(ignore_hosts)
+
 
 def main():
     try:
