@@ -6,51 +6,52 @@ Epoch: 1
 Version: 0.97.7
 Release: 2.dx4
 URL: http://sugarlabs.org/
-Source0: http://download.sugarlabs.org/sources/sucrose/glucose/%{name}/%{name}-%{version}.tar.bz2
 License: GPLv2+
 Group: User Interface/Desktops
+Source0: http://download.sugarlabs.org/sources/sucrose/glucose/%{name}/%{name}-%{version}.tar.bz2
+#Patch0: sugar-gnomekeyring.patch
 
 BuildRequires: gettext
 BuildRequires: GConf2-devel
-BuildRequires: gtk2-devel
+BuildRequires: gobject-introspection
+BuildRequires: gtk3-devel
+BuildRequires: gtksourceview3-devel
 BuildRequires: intltool
 BuildRequires: perl-XML-Parser
 BuildRequires: pkgconfig
 BuildRequires: python
-BuildRequires: pygtk2-devel
 
 Requires: dbus-x11
+Requires: ethtool
 Requires: gnome-keyring-pam
-Requires: gnome-python2-gconf
-Requires: gnome-python2-libwnck
+Requires: gstreamer-plugins-espeak
 Requires: gstreamer-python
 Requires: metacity
 Requires: NetworkManager
 Requires: openssh
-Requires: pygtksourceview
+Requires: gtksourceview3
 Requires: python-telepathy
 Requires: python-xklavier
-Requires: python-xlib
 Requires: sugar-artwork
-#Requires: sugar-settings-manager
 Requires: sugar-toolkit
+Requires: sugar-toolkit-gtk3
 Requires: telepathy-mission-control
 Requires: upower
-
-Obsoletes: sugar-journal <= 99
-#Obsoletes: sugar-update-control <= 99
+Requires: xdg-user-dirs
+Requires: gvfs
+Requires: libwnck3
 
 BuildArch: noarch
 
 %description
-Sugar provides simple yet powerful means of engaging young children in the
+Sugar provides simple yet powerful means of engaging young children in the 
 world of learning that is opened up by computers and the Internet. With Sugar,
-even the youngest learner will quickly become proficient in using the
-computer as a tool to engage in authentic problem-solving.  Sugar promotes
-sharing, collaborative learning, and reflection, developing skills that help
-them in all aspects of life.
+even the youngest learner will quickly become proficient in using the 
+computer as a tool to engage in authentic problem-solving.  Sugar promotes 
+sharing, collaborative learning, and reflection, developing skills that help 
+them in all aspects of life. 
 
-Sugar is also the learning environment for the One Laptop Per Child project.
+Sugar is also the learning environment for the One Laptop Per Child project. 
 See http://www.laptop.org for more information on this project.
 
 %package emulator
@@ -62,47 +63,95 @@ Requires: xorg-x11-server-Xephyr
 Requires: xorg-x11-utils
 
 %description emulator
-The emulator let's you test and debug sugar. For example it allows you to run
-multiple instances of sugar.
+The emulator let's you test and debug sugar. For example it allows you to run 
+multiple instances of sugar. 
 
-%package control-accessibility
-Summary: The emulator for the Sugar Learning Platform
-Group: Development/Libraries
-Requires: %{name} <= %{epoch}:%{version}-%{release}
-Requires: CapitalFont
-Requires: magnifier-Ceibal
-Requires: FlatbedCursors
-Requires: ax
+%package cp-all
+Summary: All control panel modules 
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
+Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power %{name}-cp-updater
+# Currently broken
+# Requires: %{name}-cp-keyboard %{name}-cp-updater
 
-%description control-accessibility
-sugar-cp-accessibility addon to sugar's control panel.
+%description cp-all
+This is a meta package to install all Sugar Control Panel modules
 
-%package control-frame
-Summary: The emulator for the Sugar Learning Platform
-Group: Development/Libraries
-Requires: %{name} <= %{epoch}:%{version}-%{release}
+%package cp-datetime
+Summary: Sugar Date and Time control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
 
-%description control-frame
-sugar-control-frame addon to sugar's control panel.
+%description cp-datetime
+This is the Sugar Date and Time settings control panel
 
-%package control-keyboard
-Summary: The emulator for the Sugar Learning Platform
-Group: Development/Libraries
-Requires: %{name} <= %{epoch}:%{version}-%{release}
+%package cp-frame
+Summary: Sugar Frame control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
 
-%description control-keyboard
-sugar-control-frame addon to sugar's control panel.
+%description cp-frame
+This is the Sugar Frame settings control panel
+
+%package cp-keyboard
+Summary: Sugar Keyboard control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-keyboard
+This is the Sugar Keyboard settings control panel
+
+%package cp-language
+Summary: Sugar Language control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-language
+This is the Sugar Language settings control panel
+
+%package cp-modemconfiguration
+Summary: Sugar Modem configuration control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-modemconfiguration
+This is the Sugar Modem configuration control panel
+
+%package cp-network
+Summary: Sugar Network control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-network
+This is the Sugar Network settings control panel
+
+%package cp-power
+Summary: Sugar Power control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-power
+This is the Sugar Power settings control panel
+
+%package cp-updater
+Summary: Sugar Activity Update control panel
+Group: User Interface/Desktops
+Requires: %{name} = %{version}-%{release}
+
+%description cp-updater
+This is the Sugar Activity Updates control panel
+
+
 %prep
 %setup -q
+%patch0 -p1 -b .keyring
 
 %build
-autoreconf -i
 %configure
 make
 
 %install
-rm -rf %{buildroot}
-
 export GCONF_DISABLE_MAKEFILE_SCHEMA_INSTALL=1
 make install DESTDIR=%{buildroot}
 mkdir %{buildroot}/%{_datadir}/sugar/activities
@@ -118,13 +167,6 @@ fi
 export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
 gconftool-2 --makefile-install-rule \
 	%{_sysconfdir}/gconf/schemas/sugar.schemas > /dev/null || :
-
-if [ -d /home/olpc/ ]; then
-mkdir -p /home/olpc/.sugar/default
-chmod 755 /home/olpc/.sugar/ /home/olpc/.sugar/default
-[ -f /home/olpc/.sugar/default/ssl.crt ] || openssl req -new -newkey rsa:1024 -days 365 -nodes -x509 -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=www.example.com" -keyout /home/olpc/.sugar/default/ssl.key -out /home/olpc/.sugar/default/ssl.crt
-chown olpc.olpc /home/olpc/.sugar/ -R
-fi
 
 %pre
 if [ "$1" -gt 1 ]; then
@@ -145,11 +187,19 @@ if (update-mime-database -v &> /dev/null); then
   update-mime-database "%{_datadir}/mime" > /dev/null
 fi
 
-%clean
-rm -rf %{buildroot}
+%post emulator
+touch --no-create %{_datadir}/icons/hicolor
+if [ -x %{_bindir}/gtk-update-icon-cache ] ; then
+  %{_bindir}/gtk-update-icon-cache --quiet %{_datadir}/icons/hicolor || :
+fi
+
+%preun emulator
+touch --no-create %{_datadir}/icons/hicolor
+if [ -x %{_bindir}/gtk-update-icon-cache ] ; then
+  %{_bindir}/gtk-update-icon-cache --quiet %{_datadir}/icons/hicolor || :
+fi
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
 %doc COPYING README
 
 %config %{_sysconfdir}/dbus-1/system.d/nm-user-settings.conf
@@ -159,247 +209,258 @@ rm -rf %{buildroot}
 %dir %{_datadir}/sugar/activities
 %{_datadir}/sugar/*
 
-%config(noreplace) %{_datadir}/sugar/data/activities.defaults
-
-#%exclude %{_datadir}/sugar/extensions/cpsection/accessibility
-%exclude %{_datadir}/sugar/extensions/cpsection/frame
-%exclude %{_datadir}/sugar/extensions/cpsection/keyboard
-
 %{python_sitelib}/*
 
 %{_datadir}/xsessions/sugar.desktop
 
 %{_bindir}/*
 %exclude %{_bindir}/sugar-emulator
+%dir %{_datadir}/sugar/extensions/cpsection/
+%exclude %{_datadir}/sugar/extensions/cpsection/[b-z]*
+%{_datadir}/sugar/extensions/cpsection/about*
 
 %{_datadir}/mime/packages/sugar.xml
 
 %files emulator
-%defattr(-,root,root,-)
 %{_bindir}/sugar-emulator
 %{_datadir}/applications/sugar-emulator.desktop
 %{_datadir}/icons/hicolor/scalable/apps/sugar-xo.svg
 
-#%files control-accessibility
-#%defattr(-,root,root,-)
-#%{_datadir}/sugar/extensions/cpsection/accessibility/*
+%files cp-all
 
-%files control-frame
-%defattr(-,root,root,-)
-%{_datadir}/sugar/extensions/cpsection/frame/*
+%files cp-datetime
+%{_datadir}/sugar/extensions/cpsection/datetime
 
-%files control-keyboard
-%defattr(-,root,root,-)
-%{_datadir}/sugar/extensions/cpsection/keyboard/*
+%files cp-frame
+%{_datadir}/sugar/extensions/cpsection/frame
+
+%files cp-keyboard
+%{_datadir}/sugar/extensions/cpsection/keyboard
+
+%files cp-language
+%{_datadir}/sugar/extensions/cpsection/language
+
+%files cp-modemconfiguration
+%{_datadir}/sugar/extensions/cpsection/modemconfiguration
+
+%files cp-network
+%{_datadir}/sugar/extensions/cpsection/network
+
+%files cp-power
+%{_datadir}/sugar/extensions/cpsection/power
+
+%files cp-updater
+%{_datadir}/sugar/extensions/cpsection/updater
 
 %changelog
-* Tue Sep 04 2012 Ajay Garg <ajay@activitycentral.com> - 20120907:0.94.1-33.dx3
-- Fixed sdxo#2296. We need to have the "/home/olpc/.sugar/default" directory present, before we can generate the ssl-cert pair "into" it.
+* Thu Oct 25 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.9-1
+- 0.97.9 devel release
 
-* Tue Sep 04 2012 Ajay Garg <ajay@activitycentral.com> - 20120904:0.94.1-32.dx3
-- In "%post" section, added mechanism to add a ssl-key and -cert pair; for sharing entries via HTTPD-WebDAV in a secure manner.
+* Tue Oct 16 2012 Daniel Drake <dsd@laptop.org> 0.97.8-1
+- 0.97.8 devel release
 
-* Fri Jul 20 2012 Anish Mangal <anish@activitycentral.com> - 20120720:0.94.1-31.dx3
-- Added some es translations with inputs from Rafael Ortiz <rafael@activitycentral.com> and Ajay Garg <ajay@activitycentral.com>
+* Thu Oct 11 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.7-1
+- 0.97.7 devel release
 
-* Tue Jul 17 2012 Anish Mangal <anish@activitycentral.com> - 20120717:0.94.1-30.dx3
-- Fix for au#1305 'Passphrase must be re-entered when XO loses then regains wi-fi connection' Ajay Garg <ajay@activitycentral.com>
+* Fri Oct  5 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.6-1
+- 0.97.6 devel release
 
-* Thu Jun 07 2012 Anish Mangal <anish@activitycentral.com> - 20120607:0.94.1-29.dx3
-- Add Hindi (hi_IN) translations
+* Thu Oct  4 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.97.5-2
+- Split out Control Panels to sub packages
+- Update gnome-keyring patch. RHBZ 862581
+- Add patch to update build dependencies
 
-* Fri May 04 2012 Anish Mangal <anish@activitycentral.com> - 20120504:0.94.1-28.dx3
-- v5 patch of 1-to-N journal entry sharing feature. Ajay Garg <ajay@activitycentral.com>
+* Thu Sep 27 2012 Daniel Drake <dsd@laptop.org> - 0.97.5-1
+- New development release
 
-* Wed May 02 2012 Anish Mangal <anish@activitycentral.com> - 20120502:0.94.1-27.dx3
-- v4 patch of 1-to-N journal entry sharing feature. Ajay Garg <ajay@activitycentral.com>
+* Thu Sep 20 2012 Daniel Drake <dsd@laptop.org> - 0.97.4-1
+- New development release
 
-* Mon Apr 30 2012 Anish Mangal <anish@activitycentral.com> - 20120430:0.94.1-26.dx3
-- v2 patch of 1-to-N journal entry sharing feature. Ajay Garg <ajay@activitycentral.com>
+* Thu Sep 13 2012 Daniel Drake <dsd@laptop.org> - 0.97.3-1
+- New development release
 
-* Sun Apr 29 2012 Anish Mangal <anish@activitycentral.com> - 20120429:0.94.1-25.dx3
-- Add 1-to-N journal entry sharing feature. Ajay Garg <ajay@activitycentral.com>
+* Tue Aug 28 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.97.2-1
+- 0.97.2 devel release
 
-* Fri Apr 27 2012 Anish Mangal <anish@activitycentral.com> - 20120427:0.94.1-24.dx3
-- Update POTFILES.in in sugar and update some es translations uy#1795
+* Tue Aug 21 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.97.1-1
+- 0.97.1 devel release
 
-* Thu Apr 26 2012 Anish Mangal <anish@activitycentral.com> - 20120426:0.94.1-23.dx3
-- Add sascha's backport of the non-utf8-ssid fix
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.96.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-* Thu Apr 26 2012 Anish Mangal <anish@activitycentral.com> - 20120426:0.94.1-22.dx3
-- Fixing bug in relase-21 fix :-(
+* Fri Jun 15 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.96.3-1
+- 0.96.3 stable release
 
-* Thu Apr 26 2012 Anish Mangal <anish@activitycentral.com> - 20120426:0.94.1-21.dx3
-- Fixing proxy feature backporting patch (https://dev.laptop.org.au/issues/1179#note-9)
+* Tue Jun  5 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.96.2-1
+- 0.96.2 stable release
 
-* Tue Apr 10 2012 Anish Mangal <anish@activitycentral.com> - 20120410:0.94.1-20.dx3
-- Adding es translations for accessibility and update POTFILES.in
+* Sat May  5 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.96.1-2
+- Add patch to create gnome keyring if it doesn't exist
 
-* Sat Apr 07 2012 Anish Mangal <anish@activitycentral.com> - 20120407:0.94.1-19.dx3
-- Adding es translations
+* Mon Apr 30 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.96.1-1
+- 0.96.1 stable release
 
-* Fri Apr 06 2012 Anish Mangal <anish@activitycentral.com> - 20120406:0.94.1-18.dx3
-- Updating translations
+* Tue Apr 24 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.96.0-1
+- 0.96.0 stable release
 
-* Fri Mar 23 2012 Anish Mangal <anish@activitycentral.com> - 20120323:0.94.1-17.dx3
-- Bump release number. No code change
+* Thu Apr 19 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.7-1
+- devel release 0.95.7
 
-* Tue Mar 20 2012 Anish Mangal <anish@activitycentral.com> - 20120320:0.94.1-16.dx3
-- au#1179 remove duplicate export_proxy_settings from sugar-session
+* Mon Mar 26 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.6-1
+- devel release 0.95.6
 
-* Thu Mar 08 2012 Anish Mangal <anish@activitycentral.com> - 20120308:0.94.1-15.dx3
-- au#1100 Control visibility of Extreme Power management via gconf
+* Wed Mar 14 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.5-1
+- devel release 0.95.5
 
-* Tue Mar 06 2012 Anish Mangal <anish@activitycentral.com> - 20120306:0.94.1-14.dx3
-- au#1069 Updating strings
-- sl#2818, au#589 Modifications in favorite status of activities
-- {sl#3343, au#1122}, {sl#3344, au#1119} and {sl#3346, uy#1242} Fixes to batch operation mode
+* Tue Mar  6 2012 Daniel Drake <dsd@laptop.org> - 0.95.4-2
+- Add dependency on sugar-toolkit-gtk3 (needed to launch activities)
 
-* Mon Feb 27 2012 Anish Mangal <anish@activitycentral.com> - 20120227:0.94.1-13.dx3
-- Display notifications when sugar starts uy#698: Ajay Garg <ajay@activitycentral.com>
+* Thu Feb  2 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.4-1
+- devel release 0.95.4
 
-* Fri Feb 24 2012 Anish Mangal <anish@activitycentral.com> - 20120224:0.94.1-12.dx3
-- Add patch to fix espeak issue in uy#1322
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.95.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
-* Thu Feb 23 2012 Anish Mangal <anish@activitycentral.com> - 20120223:0.94.1-11.dx3
-- Add patch to fix path for olpc_build in Control Panel>About My Computer
+* Mon Jan  2 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.3-3
+- Drop premature sugar-base obsoletion
 
-* Wed Feb 22 2012 Anish Mangal <anish@activitycentral.com> - 20120222:0.94.1-10.dx3
-- Fix some typos in a few patches (Reported by Chris Leonard <cjlhomeaddress@gmail.com>
+* Thu Dec 22 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.3-2
+- Obsolete sugar-base
 
-* Wed Feb 22 2012 Anish Mangal <anish@activitycentral.com> - 20120222:0.94.1-9.dx3
-- Update to au#704 patch, allow config of NTP servers from /ControlPanel/Date&Time by ajay@activitycentral.com
+* Wed Dec 21 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.3-1
+- devel release 0.95.3
 
-* Tue Feb 21 2012 Anish Mangal <anish@activitycentral.com> - 20120221:0.94.1-8.dx3
-- au#704 allow configuration of NTP servers from /ControlPanel/Date&Time by ajay@activitycentral.com
+* Wed Nov 16 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.2-1
+- devel release 0.95.2
 
-* Sun Feb 19 2012 Anish Mangal <anish@activitycentral.com> - 20120219:0.94.1-7.dx3
-- Update to proxy patch (rework by silbe@activitycentral.com, porting by ajay@activiticentral.com)
+* Tue Oct 25 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.95.1-1
+- devel release 0.95.1
 
-* Sun Feb 19 2012 Anish Mangal <anish@activitycentral.com> - 20120219:0.94.1-6.dx3
-- Update to new Dextrose 3 development patchset 20120219
+* Wed Oct 19 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.94.1-1
+- 0.94.1 stable release
 
-* Tue Feb 14 2012 Anish Mangal <anish@activitycentral.com> - 20120214:0.94.1-5.dx3
-- Update to new Dextrose 3 development patchset (revert 1-to-N feature) 
+* Thu Sep 29 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.94.0-1
+- 0.94.0 stable release
 
-* Tue Feb 14 2012 Anish Mangal <anish@activitycentral.com> - 20120214:0.94.1-4.dx3
-- Update to new Dextrose 3 development patchset 20120214
-- (jvonau) au.diff patch for language fix
+* Tue Sep 20 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.93.5-1
+- 0.93.5 dev release
 
-* Mon Feb 06 2012 Anish Mangal <anish@activitycentral.com> - 1:0.94.1-20120206.dx3
-- update to Dextrose 3 patch set 20120206
-- Open sl#3319. FIXME: release numbering scheme
+* Wed Sep  7 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.93.4-1
+- 0.93.4 dev release
 
-* Thu Feb 02 2012 Anish Mangal <anish@activitycentral.com> - 1:0.94.1-20120203.dx3
-- update to Dextrose 3 patch set 20120203
-- Fix dependencies for sugar-control-accessibility
+* Tue Sep  6 2011 Daniel Drake <dsd@laptop.org> - 0.93.3-2
+- Updated NetworkManager-0.9 support patch
 
-* Thu Feb 02 2012 Anish Mangal <anish@activitycentral.com> - 1:0.94.1-20120124.dx3
-- update to Dextrose 3 patch set 20120124
-- split sugar control panel components in separate rpms: frame, accessibility, keyboard
+* Fri Aug 26 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.93.3-1 
+- 0.93.3 dev release
 
-* Wed Oct 25 2011 Anish Mangal <anish@activitycentral.com> - 1:0.94.1-20111025.dx3
-- update to Dextrose 3 patch set 20111025
+* Fri Aug 19 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.93.2-2
+- Add xdg-user-dirs dep
 
-* Sat Oct 15 2011 Anish Mangal <anish@activitycentral.com> - 1:0.94.0-20111015.dx3
-- update to Dextrose 3 patch set 20111015
+* Fri Aug 19 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.93.2-1 
+- 0.93.2 dev release
 
-* Fri Oct 14 2011 Anish Mangal <anish@activitycentral.com> - 1:0.94.0-20111014.dx3
-- update to Dextrose 3 patch set 20111014
+* Mon Jul 25 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.4-1
+- 0.92.4
 
-* Tue Sep 20 2011 Anish Mangal <anish@activitycentral.com> - 1:0.93.4-20110920.dx3
-- update to Dextrose 3 patch set 20110920
+* Fri Jul  8 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.3-1
+- 0.92.3
 
-* Mon Aug 15 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.4-20110815.dx3
-- update to Dextrose 3 patch set 20110815
+* Thu Jun  9 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.2-1
+- 0.92.2
 
-* Sun Aug 14 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.4-20110814.dx3
-- update to Dextrose 3 patch set 20110814
+* Wed Jun  8 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-6
+- Add an extra NM patch
 
-* Mon Jul 25 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.4-20110725.dx3
-- update to 0.92.4 (upstream) + Dextrose 3 patch set 20110725
+* Tue May 24 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-5
+- Add patch for NM-0.9 (thanks to John Dulaney for his assistance)
 
-* Sat Jul 23 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.3-20110723.dx3
-- update to Dextrose 3 patch set 20110723
+* Tue May 17 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-4
+- Drop previous patch, in wider testing it breaks more than it fixes
 
-* Mon Jul 18 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.3-20110718.dx3
-- update to Dextrose 3 patch set 20110718
+* Mon Apr 25 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-3
+- Add patch to fix jabber online status b.sl.o #2483
 
-* Sun Jul 17 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.3-20110717.dx3
-- update to 0.92.3 (upstream) + Dextrose 3 patch set 20110717
+* Mon Apr 25 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-2
+- Fix the sugar desktop icon in emulator
 
-* Tue Jul  5 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.2-20110705.dx3
-- update to 0.92.2 (upstream) + Dextrose 3 patch set 20110705
+* Thu Apr 14 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.1-1
+- 0.92.1 release
 
-* Sat Apr 16 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.1-20110416.dx3
-- update to 0.92.1 (upstream) + Dextrose 3 patch set 20110416
+* Tue Mar 01 2011 Simon Schampijer <simon@laptop.org> - 0.92.0-2
+- added upower (battery status indicator) and ConsoleKit
+  (logged users information) as runtime dependencies
 
-* Sun Mar 27 2011 Sascha Silbe <silbe@activitycentral.com> - 1:0.92.0-20110327.dx3
-- update to 0.92.0 (upstream) + Dextrose 3 patch set 20110327
-- add dependency on upower
-- bump Epoch to 1 so we always override OLPC provided Sugar packages
+* Mon Feb 28 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.92.0-1
+- 0.92.0 release
 
-* Wed Jan 19 2011 Steven M. Parrish <smparrish@gmail.com> 0.90.3-2.dx3
-- apply Dextrose patch set
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.90.3-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
-* Mon Nov  1 2010 Peter Robinson <pbrobinson@gmail.com> - 0.90.3-2
+* Sat Jan 29 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.3-4
+- Drop patch to enable sugar-settings-manager
+
+* Sat Jan 29 2011 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.3-3
+- bump build
+
+* Mon Nov  1 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.3-2
 - add gnome-keyring-pam as dep to fix prompt
 
-* Fri Oct 15 2010 Peter Robinson <pbrobinson@gmail.com> - 0.90.3-1
+* Fri Oct 15 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.3-1
 - 0.90.3 release
 
-* Tue Oct  5 2010 Peter Robinson <pbrobinson@gmail.com> - 0.90.2-1
+* Tue Oct  5 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.2-1
 - 0.90.2 release
 
-* Fri Oct  1 2010 Peter Robinson <pbrobinson@gmail.com> - 0.90.1-1
+* Fri Oct  1 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.1-1
 - 0.90.1 stable release
 
-* Wed Sep 29 2010 Peter Robinson <pbrobinson@gmail.com> - 0.90.0-1
+* Wed Sep 29 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.90.0-1
 - 0.90.0 stable release
 
-* Tue Sep 21 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.10-1
+* Tue Sep 21 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.10-1
 - New upstream devel 0.89.10 release
 
-* Sat Sep 18 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.9-1
+* Sat Sep 18 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.9-1
 - New upstream devel 0.89.9 release
 
-* Fri Sep  3 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.8-1
+* Fri Sep  3 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.8-1
 - New upstream devel 0.89.8 release
 
-* Tue Aug 31 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.7-1
+* Tue Aug 31 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.7-1
 - New upstream devel 0.89.7 release
 
-* Mon Aug 30 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.6-1
+* Mon Aug 30 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.6-1
 - New upstream devel 0.89.6 release
 
-* Fri Aug 27 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.5-1
+* Fri Aug 27 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.5-1
 - New upstream devel 0.89.5 release
 
-* Tue Aug 25 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.4-1
+* Tue Aug 25 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.4-1
 - New upstream devel 0.89.4 release
 
-* Wed Aug 17 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.3-1
+* Wed Aug 17 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.3-1
 - New upstream devel 0.89.3 release
 
-* Wed Aug  4 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.2-1
+* Wed Aug  4 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.2-1
 - New upstream devel 0.89.2 release
 
 * Thu Jul 22 2010 David Malcolm <dmalcolm@redhat.com> - 0.89.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Features/Python_2.7/MassRebuild
 
-* Wed Jul 14 2010 Peter Robinson <pbrobinson@gmail.com> - 0.89.1-1
+* Wed Jul 14 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.89.1-1
 - New upstream devel 0.89.1 release
 
-* Thu Jun  3 2010 Peter Robinson <pbrobinson@gmail.com> - 0.88.1-1
+* Thu Jun  3 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.88.1-1
 - New upstream stable 0.88.1 release
 
-* Sat May 30 2010 Peter Robinson <pbrobinson@gmail.com> - 0.88.0-3
+* Sat May 30 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.88.0-3
 - Bump build
 
-* Sat May 30 2010 Peter Robinson <pbrobinson@gmail.com> - 0.88.0-2
-- Clean up some descriptions
+* Sat May 30 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.88.0-2
+- Clean up some descriptions 
 
-* Tue Mar 20 2010 Peter Robinson <pbrobinson@gmail.com> - 0.88.0-1
+* Tue Mar 20 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.88.0-1
 - New upstream stable 0.88.0 release
 
 * Wed Mar 10 2010 Sebastian Dziallas <sebastian@when.com> - 0.87.8-1
@@ -420,7 +481,7 @@ rm -rf %{buildroot}
 * Tue Jan 12 2010 Sebastian Dziallas <sebastian@when.com> - 0.87.3-1
 - New upstream release
 
-* Sat Jan  9 2010 Peter Robinson <pbrobinson@gmail.com> - 0.87.2-2
+* Sat Jan  9 2010 Peter Robinson <pbrobinson@fedoraproject.org> - 0.87.2-2
 - Updated to the new python sysarch spec file reqs
 
 * Wed Dec 23 2009 Sebastian Dziallas <sebastian@when.com> - 0.87.2-1
@@ -496,7 +557,7 @@ rm -rf %{buildroot}
 - Correct date in 'About my Computer' CP section #639
 - Make Jukebox the default activity for ogg-vorbis #423
 - Find an available icon for displaying the removable device #627
-- CP: Disallow the user from selecting any fallbacks if English (USA) is
+- CP: Disallow the user from selecting any fallbacks if English (USA) is 
 selected (#slo:561)
 - Call *mount_finish when the callback is called #326
 - Add full licence to data dir #357
@@ -575,7 +636,7 @@ selected (#slo:561)
 - View Source: Use activity icon outline for Bundle Source, part of #360
 - View Source: Hide Python Bytecode files #361
 - Use the file transfer icons
-- Many new translations!
+- Many new translations! 
 
 * Thu Feb 19 2009 Simon Schampijer <simon@schampijer.de> - 0.83.7-3
 - actually adding pygtksourceview2 as a dependency
@@ -610,7 +671,7 @@ selected (#slo:561)
 - Right click on AP should reveal palette not connect to AP #10
 - Display space used and left in the volume palette in the journal #33
 - Don't update the zoom level when a dialog window pops up
-- Fix filtering the objectchooser with data types #219
+- Fix filtering the objectchooser with data types #219 
 
 * Fri Feb 06 2009 Simon Schampijer <simon@schampijer.de> - 0.83.6-2.20090206git7115089fb0
 - Fix italian translation
@@ -678,7 +739,7 @@ selected (#slo:561)
 - #165 Install bundles when they get into the journal
 - add Resume item to the file transfer palette
 - #126 Fix erase button in the journal
-- following eben's spec for the device positions
+- following eben's spec for the device positions 
 
 * Sun Jan 04 2009 Simon Schampijer <simon@laptop.org> - 0.83.4-2
 - add intltool build require
@@ -744,9 +805,9 @@ selected (#slo:561)
 - remove numpy finally
 
 * Sat Sep 13 2008 Simon Schampijer <simon@laptop.org> - 0.82.6-1
-- #8438 control panel fails when run with python -OO
-- #8470 SpreadLayout leaks self._collisions
-- #8375 gst usage in the shell wastes 2.6mb
+- #8438 control panel fails when run with python -OO                                                                         
+- #8470 SpreadLayout leaks self._collisions                                                                               
+- #8375 gst usage in the shell wastes 2.6mb                                                                                        
 - #8372 Remove numpy usage from the shell
 
 * Thu Sep 12 2008 Marco Pesenti Gritti <mpg@redhat.com> - 0.82.5-1
@@ -769,7 +830,7 @@ selected (#slo:561)
 - Require gstreamer-python and telepathy-python (rhbz#447589)
 
 * Fri Aug 29 2008 Simon Schampijer <simon@laptop.org> - 0.82.2-1
-- 6929 Control panel: include copyright/licensing info in about dialogue
+- 6929 Control panel: include copyright/licensing info in about dialogue 
 - Fix some launcher issues
 
 * Thu Aug 28 2008 Tomeu Vizoso <tomeu@tomeuvizoso.net> - 0.82.1-1
@@ -813,7 +874,7 @@ selected (#slo:561)
 - 7625 alt+tab switching is slow because activities are notified unneccessary
 - 7560 cp: Inconsistent behavior after changing the xo color
 - 7641 Control panel sugar theme infelicities.
-- 6136 No feedback from 'register' request.
+- 6136 No feedback from 'register' request. 
 
 * Wed Jul 23 2008 Simon Schampijer <simon@laptop.org> - 0.81.7-1
 - 7546 Activity launcher fails to show when launching from the journal
@@ -827,7 +888,7 @@ selected (#slo:561)
 - 7434 Control panel UI for power management.
 
 * Thu Jul 17 2008 Simon Schampijer <simon@laptop.org> - 0.81.6-4.20080715git8137d5c37f
-- split the sugar-emulator in it's own package to get rid of the
+- split the sugar-emulator in it's own package to get rid of the 
   xephyr dependency
 
 * Tue Jul 15 2008 Tomeu Vizoso <tomeu@tomeuvizoso.net> - 0.81.6-3.20080715git8137d5c37f
@@ -852,7 +913,7 @@ selected (#slo:561)
 - 7391 Make the search field in Home reveal the list view
 - 7248 Speaker device has inconsistent behavior
 - 7272 Notifications are redundant with new launching feedback
-- 7273 Activity icons remain colored after launch
+- 7273 Activity icons remain colored after launch 
 
 * Sat Jun 21 2008 Tomeu Vizoso <tomeu@tomeuvizoso.net> - 0.81.5-1
 - Fix a bug with activity switching (benzea)
@@ -873,7 +934,7 @@ selected (#slo:561)
 - Sort activities in the list and ring by installation date (Tomeu)
 - Speaker device (Martin Dengler)
 - Graphical frontend for the control panel (Simon)
-- Rotate the dpad keys when the screen rotate button is pressed (Erik Garrison)
+- Rotate the dpad keys when the screen rotate button is pressed (Erik Garrison) 
 
 * Thu May 22 2008 Simon Schampijer <simon@schampijer.de> - 0.81.1-2
 - Removed patch to fix activity location
@@ -887,7 +948,7 @@ selected (#slo:561)
 - Misc graphical fixes.
 
 * Mon Apr 28 2008 Marco Pesenti Gritti <mpg@redhat.com> - 0.79.3-2
-- Patch to fix system activities location
+- Patch to fix system activities location 
 
 * Wed Apr 09 2008 Tomeu Vizoso <tomeu@tomeuvizoso.net> - 0.79.3-1
 - Misc graphical fixes.
@@ -1219,7 +1280,7 @@ Snapshot 306d32832f
 - Use the new palette widget everywhere in the UI
 - Do not always show the shutdown palette on startup
 - Implement primary and secondary state for palettes
-- Fix several frame/zoom level bugs
+- Fix several frame/zoom level bugs 
 
 * Fri Jun 29 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.65-0.3.20070629git30bee7e43a
 - Better palette positioning
@@ -1343,7 +1404,7 @@ Snapshot 306d32832f
 * Thu Mar 29 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.66.20070329git
 - Better feedback for the ap states on the mesh view.
 
-* Thu Mar 29 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.65.20070329git
+* Thu Mar 29 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.65.20070329git 
 - Fix pdf mime type. Mesh network support.
 
 * Wed Mar 28 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.64.20070328git
@@ -1462,7 +1523,7 @@ Snapshot 306d32832f
 - Update snapshot
 
 * Wed Feb 28 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.24.20070228git
-- Update snapshot
+- Update snapshot 
 
 * Tue Feb 27 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.23.20070227git
 - Update snapshot
@@ -1536,10 +1597,10 @@ Snapshot 306d32832f
 * Mon Jan  8 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.1.20070108git
 - Update to 2.1.20070108git
 
-* Fri Jan  5 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.2.20070105git
+* Fri Jan  5 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.2.20070105git 
 - Update to 0.63-2.2.20070105git
 
-* Fri Jan  5 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.1.20070105git
+* Fri Jan  5 2007 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-2.1.20070105git 
 - Update to 0.63-2.1.20070105git
 
 * Thu Nov 21 2006 Marco Pesenti Gritti <mpg@redhat.com> - 0.63-1
@@ -1553,7 +1614,7 @@ Snapshot 306d32832f
 
 * Mon Nov 18 2006 Marco Pesenti Gritti <mpg@redhat.com> - 0.60-1
 - Update 0.60
-- Addd the service files
+- Addd the service files 
 
 * Fri Nov 17 2006 Marco Pesenti Gritti <mpg@redhat.com> - 0.59.1-1
 - Update to 0.59.1
