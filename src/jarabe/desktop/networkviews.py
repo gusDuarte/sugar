@@ -23,6 +23,9 @@ import uuid
 
 import dbus
 import glib
+
+from gi.repository import Gtk
+
 import string
 
 from sugar3.graphics.icon import Icon
@@ -31,7 +34,8 @@ from sugar3.graphics import xocolor
 from sugar3.graphics import style
 from sugar3.graphics.icon import get_icon_state
 from sugar3.graphics import palette
-from sugar3.graphics.menuitem import MenuItem
+from sugar3.graphics.palettemenuitem import PaletteMenuItem
+from sugar3.graphics.palettemenuitem import PaletteMenuItemSeparator
 from sugar3 import profile
 
 from jarabe.view.pulsingicon import EventPulsingIcon
@@ -309,14 +313,22 @@ class WirelessNetworkView(EventPulsingIcon):
         label = glib.markup_escape_text(self._display_name)
         p = palette.Palette(primary_text=label, icon=self._palette_icon)
 
-        self._connect_item = MenuItem(_('Connect'), 'dialog-ok')
-        self._connect_item.connect('activate', self.__connect_activate_cb)
-        p.menu.append(self._connect_item)
+        self.menu_box = Gtk.VBox()
 
-        self._disconnect_item = MenuItem(_('Disconnect'), 'media-eject')
-        self._disconnect_item.connect('activate',
-                                        self._disconnect_activate_cb)
-        p.menu.append(self._disconnect_item)
+        self._connect_item = PaletteMenuItem(_('Connect'))
+        icon = Icon(icon_size=Gtk.IconSize.MENU, icon_name='dialog-ok')
+        self._connect_item.set_image(icon)
+        self._connect_item.connect('activate', self.__connect_activate_cb)
+        self.menu_box.add(self._connect_item)
+
+        self._disconnect_item = PaletteMenuItem(_('Disconnect'))
+        icon = Icon(icon_size=Gtk.IconSize.MENU, icon_name='media-eject')
+        self._disconnect_item.set_image(icon)
+        self._disconnect_item.connect('activate', self.__disconnect_activate_cb)
+        self.menu_box.add(self._disconnect_item)
+
+        p.set_content(self.menu_box)
+        self.menu_box.show_all()
 
         self.connect_to_palette_pop_events(p)
 
@@ -448,7 +460,7 @@ class WirelessNetworkView(EventPulsingIcon):
         else:
             self.props.alpha = 1.0
 
-    def _disconnect_activate_cb(self, item):
+    def __disconnect_activate_cb(self, item):
         ap_paths = self._access_points.keys()
         network.disconnect_access_points(ap_paths)
 
@@ -704,8 +716,6 @@ class SugarAdhocView(EventPulsingIcon):
         get_adhoc_manager_instance().connect('state-changed',
                                              self.__state_changed_cb)
 
-        self.connect('button-release-event', self.__button_release_event_cb)
-
         pulse_color = XoColor('%s,%s' % (style.COLOR_BUTTON_GREY.get_svg(),
                                          style.COLOR_TRANSPARENT.get_svg()))
         self.props.pulse_color = pulse_color
@@ -713,6 +723,7 @@ class SugarAdhocView(EventPulsingIcon):
                                        (profile.get_color().get_stroke_color(),
                                         style.COLOR_TRANSPARENT.get_svg()))
         self.props.base_color = self._state_color
+        self.palette_invoker.props.toggle_palette = True
         self._palette = self._create_palette()
         self.set_palette(self._palette)
         self._palette_icon.props.xo_color = self._state_color
@@ -726,23 +737,27 @@ class SugarAdhocView(EventPulsingIcon):
         palette_ = palette.Palette(glib.markup_escape_text(text),
                                    icon=self._palette_icon)
 
-        self._connect_item = MenuItem(_('Connect'), 'dialog-ok')
+        self.menu_box = Gtk.VBox()
+
+        self._connect_item = PaletteMenuItem(_('Connect'))
+        icon = Icon(icon_size=Gtk.IconSize.MENU, icon_name='dialog-ok')
+        self._connect_item.set_image(icon)
         self._connect_item.connect('activate', self.__connect_activate_cb)
-        palette_.menu.append(self._connect_item)
-        self._connect_item.show()
+        self.menu_box.add(self._connect_item)
+ 
+        self._disconnect_item = PaletteMenuItem(_('Disconnect'))
+        icon = Icon(icon_size=Gtk.IconSize.MENU, icon_name='media-eject')
+        self._disconnect_item.set_image(icon)
+        self._disconnect_item.connect('activate', self.__disconnect_activate_cb)
+        self.menu_box.add(self._disconnect_item)
 
-        self._disconnect_item = MenuItem(_('Disconnect'), 'media-eject')
-        self._disconnect_item.connect('activate',
-                                      self.__disconnect_activate_cb)
-        palette_.menu.append(self._disconnect_item)
-
-        self.connect_to_palette_pop_events(palette)
-
+        palette_.set_content(self.menu_box)
+        self.menu_box.show_all()
+        self._disconnect_item.hide()
+ 
+        self.connect_to_palette_pop_events(palette_)
+ 
         return palette_
-
-    def __button_release_event_cb(self, icon, event):
-        self._palette.popup(immediate=True,
-                            state=palette.Palette.SECONDARY)
 
     def __connect_activate_cb(self, icon):
         get_adhoc_manager_instance().activate_channel(self._channel)
@@ -832,8 +847,6 @@ class OlpcMeshView(EventPulsingIcon):
         self._active = False
         device = mesh_mgr.mesh_device
 
-        self.connect('button-release-event', self.__button_release_event_cb)
-
         interface_props = dbus.Interface(device, dbus.PROPERTIES_IFACE)
         interface_props.Get(network.NM_DEVICE_IFACE, 'State',
                             reply_handler=self.__get_device_state_reply_cb,
@@ -855,6 +868,7 @@ class OlpcMeshView(EventPulsingIcon):
                                          style.COLOR_TRANSPARENT.get_svg()))
         self.props.pulse_color = pulse_color
         self.props.base_color = profile.get_color()
+        self.palette_invoker.props.toggle_palette = True
         self._palette = self._create_palette()
         self.set_palette(self._palette)
 
@@ -862,11 +876,16 @@ class OlpcMeshView(EventPulsingIcon):
         text = _('Mesh Network %d') % (self._channel, )
         _palette = palette.Palette(glib.markup_escape_text(text))
 
-        self._connect_item = MenuItem(_('Connect'), 'dialog-ok')
-        self._connect_item.connect('activate', self.__connect_activate_cb)
-        _palette.menu.append(self._connect_item)
+        self.menu_box = Gtk.VBox()
 
-        return _palette
+        self._connect_item = PaletteMenuItem(_('Connect'))
+        icon = Icon(icon_size=Gtk.IconSize.MENU, icon_name='dialog-ok')
+        self._connect_item.set_image(icon)
+        self._connect_item.connect('activate', self.__connect_activate_cb)
+        self.menu_box.add(self._connect_item)
+
+        _palette_.set_content(self.menu_box)
+        self.menu_box.show_all()
 
     def __get_device_state_reply_cb(self, state):
         self._device_state = state
@@ -930,10 +949,6 @@ class OlpcMeshView(EventPulsingIcon):
 
     def __connect_activate_cb(self, icon):
         self._connect()
-
-    def __button_release_event_cb(self, icon, event):
-        self._palette.popup(immediate=True,
-                            state=palette.Palette.SECONDARY)
 
     def _connect(self):
         self._mesh_mgr.user_activate_channel(self._channel)
