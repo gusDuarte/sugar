@@ -1095,7 +1095,7 @@ def _write_metadata_and_preview_files_and_return_file_paths(metadata,
 
 
 def update_only_metadata_and_preview_files_and_return_file_paths(metadata):
-    file_name = get_file_name(metadata['title'], metadata['mime_type'])
+    file_name = metadata['title']
     _write_metadata_and_preview_files_and_return_file_paths(metadata,
                                                             file_name)
 
@@ -1148,7 +1148,16 @@ def _write_entry_on_external_device(metadata, file_path,
 
 
 def get_file_name(title, mime_type):
-    return title
+    file_name = title
+
+    # Invalid characters in VFAT filenames. From
+    # http://en.wikipedia.org/wiki/File_Allocation_Table
+    invalid_chars = ['/', '\\', ':', '*', '?', '"', '<', '>', '|', '\x7F']
+    invalid_chars.extend([chr(x) for x in range(0, 32)])
+    for char in invalid_chars:
+        file_name = file_name.replace(char, '_')
+
+    return file_name
 
 
 def get_unique_file_name(mount_point, file_name):

@@ -19,12 +19,14 @@ import hashlib
 from gettext import gettext as _
 
 from gi.repository import Gtk
+from gi.repository import Gdk
 import dbus
 import os
 import shutil
 
 from sugar3 import env
 from sugar3.graphics.icon import Icon
+from sugar3.graphics import style
 
 from jarabe.model import network
 from jarabe.journal.objectchooser import ObjectChooser
@@ -525,12 +527,18 @@ def create(ssid, flags, wpa_flags, rsn_flags, dev_caps, response):
 
     key_dialog.connect('response', _key_dialog_response_cb)
     key_dialog.show_all()
+    width, height = key_dialog.get_size()
+    key_dialog.move(Gdk.Screen.width() / 2 - width / 2,
+                    style.GRID_CELL_SIZE * 2)
 
 
 def get_key_values(key_list, final_callback, settings):
     key_dialog = KeyValuesDialog(key_list, final_callback,
                                  settings)
     key_dialog.show_all()
+    width, height = key_dialog.get_size()
+    key_dialog.move(Gdk.Screen.width() / 2 - width / 2,
+                    style.GRID_CELL_SIZE * 2)
 
 
 def _key_dialog_response_cb(key_dialog, response_id):
