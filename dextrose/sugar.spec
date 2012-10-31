@@ -71,7 +71,9 @@ Summary: All control panel modules
 Group: User Interface/Desktops
 Requires: %{name} = %{version}-%{release}
 Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
-Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power %{name}-cp-updater
+Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
+#Disabled in dx4
+# %{name}-cp-updater
 # Currently broken
 # Requires: %{name}-cp-keyboard %{name}-cp-updater
 
@@ -134,13 +136,13 @@ Requires: %{name} = %{version}-%{release}
 %description cp-power
 This is the Sugar Power settings control panel
 
-%package cp-updater
-Summary: Sugar Activity Update control panel
-Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+#%package cp-updater
+#Summary: Sugar Activity Update control panel
+#Group: User Interface/Desktops
+#Requires: %{name} = %{version}-%{release}
 
-%description cp-updater
-This is the Sugar Activity Updates control panel
+#%description cp-updater
+#This is the Sugar Activity Updates control panel
 
 
 %prep
@@ -249,8 +251,8 @@ fi
 %files cp-power
 %{_datadir}/sugar/extensions/cpsection/power
 
-%files cp-updater
-%{_datadir}/sugar/extensions/cpsection/updater
+#%files cp-updater
+#%{_datadir}/sugar/extensions/cpsection/updater
 
 %changelog
 * Thu Oct 25 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.9-1
