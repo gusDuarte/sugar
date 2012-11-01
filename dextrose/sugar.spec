@@ -69,7 +69,7 @@ multiple instances of sugar.
 %package cp-all
 Summary: All control panel modules 
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
 Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
 #Disabled in dx4
@@ -83,7 +83,7 @@ This is a meta package to install all Sugar Control Panel modules
 %package cp-datetime
 Summary: Sugar Date and Time control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-datetime
 This is the Sugar Date and Time settings control panel
@@ -91,7 +91,7 @@ This is the Sugar Date and Time settings control panel
 %package cp-frame
 Summary: Sugar Frame control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-frame
 This is the Sugar Frame settings control panel
@@ -99,7 +99,7 @@ This is the Sugar Frame settings control panel
 %package cp-keyboard
 Summary: Sugar Keyboard control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-keyboard
 This is the Sugar Keyboard settings control panel
@@ -107,7 +107,7 @@ This is the Sugar Keyboard settings control panel
 %package cp-language
 Summary: Sugar Language control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-language
 This is the Sugar Language settings control panel
@@ -115,7 +115,7 @@ This is the Sugar Language settings control panel
 %package cp-modemconfiguration
 Summary: Sugar Modem configuration control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-modemconfiguration
 This is the Sugar Modem configuration control panel
@@ -123,7 +123,7 @@ This is the Sugar Modem configuration control panel
 %package cp-network
 Summary: Sugar Network control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-network
 This is the Sugar Network settings control panel
@@ -131,7 +131,7 @@ This is the Sugar Network settings control panel
 %package cp-power
 Summary: Sugar Power control panel
 Group: User Interface/Desktops
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-power
 This is the Sugar Power settings control panel
