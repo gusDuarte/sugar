@@ -150,6 +150,7 @@ This is the Sugar Power settings control panel
 %patch0 -p1 -b .keyring
 
 %build
+autoreconf -i
 %configure
 make
 
