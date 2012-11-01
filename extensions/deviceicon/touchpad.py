@@ -41,6 +41,7 @@ STATUS_ICON = ('touchpad-capacitive', 'touchpad-resistive')
 # NODE_PATH is used to communicate with the touchpad device.
 NODE_PATH = '/sys/devices/platform/i8042/serio1/hgpk_mode'
 
+_view = None
 
 class DeviceView(TrayIcon):
     """ Manage the touchpad mode from the device palette on the Frame. """
@@ -58,18 +59,18 @@ class DeviceView(TrayIcon):
         self.set_palette_invoker(FrameWidgetInvoker(self))
         self.connect('button-release-event', self.__button_release_event_cb)
 
-    def create_palette(self):
-        """ Create a palette for this icon; called by the Sugar framework
-        when a palette needs to be displayed. """
+        # Create the palette during initialization.
         label = glib.markup_escape_text(_('My touchpad'))
-        self.palette = ResourcePalette(label, self.icon)
-        self.palette.set_group_id('frame')
-        return self.palette
+        self._palette = ResourcePalette(label, self.icon)
+        self._palette.set_group_id('frame')
+
+    def create_palette(self):
+        return self._palette
 
     def __button_release_event_cb(self, widget, event):
         """ Callback for button release event; used to invoke touchpad-mode
         change. """
-        self.palette.toggle_mode()
+        self._palette.toggle_mode()
         return True
 
 
@@ -109,9 +110,15 @@ class ResourcePalette(Palette):
 def setup(tray):
     """ Initialize the devic icon; called by the shell when initializing the
     Frame. """
-    if os.path.exists(NODE_PATH):
-        tray.add_device(DeviceView())
-        _write_touchpad_mode_str(TOUCHPAD_MODE_MOUSE)
+
+    global _view
+
+    client = GConf.Client.get_default()
+    if client.get_bool('/desktop/sugar/deviceicon/show_touchpad') == True:
+        if os.path.exists(NODE_PATH):
+            _view = DeviceView()
+            tray.add_device(_view)
+            _write_touchpad_mode_str(TOUCHPAD_MODE_MOUSE)
 
 
 def _read_touchpad_mode_str():

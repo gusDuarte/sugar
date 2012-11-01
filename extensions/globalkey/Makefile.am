@@ -5,4 +5,5 @@ sugar_PYTHON = 		\
 	screenshot.py	\
         magnifier.py    \
 	speech.py	\
+	touchpad.py     \
 	viewsource.py
