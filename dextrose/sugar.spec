@@ -9,7 +9,6 @@ URL: http://sugarlabs.org/
 License: GPLv2+
 Group: User Interface/Desktops
 Source0: http://download.sugarlabs.org/sources/sucrose/glucose/%{name}/%{name}-%{version}.tar.bz2
-#Patch0: sugar-gnomekeyring.patch
 
 BuildRequires: gettext
 BuildRequires: GConf2-devel
@@ -147,7 +146,6 @@ This is the Sugar Power settings control panel
 
 %prep
 %setup -q
-%patch0 -p1 -b .keyring
 
 %build
 autoreconf -i
