@@ -198,7 +198,7 @@ class ChooserListView(BaseListView):
     }
 
     def __init__(self):
-        BaseListView.__init__(self)
+        BaseListView.__init__(self, True)
 
         self.cell_icon.props.show_palette = False
         self.tree_view.props.hover_selection = True
