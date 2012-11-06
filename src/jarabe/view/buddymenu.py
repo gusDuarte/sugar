@@ -77,17 +77,18 @@ class BuddyMenu(Palette):
         self.menu.append(menu_item)
         menu_item.show()
 
-        remote_share_menu_item = None
-        from jarabe.journal import webdavmanager
-        if not webdavmanager.is_remote_webdav_loaded(self._buddy.props.ip_address):
-            remote_share_menu_item = PaletteMenuItem(_('Access Share'), 'list-add')
-            remote_share_menu_item.connect('activate', self._access_share_cb)
-        else:
-            remote_share_menu_item = PaletteMenuItem(_('Unmount Share'), 'list-remove')
-            remote_share_menu_item.connect('activate', self.__unmount_cb)
+        if jarabe.journal.model.is_peer_to_peer_sharing_available():
+            remote_share_menu_item = None
+            from jarabe.journal import webdavmanager
+            if not webdavmanager.is_remote_webdav_loaded(self._buddy.props.ip_address):
+                remote_share_menu_item = MenuItem(_('Access Share'), 'list-add')
+                remote_share_menu_item.connect('activate', self._access_share_cb)
+            else:
+                remote_share_menu_item = MenuItem(_('Unmount Share'), 'list-remove')
+                remote_share_menu_item.connect('activate', self.__unmount_cb)
 
-        self.menu.append(remote_share_menu_item)
-        remote_share_menu_item.show()
+            self.menu.append(remote_share_menu_item)
+            remote_share_menu_item.show()
 
         self._invite_menu = PaletteMenuItem('')
         self._invite_menu.connect('activate', self._invite_friend_cb)
@@ -123,6 +124,37 @@ class BuddyMenu(Palette):
         item.connect('activate', self.__controlpanel_activate_cb)
         self.menu_box.pack_start(item, True, True, 0)
         item.show()
+
+    def __unmount_cb(self, menuitem):
+        from jarabe.journal.journalactivity import get_journal
+        singleton_volumes_toolbar = get_journal().get_volumes_toolbar()
+        singleton_volumes_toolbar._remove_remote_share_button(self._buddy.props.ip_address)
+
+    def _access_share_cb(self, menuitem):
+        from jarabe.journal.journalactivity import get_journal
+        volumes_toolbar = get_journal().get_volumes_toolbar()
+
+        # TRANS: Do not translate the """%s""".
+        primary_text = _('%s\'s Shares') % self._buddy.props.nick
+        button = volumes_toolbar._add_remote_share_button(primary_text,
+                                                 self._buddy.props.ip_address,
+                                                 self._buddy.props.color,
+                                                 jarabe.journal.volumestoolbar.SHARE_TYPE_PEER)
+
+        # Now, make three levels of transitions, from the
+        # Neighborhood-view.
+
+        # 1. Switch to the home-view.
+        from jarabe.model import shell
+        from jarabe.model.shell import ShellModel
+        shell.get_model().set_zoom_level(ShellModel.ZOOM_HOME)
+
+        # 2. Switch to the journal-activity-view.
+        top_frame = jarabe.frame.get_view()
+        top_frame.switch_to_journal_activity()
+
+        # 3. Switch to the newly mounted-view.
+        volumes_toolbar._button_toggled_cb(button, force_toggle=True)
 
     def _quit(self, action):
         home_window = jarabe.desktop.homewindow.get_instance()
