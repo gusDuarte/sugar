@@ -147,7 +147,7 @@ class _AgePage(_Page):
     def __init__(self, intro):
         _Page.__init__(self)
         self._intro = intro
-        self._max_age = 1000
+        self._max_age = 100
 
         alignment = Gtk.Alignment.new(0.5, 0.5, 0, 0)
         self.pack_start(alignment, expand=True, fill=True, padding=0)
