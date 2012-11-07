@@ -377,3 +377,6 @@ class Frame(object):
         # Do nothing for now. Our notification UI is so simple, there's no
         # point yet.
         pass
+
+    def switch_to_journal_activity(self):
+        self._activities_tray._show_journal_activity()

@@ -83,10 +83,10 @@ class BuddyMenu(Palette):
             remote_share_menu_item = None
             from jarabe.journal import webdavmanager
             if not webdavmanager.is_remote_webdav_loaded(self._buddy.props.ip_address):
-                remote_share_menu_item = MenuItem(_('Access Share'), 'list-add')
+                remote_share_menu_item = PaletteMenuItem(_('Access Share'), 'list-add')
                 remote_share_menu_item.connect('activate', self._access_share_cb)
             else:
-                remote_share_menu_item = MenuItem(_('Unmount Share'), 'list-remove')
+                remote_share_menu_item = PaletteMenuItem(_('Unmount Share'), 'list-remove')
                 remote_share_menu_item.connect('activate', self.__unmount_cb)
 
             self.menu_box.pack_start(remote_share_menu_item, True, True, 0)
