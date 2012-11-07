@@ -6,6 +6,11 @@ test -n "${srcdir}" || srcdir="$(pwd)"
 olddir="$(pwd)"
 cd "$srcdir"
 
+#http://permalink.gmane.org/gmane.comp.education.sugar.devel/35523
+mkdir m4
+
+mkdir m4
+
 intltoolize
 autoreconf -i
 
