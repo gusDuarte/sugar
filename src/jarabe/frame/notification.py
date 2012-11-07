@@ -26,8 +26,8 @@ from gettext import gettext as _
 from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor
 from sugar3.graphics.palette import Palette
-from sugar3.graphics.palettemenuitem import PaletteMenuItem
 from sugar3.graphics.toolbutton import ToolButton
+from sugar3.graphics.palettemenu import PaletteMenuItem
 from sugar3 import profile
 
 from jarabe.frame.frameinvoker import FrameWidgetInvoker

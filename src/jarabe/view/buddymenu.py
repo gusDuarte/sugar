@@ -76,7 +76,7 @@ class BuddyMenu(Palette):
             menu_item = PaletteMenuItem(_('Make friend'), 'list-add')
             menu_item.connect('activate', self._make_friend_cb)
 
-        self.menu.append(menu_item)
+        self.menu_box.pack_start(menu_item, True, True, 0)
         menu_item.show()
 
         if jarabe.journal.model.is_peer_to_peer_sharing_available():
@@ -89,7 +89,7 @@ class BuddyMenu(Palette):
                 remote_share_menu_item = MenuItem(_('Unmount Share'), 'list-remove')
                 remote_share_menu_item.connect('activate', self.__unmount_cb)
 
-            self.menu.append(remote_share_menu_item)
+            self.menu_box.pack_start(remote_share_menu_item, True, True, 0)
             remote_share_menu_item.show()
 
         self._invite_menu = PaletteMenuItem('')
