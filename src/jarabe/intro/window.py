@@ -347,7 +347,7 @@ class IntroWindow(Gtk.Window):
 
     def _create_profile_cb(self, name, age, color):
         create_profile(name, age, color)
-        self.emit("done"))
+        self.emit("done")
 
         return False
 
