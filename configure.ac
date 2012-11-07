@@ -60,8 +60,6 @@ extensions/cpsection/modemconfiguration/Makefile
 extensions/cpsection/Makefile
 extensions/cpsection/network/Makefile
 extensions/cpsection/power/Makefile
-extensions/cpsection/updater/backends/Makefile
-extensions/cpsection/updater/Makefile
 extensions/deviceicon/Makefile
 extensions/globalkey/Makefile
 extensions/Makefile
