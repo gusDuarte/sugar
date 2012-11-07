@@ -67,6 +67,7 @@ class BuddyMenu(Palette):
         self._buddy.disconnect_by_func(self.__buddy_notify_nick_cb)
 
     def _add_buddy_items(self):
+        menu_item = None
         if friends.get_model().has_buddy(self._buddy):
             menu_item = PaletteMenuItem(_('Remove friend'), 'list-remove')
             menu_item.connect('activate', self._remove_friend_cb)
