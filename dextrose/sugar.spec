@@ -1,10 +1,48 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
+# Environment setup:
+#
+#	mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+#	echo | bzip2 -c > ~/rpmbuild/SOURCES/sugar-0.97.7.tar.gz
+#	cd ~/build/ && git clone git://git.sugarlabs.org/dextrose/sugar.git
+#	ln -s ~/build/sugar/dextrose/sugar.spec ~/rpmbuild/SPECS/sugar.spec
+#	rpmbuild -ba ~/rpmbuild/SPECS/sugar.spec
+#
+
+%define git_repo sugar
+%define git_head devel
+
+%define git_repodir %(echo ~/build/)
+%define git_gitdir %{git_repodir}/%{git_repo}/.git
+
+%define git_get_source pushd %{git_repodir}/%{git_repo} ;\
+        /usr/bin/git archive --format=tar --prefix=%{name}-%{version}/ %{git_head} | \
+                bzip2 -c > %{_sourcedir}/%{name}-%{version}.tar.bz2 ;\
+        popd
+
+%define git_clone_source if [ -d %{name}-%{version} ] ; then \
+                cd %{name}-%{version} && git pull origin %{git_head} ; \
+        else \
+                git clone %{git_gitdir} %{name}-%{version} && \
+                cd %{name}-%{version}/ ; \
+        fi
+
+%define git_submodule git submodule
+%define git_prep_submodules %{git_submodule} init --cloned && %{git_submodule} update
+
+%define git_version %(git --git-dir=%{git_gitdir} describe --tags 2> /dev/null || echo 0.0-`git --git-dir=%{git_gitdir} log --oneline | wc -l`-g`git --git-dir=%{git_gitdir} describe --always`)
+
+# if the git repo has tags
+%define git_get_ver %(echo %{git_version} | sed 's/^v\\?\\(.*\\)-\\([0-9]\\+\\)-g.*$/\\1/;s/-//')
+%define git_get_rel %(echo %{git_version} | sed 's/^v\\?\\(.*\\)-\\([0-9]\\+-g.*\\)$/\\2/;s/-/_/')
+
+
+
 Summary: Constructionist learning platform
 Name: sugar
 Epoch: 1
-Version: 0.97.9
-Release: 2.dx4
+Version: %git_get_ver
+Release: %git_get_rel
 URL: http://sugarlabs.org/
 License: GPLv2+
 Group: User Interface/Desktops
@@ -145,9 +183,11 @@ This is the Sugar Power settings control panel
 
 
 %prep
+%git_get_source
 %setup -q
 
 %build
+sh autogen.sh
 autoreconf -i
 %configure
 make
