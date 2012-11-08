@@ -389,7 +389,10 @@ class JournalActivity(JournalWindow):
             return
 
         metadata['bundle_id'] = bundle.get_bundle_id()
-        model.write(metadata)
+
+        from jarabe.journal.journalactivity import get_mount_point
+        metadata['mountpoint'] = get_mount_point()
+        model.update_only_metadata_and_preview_files_and_return_file_paths(metadata)
 
     def set_bundle_installation_allowed(self, allowed):
         self._bundle_installation_allowed = allowed
