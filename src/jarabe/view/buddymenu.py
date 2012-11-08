@@ -24,7 +24,8 @@ import glib
 import dbus
 
 from sugar3.graphics.palette import Palette
-from sugar3.graphics.palettemenuitem import PaletteMenuItem
+from sugar3.graphics.palettemenu import PaletteMenuBox
+from sugar3.graphics.palettemenu import PaletteMenuItem
 from sugar3.graphics.icon import Icon
 
 from jarabe.model import shell
@@ -67,6 +68,7 @@ class BuddyMenu(Palette):
         self._buddy.disconnect_by_func(self.__buddy_notify_nick_cb)
 
     def _add_buddy_items(self):
+        menu_item = None
         if friends.get_model().has_buddy(self._buddy):
             menu_item = PaletteMenuItem(_('Remove friend'), 'list-remove')
             menu_item.connect('activate', self._remove_friend_cb)
@@ -74,20 +76,20 @@ class BuddyMenu(Palette):
             menu_item = PaletteMenuItem(_('Make friend'), 'list-add')
             menu_item.connect('activate', self._make_friend_cb)
 
-        self.menu.append(menu_item)
+        self.menu_box.pack_start(menu_item, True, True, 0)
         menu_item.show()
 
         if jarabe.journal.model.is_peer_to_peer_sharing_available():
             remote_share_menu_item = None
             from jarabe.journal import webdavmanager
             if not webdavmanager.is_remote_webdav_loaded(self._buddy.props.ip_address):
-                remote_share_menu_item = MenuItem(_('Access Share'), 'list-add')
+                remote_share_menu_item = PaletteMenuItem(_('Access Share'), 'list-add')
                 remote_share_menu_item.connect('activate', self._access_share_cb)
             else:
-                remote_share_menu_item = MenuItem(_('Unmount Share'), 'list-remove')
+                remote_share_menu_item = PaletteMenuItem(_('Unmount Share'), 'list-remove')
                 remote_share_menu_item.connect('activate', self.__unmount_cb)
 
-            self.menu.append(remote_share_menu_item)
+            self.menu_box.pack_start(remote_share_menu_item, True, True, 0)
             remote_share_menu_item.show()
 
         self._invite_menu = PaletteMenuItem('')

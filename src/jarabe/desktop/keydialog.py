@@ -518,7 +518,7 @@ def create(ssid, flags, wpa_flags, rsn_flags, dev_caps, response):
     elif (wpa_flags & network.NM_802_11_AP_SEC_KEY_MGMT_PSK) or \
             (rsn_flags & network.NM_802_11_AP_SEC_KEY_MGMT_PSK):
         key_dialog = WPAPersonalKeyDialog(ssid, flags, wpa_flags, rsn_flags,
-                                  dev_caps, settings, response)
+                                  dev_caps, response)
     elif (wpa_flags & network.NM_802_11_AP_SEC_KEY_MGMT_802_1X) or \
             (rsn_flags & network.NM_802_11_AP_SEC_KEY_MGMT_802_1X):
         # nothing. All details are asked for WPA/WPA2-Enterprise

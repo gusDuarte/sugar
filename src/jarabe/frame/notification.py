@@ -26,8 +26,8 @@ from gettext import gettext as _
 from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor
 from sugar3.graphics.palette import Palette
-from sugar3.graphics.palettemenuitem import PaletteMenuItem
 from sugar3.graphics.toolbutton import ToolButton
+from sugar3.graphics.palettemenu import PaletteMenuItem
 from sugar3 import profile
 
 from jarabe.frame.frameinvoker import FrameWidgetInvoker
@@ -282,5 +282,8 @@ class NotificationWindow(Gtk.Window):
         self.connect('realize', self._realize_cb)
 
     def _realize_cb(self, widget):
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.get_window().set_accept_focus(False)
+
         color = Gdk.color_parse(style.COLOR_TOOLBAR_GREY.get_html())
         self.modify_bg(Gtk.StateType.NORMAL, color)

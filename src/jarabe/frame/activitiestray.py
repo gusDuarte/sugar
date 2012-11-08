@@ -249,6 +249,8 @@ class ActivitiesTray(HTray):
         # JournalActivity is always the first activity to be added.
         # Broadcast the signal-of-its-creation.
         if group is None:
+            self._journal_button = button
+            self._journal_activity = home_activity
             self._signal_addition_of_journal_activity()
 
     def _signal_addition_of_journal_activity(self):
@@ -311,6 +313,10 @@ class ActivitiesTray(HTray):
 
     def __remove_invite_cb(self, icon, invite):
         self._invites.remove_invite(invite)
+
+    def _show_journal_activity(self):
+        self.__activity_clicked_cb(self._journal_button,
+                                   self._journal_activity)
 
     def __invite_added_cb(self, invites_model, invite):
         self._add_invite(invite)
