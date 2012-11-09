@@ -885,7 +885,7 @@ class OlpcMeshView(EventPulsingIcon):
         self._connect_item.connect('activate', self.__connect_activate_cb)
         self.menu_box.add(self._connect_item)
 
-        _palette_.set_content(self.menu_box)
+        _palette.set_content(self.menu_box)
         self.menu_box.show_all()
 
     def __get_device_state_reply_cb(self, state):
