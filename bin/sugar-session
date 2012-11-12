@@ -372,6 +372,7 @@ def main():
     if timezone is not None and timezone:
         os.environ['TZ'] = timezone
 
+    export_proxy_settings()
     set_fonts()
     set_theme()
 
