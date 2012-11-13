@@ -9,4 +9,5 @@ sugar_PYTHON = 		\
 	speaker.py	\
 	speech.py	\
 	touchpad.py	\
+	virtualkeyboard.py \
 	volume.py
