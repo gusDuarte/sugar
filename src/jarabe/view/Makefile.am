@@ -13,4 +13,4 @@ sugar_PYTHON =				\
 	service.py			\
 	tabbinghandler.py		\
 	viewsource.py                   \
-	virtualkeyboard.py              \
+	virtualkeyboard.py
