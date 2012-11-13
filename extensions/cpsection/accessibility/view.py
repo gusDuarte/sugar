@@ -77,6 +77,7 @@ class accessibility(SectionView):
         self._view_mouse_keys()
         self._view_sticky_keys()
         self._view_bounce_keys()
+        self._view_virtualkeyboard()
 
         self._vbox_section.pack_start(self.box_pm_keyboard, False, False, 0)
         self.box_pm_keyboard.show()
@@ -133,6 +134,14 @@ class accessibility(SectionView):
         state = widget.get_active()
         self._model.set_bounce_keys(state)
 
+    def _set_virtualkeyboard(self, widget):
+        state = widget.get_active()
+        self._model.set_virtualkeyboard(state)
+        self.restart_alerts.append('zone')
+        self.needs_restart = True
+        self._zone_alert.props.msg = self.restart_msg
+        self._zone_alert.show()
+
     def _set_contrast(self, widget):
         state = widget.get_active()
         self._model.set_contrast(state)
@@ -165,6 +174,8 @@ class accessibility(SectionView):
         self._model.set_sticky_keys(self.init_state_sticky_keys)
         self._model.set_bounce_keys(self.init_state_bounce_keys)
 
+        self._model.set_virtualkeyboard(self.init_state_virtualkeyboard)
+        self.btn_virtualkeyboard.set_active(self.init_state_virtualkeyboard)
 
         self._model.set_contrast(self.init_state_contrast)
         self.btn_contrast.set_active(self.init_state_contrast)
@@ -219,6 +230,24 @@ class accessibility(SectionView):
         lbl_bounce.set_alignment(0, 0)
         self.box_pm_keyboard.pack_start(lbl_bounce, True, True, 2)
         lbl_bounce.show()
+
+    def _view_virtualkeyboard(self):
+        self.btn_virtualkeyboard = Gtk.CheckButton(_('Virtual keyboard'))
+        self._virtualkeyboard_pm_change_handler = self.btn_virtualkeyboard.connect("toggled", self._set_virtualkeyboard)
+        self.init_state_virtualkeyboard = self._model.get_virtualkeyboard()
+        if self.init_state_virtualkeyboard:
+            self.btn_virtualkeyboard.handler_block(self._virtualkeyboard_pm_change_handler)
+            self.btn_virtualkeyboard.set_active(True)
+            self.btn_virtualkeyboard.handler_unblock(self._virtualkeyboard_pm_change_handler)
+        else:
+            self.btn_virtualkeyboard.set_active(False)
+        self.box_pm_keyboard.pack_start(self.btn_virtualkeyboard, True, True, 2)
+        self.btn_virtualkeyboard.show()
+
+        lbl_virtualkeyboard = Gtk.Label(_('Show virtual keyboard on frame.'))
+        lbl_virtualkeyboard.set_alignment(0, 0)
+        self.box_pm_keyboard.pack_start(lbl_virtualkeyboard, True, True, 2)
+        lbl_virtualkeyboard.show()
 
     def _view_contrast(self):
         self.btn_contrast = Gtk.CheckButton(_('Contrast'))

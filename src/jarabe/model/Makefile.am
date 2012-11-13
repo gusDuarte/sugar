@@ -19,4 +19,5 @@ sugar_PYTHON =			\
         session.py		\
 	sound.py		\
 	speech.py		\
-	telepathyclient.py
+	telepathyclient.py      \
+	virtualkeyboard.py

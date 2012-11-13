@@ -48,6 +48,14 @@ class Keyboard:
     def set_bounce_keys(self, activar):
         client = GConf.Client.get_default()
         client.set_bool("/desktop/sugar/accessibility/keyboard/bouncekeys_enable", activar)
+
+    def get_virtualkeyboard(self):
+        client = GConf.Client.get_default()
+        return client.get_bool("/desktop/sugar/accessibility/keyboard/virtualkeyboard_enable")
+
+    def set_virtualkeyboard(self, activar):
+        client = GConf.Client.get_default()
+        client.set_bool("/desktop/sugar/accessibility/keyboard/virtualkeyboard_enable", activar)
         self.run_config_keyboard()
 
     def run_config_keyboard(self):

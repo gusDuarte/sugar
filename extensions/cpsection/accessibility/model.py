@@ -23,7 +23,7 @@ keyboard = accessibility.Keyboard()
 screen = accessibility.Screen()
 mouse = accessibility.Mouse()
 
-KEYWORDS = ['mouse_keys', 'sticky_keys', 'bounce_keys', 'contrast', 'white_mouse', 'accel_mouse', 'capital_letters']
+KEYWORDS = ['mouse_keys', 'sticky_keys', 'bounce_keys', 'virtualkeyboard', 'contrast', 'white_mouse', 'accel_mouse', 'capital_letters']
 
 def get_mouse_keys():
     return keyboard.get_mouse_keys()
@@ -51,6 +51,15 @@ def set_bounce_keys(activar):
 
 def print_bounce_keys():
     print str(get_bounce_keys())
+
+def get_virtualkeyboard():
+    return keyboard.get_virtualkeyboard()
+
+def set_virtualkeyboard(activar):
+    keyboard.set_virtualkeyboard(activar)
+
+def print_virtualkeyboard():
+    print str(get_virtualkeyboard())
 
 def get_contrast():
     return screen.get_contrast()

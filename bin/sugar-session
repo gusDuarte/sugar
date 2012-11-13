@@ -315,8 +315,11 @@ def export_proxy_settings():
         http_proxy = 'http://%s:%d/' % (http_host, http_port)
 
     os.environ['http_proxy'] = http_proxy
-    ignore_hosts = client.get_list('/system/http_proxy/ignore_hosts',
-                                   gconf.VALUE_STRING)
+
+    ignore_hosts = []
+    ignore_hosts_list = client.get('/system/http_proxy/ignore_hosts')
+    for entry in ignore_hosts_list.get_list():
+        ignore_hosts.append(entry.get_string())
     os.environ['no_proxy'] = ','.join(ignore_hosts)
 
 def start_home():
