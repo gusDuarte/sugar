@@ -16,6 +16,10 @@
 %define git_gitdir %{git_repodir}/%{git_repo}/.git
 
 %define git_get_source pushd %{git_repodir}/%{git_repo} ;\
+	/usr/bin/git pull \;
+	/usr/bin/git log > CHANGES \;
+	/usr/bin/git add CHANGES \;
+	/usr/bin/git commit -m "Updated CHANGES file" \;
         /usr/bin/git archive --format=tar --prefix=%{name}-%{version}/ %{git_head} | \
                 bzip2 -c > %{_sourcedir}/%{name}-%{version}.tar.bz2 ;\
         popd
