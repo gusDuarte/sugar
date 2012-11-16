@@ -18,11 +18,12 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GConf
 from gi.repository import GObject
+from gi.repository import Gio
 from gettext import gettext as _
 
 import os
-import subprocess
 import pango
+import subprocess
 import logging
 
 from sugar3.graphics import style
@@ -38,14 +39,26 @@ TITLE = _('Network')
 _APPLY_TIMEOUT = 3000
 EXPLICIT_REBOOT_MESSAGE = _('Please restart your computer for changes to take effect.')
 
+# Please refer ::
+# http://developer.gnome.org/ProxyConfiguration/
+
+GSETTINGS_PROXY       = Gio.Settings.new('org.gnome.system.proxy')
+GSETTINGS_PROXY_FTP   = Gio.Settings.new('org.gnome.system.proxy.ftp')
+GSETTINGS_PROXY_HTTP  = Gio.Settings.new('org.gnome.system.proxy.http')
+GSETTINGS_PROXY_HTTPS = Gio.Settings.new('org.gnome.system.proxy.https')
+GSETTINGS_PROXY_SOCKS = Gio.Settings.new('org.gnome.system.proxy.socks')
+
+
 client = GConf.Client.get_default()
 
 
 class GConfMixin(object):
     """Mix-in class for GTK widgets backed by GConf"""
-    def __init__(self, gconf_key, widget=None, signal='changed'):
+    def __init__(self, gconf_key, gsettings_dconf, dconf_key, widget=None, signal='changed'):
         self._timeout_id = None
         self._gconf_key = gconf_key
+        self._gsettings_dconf = gsettings_dconf
+        self._dconf_key = dconf_key
         self._notify_id = client.notify_add(gconf_key, self.__gconf_notify_cb, None)
         initial_value = self._get_gconf_value()
         self._undo_value = initial_value
@@ -99,12 +112,16 @@ class GConfMixin(object):
         gconf_type = client.get(self._gconf_key).type
         if gconf_type == GConf.ValueType.STRING:
             client.set_string(self._gconf_key, new_value)
+            self._gsettings_dconf.set_string(self._dconf_key, new_value)
         elif gconf_type == GConf.ValueType.INT:
             client.set_int(self._gconf_key, new_value)
+            self._gsettings_dconf.set_int(self._dconf_key, new_value)
         elif gconf_type == GConf.ValueType.FLOAT:
             client.set_float(self._gconf_key, new_value)
+            self._gsettings_dconf.set_double(self._dconf_key, new_value)
         elif gconf_type == GConf.ValueType.BOOL:
             client.set_bool(self._gconf_key, new_value)
+            self._gsettings_dconf.set_boolean(self._dconf_key, new_value)
         elif gconf_type == GConf.ValueType.LIST:
             import traceback
             list_type = client.get(self._gconf_key).get_list_type()
@@ -127,6 +144,8 @@ class GConfMixin(object):
                                             env=environment,
                                             shell=True)
                 process.wait()
+
+                self._gsettings_dconf.set_strv(self._dconf_key, new_value)
             except Exception, e:
                 logging.exception(e)
             #client.set_list(self._gconf_key, list_type, new_value)
@@ -147,9 +166,9 @@ class GConfEntry(Gtk.Entry, GConfMixin):
     GConf directory containing the key.
     """
 
-    def __init__(self, gconf_key):
+    def __init__(self, gconf_key, gsettings_dconf, dconf_key):
         Gtk.Entry.__init__(self)
-        GConfMixin.__init__(self, gconf_key)
+        GConfMixin.__init__(self, gconf_key, gsettings_dconf, dconf_key)
 
     def get_value_for_gconf(self):
         return self.props.text
@@ -164,9 +183,9 @@ class GConfIntegerSpinButton(Gtk.SpinButton, GConfMixin):
     GConf directory containing the key.
     """
 
-    def __init__(self, gconf_key, adjustment, climb_rate=0):
+    def __init__(self, gconf_key, gsettings_dconf, dconf_key, adjustment, climb_rate=0):
         Gtk.SpinButton.__init__(self, adjustment=adjustment, climb_rate=climb_rate)
-        GConfMixin.__init__(self, gconf_key)
+        GConfMixin.__init__(self, gconf_key, gsettings_dconf, dconf_key)
 
     def get_value_for_gconf(self):
         return self.get_value_as_int()
@@ -178,9 +197,9 @@ class GConfIntegerSpinButton(Gtk.SpinButton, GConfMixin):
 class GConfStringListEntry(GConfEntry):
     """Text entry backed by a GConf list of strings"""
 
-    def __init__(self, gconf_key, separator=','):
+    def __init__(self, gconf_key, gsettings_dconf, dconf_key, separator=','):
         self._separator = separator
-        GConfEntry.__init__(self, gconf_key)
+        GConfEntry.__init__(self, gconf_key, gsettings_dconf, dconf_key)
 
     def get_value_for_gconf(self):
         entries = self.props.text.split(self._separator)
@@ -211,9 +230,9 @@ class SettingBox(Gtk.HBox):
 class GConfStringSettingBox(SettingBox):
     """A configuration line for a GConf string setting"""
 
-    def __init__(self, name, gconf_key, size_group=None):
+    def __init__(self, name, gconf_key, gsettings_dconf, dconf_key, size_group=None):
         SettingBox.__init__(self, name, size_group=size_group)
-        self.string_entry = GConfEntry(gconf_key)
+        self.string_entry = GConfEntry(gconf_key, gsettings_dconf, dconf_key)
         self.string_entry.show()
         self.pack_start(self.string_entry, True, True, 0)
 
@@ -229,17 +248,19 @@ class GConfStringSettingBox(SettingBox):
 class GConfPasswordSettingBox(GConfStringSettingBox):
     """A configuration line for a GConf password setting"""
 
-    def __init__(self, name, gconf_key, size_group=None):
-        GConfStringSettingBox.__init__(self, name, gconf_key, size_group)
+    def __init__(self, name, gconf_key, gsettings_dconf, dconf_key, size_group=None):
+        GConfStringSettingBox.__init__(self, name, gconf_key,
+                                       gsettings_dconf, dconf_key, size_group)
         self.string_entry.set_visibility(False)
 
 
 class GConfHostListSettingBox(GConfStringSettingBox):
     """A configuration line for a host list GConf setting"""
 
-    def __init__(self, name, gconf_key, size_group=None):
+    def __init__(self, name, gconf_key, gsettings_dconf, dconf_key, size_group=None):
         SettingBox.__init__(self, name, size_group=size_group)
-        self.hosts_entry = GConfStringListEntry(gconf_key)
+        self.hosts_entry = GConfStringListEntry(gconf_key,
+                                                gsettings_dconf, dconf_key)
         self.hosts_entry.show()
         self.pack_start(self.hosts_entry, True, True, 0)
 
@@ -254,15 +275,20 @@ class GConfHostListSettingBox(GConfStringSettingBox):
 class GConfHostPortSettingBox(SettingBox):
     """A configuration line for a combined host name and port GConf setting"""
 
-    def __init__(self, name, host_key, port_key, size_group=None):
+    def __init__(self, name, host_key, port_key, gsettings_dconf,
+                 dconf_host_key, dconf_port_key, size_group=None):
         SettingBox.__init__(self, name, size_group=size_group)
-        self.host_name_entry = GConfEntry(host_key)
+        self.host_name_entry = GConfEntry(host_key, gsettings_dconf,
+                                          dconf_host_key)
         self.host_name_entry.show()
         self.pack_start(self.host_name_entry, True, True, 0)
 
         # port number 0 means n/a
         adjustment = Gtk.Adjustment(0, 0, 65535, 1, 10)
-        self.port_spin_button = GConfIntegerSpinButton(port_key, adjustment,
+        self.port_spin_button = GConfIntegerSpinButton(port_key,
+                                                       gsettings_dconf,
+                                                       dconf_port_key,
+                                                       adjustment,
                                                        climb_rate=0.1)
         self.port_spin_button.show()
         self.pack_start(self.port_spin_button, False, False, 0)
@@ -341,7 +367,8 @@ class GConfExclusiveOptionSetsBox(ExclusiveOptionSetsBox, GConfMixin):
     Container for sets of GConf settings based on a top-level setting
     """
 
-    def __init__(self, top_name, top_gconf_key, option_sets, size_group=None):
+    def __init__(self, top_name, top_gconf_key, gsettings_dconf,
+                 dconf_key, option_sets, size_group=None):
         """Initialize a GConfExclusiveOptionSetsBox instance
 
         Arguments:
@@ -359,7 +386,8 @@ class GConfExclusiveOptionSetsBox(ExclusiveOptionSetsBox, GConfMixin):
                                   for name, value, widget in option_sets])
         ExclusiveOptionSetsBox.__init__(self, top_name, display_sets,
                                         size_group=size_group)
-        GConfMixin.__init__(self, top_gconf_key, self._top_combo_box)
+        GConfMixin.__init__(self, top_gconf_key, gsettings_dconf,
+                            dconf_key, self._top_combo_box)
 
     def get_value_for_gconf(self):
         giter = self._top_combo_box.get_active_iter()
@@ -412,7 +440,8 @@ class GConfOptionalSettingsBox(OptionalSettingsBox, GConfMixin):
     """
     Container for GConf settings (de)activated by a top-level setting
     """
-    def __init__(self, top_name, top_gconf_key, options):
+    def __init__(self, top_name, top_gconf_key, gsettings_dconf,
+                 dconf_key, options):
         """Initialize a GConfExclusiveOptionSetsBox instance
         Arguments:
 
@@ -422,7 +451,8 @@ class GConfOptionalSettingsBox(OptionalSettingsBox, GConfMixin):
         options -- list of  GTK widgets to display for each of the options
         """
         OptionalSettingsBox.__init__(self, top_name, options)
-        GConfMixin.__init__(self, top_gconf_key, self._top_check_button,
+        GConfMixin.__init__(self, top_gconf_key, gsettings_dconf,
+                            dconf_key, self._top_check_button,
                             signal='toggled')
 
     def get_value_for_gconf(self):
@@ -655,6 +685,8 @@ class Network(SectionView):
 
         url_box = GConfStringSettingBox(_('Configuration URL:'),
                                         '/system/proxy/autoconfig_url',
+                                        GSETTINGS_PROXY,
+                                        'autoconfig-url',
                                         size_group)
         url_box.show()
         automatic_proxy_box.pack_start(url_box, True, True, 0)
@@ -675,23 +707,30 @@ class Network(SectionView):
         http_box = GConfHostPortSettingBox(_('HTTP Proxy:'),
                                            '/system/http_proxy/host',
                                            '/system/http_proxy/port',
+                                            GSETTINGS_PROXY_HTTP,
+                                            'host',
+                                            'port',
                                            size_group)
         http_box.show()
         manual_proxy_box.pack_start(http_box, True, True, 0)
         self._undo_objects.append(http_box)
 
         user_name_box = GConfStringSettingBox(_('Username:'),
-            '/system/http_proxy/authentication_user', size_group)
+            '/system/http_proxy/authentication_user',
+            GSETTINGS_PROXY_HTTP, 'authentication-user', size_group)
         user_name_box.show()
         self._undo_objects.append(user_name_box)
 
         password_box = GConfPasswordSettingBox(_('Password:'),
-            '/system/http_proxy/authentication_password', size_group)
+            '/system/http_proxy/authentication_password',
+            GSETTINGS_PROXY_HTTP, 'authentication-password', size_group)
         password_box.show()
         self._undo_objects.append(password_box)
 
         auth_box = GConfOptionalSettingsBox(_('Use authentication'),
             '/system/http_proxy/use_authentication',
+            GSETTINGS_PROXY_HTTP,
+            'use-authentication',
             [user_name_box, password_box])
         auth_box.show()
         manual_proxy_box.pack_start(auth_box, True, True, 0)
@@ -700,6 +739,9 @@ class Network(SectionView):
         https_box = GConfHostPortSettingBox(_('HTTPS Proxy:'),
                                             '/system/proxy/secure_host',
                                             '/system/proxy/secure_port',
+                                            GSETTINGS_PROXY_HTTPS,
+                                            'host',
+                                            'port',
                                             size_group)
         https_box.show()
         manual_proxy_box.pack_start(https_box, True, True, 0)
@@ -708,6 +750,9 @@ class Network(SectionView):
         ftp_box = GConfHostPortSettingBox(_('FTP Proxy:'),
                                           '/system/proxy/ftp_host',
                                           '/system/proxy/ftp_port',
+                                          GSETTINGS_PROXY_FTP,
+                                          'host',
+                                          'port',
                                           size_group)
         ftp_box.show()
         manual_proxy_box.pack_start(ftp_box, True, True, 0)
@@ -716,6 +761,9 @@ class Network(SectionView):
         socks_box = GConfHostPortSettingBox(_('SOCKS Proxy:'),
                                             '/system/proxy/socks_host',
                                             '/system/proxy/socks_port',
+                                            GSETTINGS_PROXY_SOCKS,
+                                            'host',
+                                            'port',
                                             size_group)
         socks_box.show()
         manual_proxy_box.pack_start(socks_box, True, True, 0)
@@ -726,13 +774,16 @@ class Network(SectionView):
                        ('Manual', 'manual', manual_proxy_box)]
         option_sets_box = GConfExclusiveOptionSetsBox(_('Method:'),
                                                       '/system/proxy/mode',
+                                                      GSETTINGS_PROXY,
+                                                      'mode',
                                                       option_sets, size_group)
         option_sets_box.show()
         proxy_box.pack_start(option_sets_box, False, False, 0)
         self._undo_objects.append(option_sets_box)
 
         no_proxy_box = GConfHostListSettingBox(_('Ignored Hosts'),
-            '/system/http_proxy/ignore_hosts', size_group)
+            '/system/http_proxy/ignore_hosts', GSETTINGS_PROXY,
+            'ignore-hosts', size_group)
         no_proxy_box.show()
         proxy_box.pack_start(no_proxy_box, False, False, 0)
         self._undo_objects.append(no_proxy_box)
