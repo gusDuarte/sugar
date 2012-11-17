@@ -42,7 +42,7 @@ if test -z "$SUGAR_PROFILE"; then
 fi
 
 if test -z "$SUGAR_SCALING"; then
-    export SUGAR_SCALING=100
+    export SUGAR_SCALING=72
 fi
 
 if gconftool-2 --dir-exists=/desktop/sugar/interface ; then
