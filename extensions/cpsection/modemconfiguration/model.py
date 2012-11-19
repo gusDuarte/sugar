@@ -18,11 +18,11 @@ import logging
 
 import dbus
 from gi.repository import Gtk
+from gi.repository import GConf
 
 import os
 import locale
 import logging
-import gconf
 
 from xml.etree.cElementTree import ElementTree
 from gettext import gettext as _
@@ -265,9 +265,9 @@ class PlanListStore(Gtk.ListStore):
 
 
 def get_gconf_setting_string(gconf_key):
-    client = gconf.client_get_default()
+    client = GConf.Client.get_default()
     return client.get_string(gconf_key) or ''
 
 def set_gconf_setting_string(gconf_key, gconf_setting_string_value):
-    client = gconf.client_get_default()
+    client = GConf.Client.get_default()
     client.set_string(gconf_key, gconf_setting_string_value)
