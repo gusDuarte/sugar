@@ -19,10 +19,10 @@ from gi.repository import Gdk
 from gi.repository import GConf
 from gi.repository import GObject
 from gi.repository import Gio
+from gi.repository import Pango
 from gettext import gettext as _
 
 import os
-import pango
 import subprocess
 import logging
 
@@ -337,7 +337,7 @@ class ExclusiveOptionSetsBox(Gtk.VBox):
         self._top_combo_box.show()
 
         cell_renderer = Gtk.CellRendererText()
-        cell_renderer.props.ellipsize = pango.ELLIPSIZE_MIDDLE
+        cell_renderer.props.ellipsize = Pango.EllipsizeMode.MIDDLE
         cell_renderer.props.ellipsize_set = True
         self._top_combo_box.pack_start(cell_renderer, True)
         self._top_combo_box.add_attribute(cell_renderer, 'text', 0)
