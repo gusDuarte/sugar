@@ -578,9 +578,8 @@ class WirelessNetworkView(EventPulsingIcon):
         elif self._mode == network.NM_802_11_MODE_ADHOC:
             settings.wireless.mode = 'adhoc'
             settings.wireless.band = 'bg'
-            if network.is_sugar_adhoc_network(self._name):
-                settings.ip4_config = IP4Config()
-                settings.ip4_config.method = 'link-local'
+            settings.ip4_config = IP4Config()
+            settings.ip4_config.method = 'link-local'
 
         wireless_security = self._get_security()
         settings.wireless_security = wireless_security
