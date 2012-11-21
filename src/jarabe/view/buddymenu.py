@@ -204,11 +204,18 @@ class BuddyMenu(Palette):
     def __buddy_notify_nick_cb(self, buddy, pspec):
         self.set_primary_text(glib.markup_escape_text(buddy.props.nick))
 
+    def _refresh_menu_items(self):
+        for child_widget in self.menu_box.get_children():
+            self.menu_box.remove(child_widget)
+        self._add_buddy_items()
+
     def _make_friend_cb(self, menuitem):
         friends.get_model().make_friend(self._buddy)
+        self._refresh_menu_items()
 
     def _remove_friend_cb(self, menuitem):
         friends.get_model().remove(self._buddy)
+        self._refresh_menu_items()
 
     def _invite_friend_cb(self, menuitem):
         activity = shell.get_model().get_active_activity()
