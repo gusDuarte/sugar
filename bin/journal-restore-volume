@@ -21,6 +21,8 @@ import shutil
 import logging
 import subprocess
 
+from jarabe.model import processmanagement
+
 from sugar import env
 #from sugar.datastore import datastore
 
@@ -38,7 +40,7 @@ backup_path = os.path.join(volume_path, 'backup', backup_identifier, 'datastore.
 
 if not os.path.exists(backup_path):
     logging.error('Could not find backup file %s', backup_path)
-    exit(1)
+    exit(processmanagement.BACKUP_OF_CURRENT_SYSTEM_NOT_FOUND)
 
 #datastore.freeze()
 subprocess.call(['pkill', '-9', '-f', 'python.*datastore-service'])

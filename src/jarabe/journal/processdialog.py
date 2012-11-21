@@ -48,10 +48,10 @@ class ProcessDialog(Gtk.Window):
         self._process_script = processmanagement.find_and_absolutize(process_script)
         self._process_params = process_params
         self._restart_after = restart_after
-        self._start_message = _('Running')
-        self._failed_message = _('Failed')
-        self._finished_message = _('Finished')
-        self._prerequisite_message = ('Prerequisites were not met')
+        self._start_message = _('RUNNING :: ')
+        self._failed_message = _('FAILED :: ')
+        self._finished_message = _('FINISHED :: ')
+        self._prerequisite_message = _('PREREQUISITES WERE NOT MET :: ')
 
         self.set_border_width(style.LINE_WIDTH)
         width = Gdk.Screen.width()

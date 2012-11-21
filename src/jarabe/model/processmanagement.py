@@ -27,6 +27,14 @@ from gettext import gettext as _
 
 BYTES_TO_READ = 100
 
+BACKUP_OF_CURRENT_SYSTEM_NOT_FOUND = 1
+
+SCRIPT_EXIT_CODES_AND_MESSAGES = {}
+SCRIPT_EXIT_CODES_AND_MESSAGES[BACKUP_OF_CURRENT_SYSTEM_NOT_FOUND] = \
+        _('No journal-backup has been taken for this XO. Please ' \
+          'ensure that you have a valid backup residing on the drive.')
+
+
 class ProcessManagement(GObject.GObject):
 
     __gtype_name__ = 'ProcessManagement'
@@ -57,28 +65,8 @@ class ProcessManagement(GObject.GObject):
                               self._report_process_status,
                               None)
 
-    def _report_process_error(self, stream, result, concat_err=''):
-        data = stream.read_finish(result)
-        concat_err = concat_err + data
-
-        if data != 0:
-                self.emit('process-management-failed', concat_err)
-        else:
-            stream.read_async([],
-                              BYTES_TO_READ,
-                              GObject.PRIORITY_LOW,
-                              None,
-                              self._report_process_error,
-                              concat_err)
-
-    def _notify_error(self, stderr):
-        stdin_stream = Gio.UnixInputStream(fd=stderr, close_fd=True)
-        stdin_stream.read_async([],
-                                BYTES_TO_READ,
-                                GObject.PRIORITY_LOW,
-                                None,
-                                self._report_process_error,
-                                None)
+    def _report_process_error(self, concat_err):
+        self.emit('process-management-failed', concat_err)
 
     def _notify_process_status(self, stdout):
         stdin_stream = Gio.UnixInputStream(fd=stdout, close_fd=True)
@@ -108,7 +96,10 @@ def _handle_process_end(pid, condition, (myself, stderr)):
         os.WEXITSTATUS(condition) == 0:
             myself.emit('process-management-finished')
     else:
-        myself._notify_error(stderr)
+        error_code_returned_from_script = os.WEXITSTATUS(condition)
+        error_message = \
+                SCRIPT_EXIT_CODES_AND_MESSAGES[error_code_returned_from_script]
+        myself._report_process_error(error_message)
 
 def find_and_absolutize(script_name):
     paths = env.os.environ['PATH'].split(':')
