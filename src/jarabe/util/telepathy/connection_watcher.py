@@ -20,7 +20,7 @@
 import logging
 
 import dbus
-import dbus.mainloop.glib
+import dbus.mainloop.GLib
 from gi.repository import GObject
 
 from telepathy.client import Connection
@@ -106,7 +106,7 @@ def get_instance():
 
 
 if __name__ == '__main__':
-    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    dbus.mainloop.GLib.DBusGMainLoop(set_as_default=True)
 
     def connection_added_cb(conn_watcher, conn):
         print 'new connection', conn.service_name

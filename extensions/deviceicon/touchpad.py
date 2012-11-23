@@ -20,7 +20,7 @@ import os
 
 from gi.repository import Gtk
 from gi.repository import GConf
-import glib
+from gi.repository import GLib
 
 import logging
 
@@ -60,7 +60,7 @@ class DeviceView(TrayIcon):
         self.connect('button-release-event', self.__button_release_event_cb)
 
         # Create the palette during initialization.
-        label = glib.markup_escape_text(_('My touchpad'))
+        label = GLib.markup_escape_text(_('My touchpad'))
         self._palette = ResourcePalette(label, self.icon)
         self._palette.set_group_id('frame')
 

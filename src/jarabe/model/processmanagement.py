@@ -19,7 +19,7 @@ from gi.repository import GObject
 from gi.repository import Gio
 
 import os
-import glib
+from gi.repository import GLib
 
 
 from sugar import env
@@ -80,7 +80,7 @@ class ProcessManagement(GObject.GObject):
     def _run_cmd_async(self, cmd):
         if self._running == False:
             try:
-                pid, stdin, stdout, stderr = glib.spawn_async(cmd, flags=glib.SPAWN_DO_NOT_REAP_CHILD, standard_output=True, standard_error=True)
+                pid, stdin, stdout, stderr = GLib.spawn_async(cmd, flags=GLib.SPAWN_DO_NOT_REAP_CHILD, standard_output=True, standard_error=True)
                 GObject.child_watch_add(pid, _handle_process_end, (self, stderr))
             except Exception:
                 self.emit('process-management-failed', _("Error - Call process: ") + str(cmd))
