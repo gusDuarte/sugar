@@ -65,6 +65,11 @@ class AboutComputer(SectionView):
         vbox_identity.set_spacing(style.DEFAULT_SPACING)
 
         self._setup_component_if_applicable(None,
+                                            _('Model:'),
+                                            self._model.get_model_laptop,
+                                            vbox_identity)
+
+        self._setup_component_if_applicable(None,
                                             _('Serial Number:'),
                                             self._model.get_serial_number,
                                             vbox_identity)
@@ -121,11 +126,6 @@ class AboutComputer(SectionView):
         box_software = Gtk.VBox()
         box_software.set_border_width(style.DEFAULT_SPACING * 2)
         box_software.set_spacing(style.DEFAULT_SPACING)
-
-        self._setup_component_if_applicable('/desktop/sugar/extensions/aboutcomputer/display_model',
-                                            _('Model:'),
-                                            self._model.get_model_laptop,
-                                            box_software)
 
         self._setup_component_if_applicable(None,
                                             _('Build:'),

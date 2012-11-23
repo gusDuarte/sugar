@@ -46,6 +46,11 @@ _MODEL = 'openprom/model'
 _XO_1_0_LEASE_PATH = '/security/lease.sig'
 _XO_1_5_LEASE_PATH = '/bootpart/boot/security/lease.sig'
 
+_OFW_MODEL_TREE = '/ofw/mfg-data/MN'
+_PROC_MODEL_TREE = '/proc/device-tree/mfg-data/MN'
+_MG = '/etc/ceibal-version'
+_JUMPC = '/etc/image_version'
+
 _logger = logging.getLogger('ControlPanel - AboutComputer')
 _not_available = _('Not available')
 
@@ -104,6 +109,8 @@ def print_serial_number():
 
 
 def get_build_number():
+    build_no = None
+
     if os.path.isfile('/boot/olpc_build'):
         build_no = _read_file('/boot/olpc_build')
     elif os.path.isfile('/bootpart/olpc_build'):
@@ -133,12 +140,19 @@ def print_build_number():
 
 
 def get_model_laptop():
-    from ceibal import laptop
+    model = None
+    if os.path.exists(_OFW_MODEL_TREE):
+        model = _read_file(_OFW_MODEL_TREE)
+    elif os.path.exists(_PROC_MODEL_TREE):
+        model = _read_file(_PROC_MODEL_TREE)
+    elif os.path.exists(_MG):
+        model = 'Magallanes'
+    elif os.path.exists(_JUMPC):
+        model = 'JumPc'
 
-    model_laptop = laptops.get_model_laptop()
-    if model_laptop is None or not model_laptop:
-        model_laptop = _not_available
-    return model_laptop
+    if model is None or not model:
+        model = _not_available
+    return model
 
 
 def _parse_firmware_number(firmware_no):
