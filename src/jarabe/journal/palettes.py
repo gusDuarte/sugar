@@ -1057,9 +1057,15 @@ class SchoolServerMenu(BaseCopyMenuItem):
                                          model.WEBDAV_MOUNT_POINT + model.SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME):
             return False
 
-        # TRANS: Do not translate the %s.
+        client = GConf.Client.get_default()
+        validity_of_uploaded_file_in_days = \
+                client.get_int('/desktop/sugar/network/validity_of_uploaded_file_in_days')
+
+        # TRANS: Do not translate the %d and %s.
         successful_uploading_message = \
-                _('Your file "%s" was correctly uploaded to the School Server.' % metadata['title'])
+                _('Your file "%s" was correctly uploaded to the School Server.\n'
+                  'The file will be available in the school server '
+                  'for %d days.' % (metadata['title'], validity_of_uploaded_file_in_days))
         get_journal().update_error_alert(self._get_editing_alert_title(),
                                          successful_uploading_message,
                                          self._post_successful_copy,
