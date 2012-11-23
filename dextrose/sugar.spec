@@ -82,6 +82,15 @@ Requires: xdg-user-dirs
 Requires: gvfs
 Requires: libwnck3
 
+
+#Fedora changed cronie provided packages , and that's breacking the build
+#Adding vixie-cron as provied by sugar, while ds-backup is not updated
+# http://pkgs.fedoraproject.org/cgit/cronie.git/commit/?id=868fb5f8e914c10b9803e3804fa8d29b079bee6e 
+Requires: cronie
+
+Provides:  vixie-cron = 4:4.4
+
+
 BuildArch: noarch
 
 %description
