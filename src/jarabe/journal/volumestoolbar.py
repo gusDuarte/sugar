@@ -21,7 +21,7 @@ from gettext import gettext as _
 
 from gi.repository import GObject
 from gi.repository import Gio
-import glib
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GConf
@@ -220,7 +220,7 @@ class VolumesToolbar(Gtk.Toolbar):
         if dir_path is not None:
             button = DirectoryButton(dir_path, icon_name)
             button.props.group = self._volume_buttons[0]
-            label = glib.markup_escape_text(label_text)
+            label = GLib.markup_escape_text(label_text)
             button.set_palette(Palette(label))
             button.connect('toggled', self._button_toggled_cb)
             button.show()
@@ -469,7 +469,7 @@ class JournalButton(BaseButton):
 class JournalButtonPalette(Palette):
 
     def __init__(self, mount):
-        Palette.__init__(self, glib.markup_escape_text(_('Journal')))
+        Palette.__init__(self, GLib.markup_escape_text(_('Journal')))
         vbox = Gtk.VBox()
         self.set_content(vbox)
         vbox.show()

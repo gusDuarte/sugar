@@ -22,7 +22,7 @@ import os
 
 import cairo
 from gi.repository import GObject
-import glib
+from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
 import simplejson
@@ -349,7 +349,7 @@ class ExpandedEntry(Gtk.EventBox):
         vbox.pack_start(halign, False, False, 0)
 
         scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.NEVER,
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC,
                                    Gtk.PolicyType.AUTOMATIC)
         scrolled_window.set_shadow_type(Gtk.ShadowType.ETCHED_IN)
         text_buffer = Gtk.TextBuffer()
@@ -389,7 +389,7 @@ class ExpandedEntry(Gtk.EventBox):
         old_title = self._metadata.get('title', None)
         new_title = self._title.get_text()
         if old_title != new_title:
-            label = glib.markup_escape_text(new_title)
+            label = GLib.markup_escape_text(new_title)
             self._icon.palette.props.primary_text = label
             self._metadata['title'] = new_title
             self._metadata['title_set_by_user'] = '1'
