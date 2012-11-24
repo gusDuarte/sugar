@@ -20,7 +20,7 @@
 import logging
 
 import dbus
-import dbus.mainloop.GLib
+import dbus.mainloop.glib
 from gi.repository import GObject
 
 from telepathy.client import Connection
