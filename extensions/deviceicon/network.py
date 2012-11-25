@@ -601,8 +601,17 @@ class WirelessDeviceView(ToolButton):
         else:
             state = network.NM_DEVICE_STATE_UNKNOWN
 
-        if self._mode == network.NM_802_11_MODE_ADHOC and \
-                network.is_sugar_adhoc_network(self._ssid):
+        if self._mode != network.NM_802_11_MODE_ADHOC and \
+                network.is_sugar_adhoc_network(self._ssid) == False:
+            if state == network.NM_DEVICE_STATE_ACTIVATED:
+                icon_name = '%s-connected' % 'network-wireless'
+            else:
+                icon_name = 'network-wireless'
+
+            icon_name = get_icon_state(icon_name, self._strength)
+            if icon_name:
+                self._icon.props.icon_name = icon_name
+        else:
             channel = network.frequency_to_channel(self._frequency)
             if state == network.NM_DEVICE_STATE_ACTIVATED:
                 self._icon.props.icon_name = 'network-adhoc-%s-connected' \
