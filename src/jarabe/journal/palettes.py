@@ -21,6 +21,7 @@ import os
 
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import Gdk
 from gi.repository import GConf
 from gi.repository import Gio
 from gi.repository import GLib
@@ -935,7 +936,7 @@ class ClipboardMenu(BaseCopyMenuItem):
         if not self._file_path_valid(metadata):
             return False
 
-        clipboard = Gtk.Clipboard()
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         clipboard.set_with_data([('text/uri-list', 0, 0)],
                                 self.__clipboard_get_func_cb,
                                 self.__clipboard_clear_func_cb,
