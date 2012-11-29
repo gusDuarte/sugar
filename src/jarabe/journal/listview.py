@@ -260,6 +260,11 @@ class BaseListView(Gtk.Bin):
 
     def __buddies_set_data_cb(self, column, cell, tree_model,
                               tree_iter, data):
+        buddy = tree_model.do_get_value(tree_iter, cell._model_column_index)
+        if buddy is None:
+            cell.props.visible = False
+            return
+
         progress = tree_model[tree_iter][ListModel.COLUMN_PROGRESS]
         cell.props.visible = progress >= 100
 
@@ -914,8 +919,13 @@ class CellRendererBuddy(CellRendererIcon):
         tree_model = self.tree_view.get_model()
         row = tree_model[self.props.palette_invoker.path]
 
-        if row[self._model_column_index] is not None:
-            nick, xo_color = row[self._model_column_index]
+        # FIXME workaround for pygobject bug, see
+        # https://bugzilla.gnome.org/show_bug.cgi?id=689277
+
+        # if row[self._model_column_index] is not None:
+        #     nick, xo_color = row[self._model_column_index]
+        if row.model.do_get_value(row.iter, self._model_column_index) is not None:
+            nick, xo_color = row.model.do_get_value(row.iter, self._model_column_index)
             return BuddyPalette((nick, xo_color.to_string()))
         else:
             return None
