@@ -51,6 +51,10 @@ from jarabe.journal import misc
 
 _FILTERED_ALPHA = 0.33
 
+DO_NOT_AUTOCONNECT_TO_ADHOC_NETWORKS_GCONF_KEY = '/desktop/sugar/network/do_not_autoconnect_to_adhoc_networks'
+client = GConf.Client.get_default()
+DO_NOT_AUTOCONNECT_TO_ADHOC_NETWORKS_GCONF_VALUE = client.get_bool(DO_NOT_AUTOCONNECT_TO_ADHOC_NETWORKS_GCONF_KEY)
+
 
 class _ActivityIcon(CanvasIcon):
     def __init__(self, model, file_name, xo_color,
@@ -534,7 +538,9 @@ class MeshBox(ViewContainer):
         self._add_adhoc_network_icon(1)
         self._add_adhoc_network_icon(6)
         self._add_adhoc_network_icon(11)
-        self._adhoc_manager.autoconnect()
+
+        if not DO_NOT_AUTOCONNECT_TO_ADHOC_NETWORKS_GCONF_VALUE:
+            self._adhoc_manager.autoconnect()
 
     def remove_adhoc_networks(self):
         for icon in self._adhoc_networks:
