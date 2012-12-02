@@ -318,9 +318,12 @@ def export_proxy_settings():
 
     ignore_hosts = []
     ignore_hosts_list = client.get('/system/http_proxy/ignore_hosts')
-    for entry in ignore_hosts_list.get_list():
-        ignore_hosts.append(entry.get_string())
-    os.environ['no_proxy'] = ','.join(ignore_hosts)
+
+    # Process, only if the "ignore_hosts_list" is non-empty.
+    if ignore_hosts_list:
+        for entry in ignore_hosts_list.get_list():
+            ignore_hosts.append(entry.get_string())
+        os.environ['no_proxy'] = ','.join(ignore_hosts)
 
 def start_home():
     from jarabe.desktop import homewindow
