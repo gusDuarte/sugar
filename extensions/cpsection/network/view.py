@@ -826,7 +826,7 @@ class Network(SectionView):
         # settings, so we need to restart for the changes to take
         # _full_ effect.
         for setting in self._undo_objects:
-            if setting.changed:
+            if setting.changed():
                 return True
 
         return False
