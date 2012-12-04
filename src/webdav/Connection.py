@@ -30,6 +30,7 @@ except ImportError: # for Python 2.4 compatibility
     hashlib = md5
 import mimetypes
 import os       # file handling
+import logging
 import urllib
 import types
 import socket   # to "catch" socket.error
@@ -71,7 +72,7 @@ class Connection(DAV):
     def __init__(self, *args, **kwArgs):
         DAV.__init__(self, *args, **kwArgs)
         self.__authorizationInfo = None
-        self.logger = getDefaultLogger()
+        self.logger = logging
         self.isConnectedToCatacomb = True
         self.serverTypeChecked = False
         self._lock = RLock()
