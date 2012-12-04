@@ -81,8 +81,8 @@ class BuddyMenu(Palette):
 
         if jarabe.journal.model.is_peer_to_peer_sharing_available():
             remote_share_menu_item = None
-            from jarabe.journal import webdavmanager
-            if not webdavmanager.is_remote_webdav_loaded(self._buddy.props.ip_address):
+            if not jarabe.journal.model.mount_point_button_exists(
+                    jarabe.journal.model.WEBDAV_MOUNT_POINT + self._buddy.props.ip_address):
                 remote_share_menu_item = PaletteMenuItem(_('Access Share'), 'list-add')
                 remote_share_menu_item.connect('activate', self._access_share_cb)
             else:
@@ -131,6 +131,7 @@ class BuddyMenu(Palette):
         from jarabe.journal.journalactivity import get_journal
         singleton_volumes_toolbar = get_journal().get_volumes_toolbar()
         singleton_volumes_toolbar._remove_remote_share_button(self._buddy.props.ip_address)
+        self._refresh_menu_items()
 
     def _access_share_cb(self, menuitem):
         from jarabe.journal.journalactivity import get_journal
@@ -157,6 +158,8 @@ class BuddyMenu(Palette):
 
         # 3. Switch to the newly mounted-view.
         volumes_toolbar._button_toggled_cb(button, force_toggle=True)
+
+        self._refresh_menu_items()
 
     def _quit(self, action):
         home_window = jarabe.desktop.homewindow.get_instance()
