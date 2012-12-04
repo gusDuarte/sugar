@@ -309,4 +309,5 @@ def is_remote_webdav_loaded(ip_address_or_dns_name):
 
 
 def unmount_share_from_backend(ip_address_or_dns_name):
-    del webdav_manager[ip_address_or_dns_name]
+    if ip_address_or_dns_name in webdav_manager.keys():
+        del webdav_manager[ip_address_or_dns_name]

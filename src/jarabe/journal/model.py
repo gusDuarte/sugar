@@ -114,6 +114,11 @@ def is_mount_point_for_peer_share(mount_point):
     from jarabe.journal.volumestoolbar import SHARE_TYPE_PEER
     return _check_remote_sharing_mount_point(mount_point, SHARE_TYPE_PEER)
 
+def mount_point_button_exists(mount_point):
+    from jarabe.journal.journalactivity import get_journal
+
+    mount_point_button = get_journal().get_volumes_toolbar()._get_button_for_mount_point(mount_point)
+    return mount_point_button is not None
 
 def is_current_mount_point_for_remote_share(view_type):
     from jarabe.journal.journalactivity import get_journal, get_mount_point
