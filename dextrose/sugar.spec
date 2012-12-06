@@ -17,9 +17,6 @@
 
 %define git_get_source pushd %{git_repodir}/%{git_repo} ;\
 	/usr/bin/git pull ;\
-#	/usr/bin/git log > CHANGES ;\
-#	/usr/bin/git add CHANGES ;\
-#	/usr/bin/git commit -m "Updated CHANGES file" ;\
         /usr/bin/git archive --format=tar --prefix=%{name}-%{version}/ %{git_head} | \
                 bzip2 -c > %{_sourcedir}/%{name}-%{version}.tar.bz2 ;\
         popd
@@ -186,6 +183,14 @@ Requires: %{name} = 1:%{version}-%{release}
 %description cp-power
 This is the Sugar Power settings control panel
 
+%package cp-accessibility
+Summary: Sugar Accessibility control panel
+Group: User Interface/Desktops
+Requires: %{name} = 1:%{version}-%{release}
+
+%description cp-accessibility
+This is the Sugar Accessibility settings control panel
+
 #%package cp-updater
 #Summary: Sugar Activity Update control panel
 #Group: User Interface/Desktops
@@ -303,10 +308,16 @@ fi
 %files cp-power
 %{_datadir}/sugar/extensions/cpsection/power
 
+%files cp-accessibility
+%{_datadir}/sugar/extensions/cpsection/accessibility
+
 #%files cp-updater
 #%{_datadir}/sugar/extensions/cpsection/updater
 
 %changelog
+* Thu Dec  6 09:51:00 EST 2012	Santiago Rodriguez <scollazo@activitycentral.com> 0.98
+- Split out accessibility control panel to sub package
+
 * Thu Oct 25 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.9-1
 - 0.97.9 devel release
 
