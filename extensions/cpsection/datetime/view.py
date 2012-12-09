@@ -179,10 +179,7 @@ class TimeZone(SectionView):
         self._treeview.set_search_entry(self._entry)
         self._treeview.set_search_equal_func(self._search, None)
         self._treeview.set_search_column(0)
-        self._timezone_box = Gtk.VBox()
-        self._scrolled_window.add_with_viewport(self._timezone_box)
-        self._timezone_box.show_all()
-        self._timezone_box.add(self._treeview)
+        self._scrolled_window.add(self._treeview)
         self._treeview.show()
 
         self._timezone_column = Gtk.TreeViewColumn(_('Timezone'))
@@ -200,7 +197,6 @@ class TimeZone(SectionView):
         self.pack_start(self._container, True, True, 0)
 
         self._zone_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
-        self._timezone_box.pack_start(self._zone_alert_box, False, False, 0)
         self._zone_alert = InlineAlert()
         self._zone_alert_box.pack_start(self._zone_alert, True, True, 0)
         if 'zone' in self.restart_alerts:
