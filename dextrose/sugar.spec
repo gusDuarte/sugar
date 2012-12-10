@@ -315,7 +315,7 @@ fi
 #%{_datadir}/sugar/extensions/cpsection/updater
 
 %changelog
-* Thu Dec  6 09:51:00 EST 2012	Santiago Rodriguez <scollazo@activitycentral.com> 0.98
+* Thu Dec  6  2012 Santiago Rodriguez <scollazo@activitycentral.com> 0.98
 - Split out accessibility control panel to sub package
 
 * Thu Oct 25 2012 Peter Robinson <pbrobinson@fedoraproject.org> 0.97.9-1
