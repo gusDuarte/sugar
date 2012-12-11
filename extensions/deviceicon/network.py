@@ -884,12 +884,6 @@ class GsmDeviceView(TrayIcon):
             gsm_state = _GSM_STATE_CONNECTED
             connection = network.find_gsm_connection()
             if connection is not None:
-                # Introspect the settings's keys once; else sometimes
-                # the key 'timestamp' gets missed.
-                connection.get_settings('connection').keys()
-
-                self._connection_timestamp = time.time() - \
-                        connection.get_settings('connection')['timestamp']
                 self._connection_time_handler = GObject.timeout_add_seconds( \
                         1, self.__connection_timecount_cb)
                 self._palette.update_connection_time()
