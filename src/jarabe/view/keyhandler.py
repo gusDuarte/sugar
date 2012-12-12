@@ -74,6 +74,7 @@ class KeyHandler(object):
         self._key_pressed = None
         self._keycode_pressed = 0
         self._keystate_pressed = 0
+        self._key_handlers_active = True
 
         self._key_grabber = SugarExt.KeyGrabber()
         self._key_grabber.connect('key-pressed',
@@ -163,6 +164,9 @@ class KeyHandler(object):
         journalactivity.get_journal().show_journal()
 
     def _key_pressed_cb(self, grabber, keycode, state, event_time):
+        if not self._key_handlers_active:
+            return
+
         key = grabber.get_key(keycode, state)
         logging.debug('_key_pressed_cb: %i %i %s', keycode, state, key)
         if key is not None:
@@ -197,6 +201,9 @@ class KeyHandler(object):
         return False
 
     def _key_released_cb(self, grabber, keycode, state, event_time):
+        if not self._key_handlers_active:
+            return
+
         logging.debug('_key_released_cb: %i %i', keycode, state)
         if self._tabbing_handler.is_tabbing():
             # We stop tabbing and switch to the new window as soon as the
@@ -215,3 +222,12 @@ def setup(frame):
         del _instance
 
     _instance = KeyHandler(frame)
+
+
+def set_key_handlers_active(active):
+    """
+    The setup(frame) is already run at sugar-session startup.
+    So, we can safely assume the "_instance" is fully-grown up.
+    """
+
+    _instance._key_handlers_active = active

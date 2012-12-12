@@ -365,6 +365,11 @@ class ControlPanel(Gtk.Window):
         self._update(query)
 
     def __stop_clicked_cb(self, widget):
+        # Now, since we are exiting the "modal" "My Settings",
+        # re-enable the Function-key-handlers.
+        from jarabe.view.keyhandler import set_key_handlers_active
+        set_key_handlers_active(True)
+
         self.destroy()
 
     def __close_request_cb(self, widget, event=None):

@@ -180,6 +180,11 @@ class BuddyMenu(Palette):
         frame = jarabe.frame.get_view()
         frame.hide()
 
+        # Now, since we are entering the "modal" "My Settings",
+        # disable the Function-key-handlers.
+        from jarabe.view.keyhandler import set_key_handlers_active
+        set_key_handlers_active(False)
+
         # show the control panel
         panel = ControlPanel()
         panel.show()
