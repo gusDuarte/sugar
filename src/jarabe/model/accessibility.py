@@ -106,8 +106,10 @@ class Screen:
         client = GConf.Client.get_default()
         if (activar):
             client.set_string('/desktop/sugar/font/default_face', self.CAPITAL_LETTERS_FONT_FACE)
+            client.set_float('/desktop/sugar/font/default_size', self.CONTRAST_FONT_SIZE)
         else:
             client.set_string('/desktop/sugar/font/default_face', self.DEFAULT_FONT_FACE)
+            client.set_float('/desktop/sugar/font/default_size', self.DEFAULT_FONT_SIZE)
 
 
 class Mouse:
