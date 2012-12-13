@@ -327,10 +327,10 @@ fi
 %files cp-accessibility
 %{_datadir}/sugar/extensions/cpsection/accessibility
 
-%files cp-accessibility
+%files cp-aboutme
 %{_datadir}/sugar/extensions/cpsection/aboutme
 
-%files cp-accessibility
+%files cp-aboutcomputer
 %{_datadir}/sugar/extensions/cpsection/aboutcomputer
 #%files cp-updater
 #%{_datadir}/sugar/extensions/cpsection/updater
