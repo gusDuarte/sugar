@@ -117,8 +117,9 @@ multiple instances of sugar.
 Summary: All control panel modules 
 Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
-Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
-Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
+Requires: 1:%{name}-cp-datetime 1:%{name}-cp-frame 1:%{name}-cp-language
+Requires: 1:%{name}-cp-modemconfiguration 1:%{name}-cp-network 1:%{name}-cp-power
+Requires: 1:%{name}-cp-accessibility 1:%{name}-cp-aboutme 1:%{name}-cp-aboutcomputer
 #Disabled in dx4
 # %{name}-cp-updater
 # Currently broken
