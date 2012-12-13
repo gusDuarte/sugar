@@ -16,7 +16,7 @@
 %define git_gitdir %{git_repodir}/%{git_repo}/.git
 
 %define git_get_source pushd %{git_repodir}/%{git_repo} ;\
-	/usr/bin/git pull ;\
+#	/usr/bin/git pull ;\
         /usr/bin/git archive --format=tar --prefix=%{name}-%{version}/ %{git_head} | \
                 bzip2 -c > %{_sourcedir}/%{name}-%{version}.tar.bz2 ;\
         popd
@@ -191,6 +191,22 @@ Requires: %{name} = 1:%{version}-%{release}
 %description cp-accessibility
 This is the Sugar Accessibility settings control panel
 
+%package cp-aboutme
+Summary: Sugar About me control panel
+Group: User Interface/Desktops
+Requires: %{name} = 1:%{version}-%{release}
+
+%description cp-aboutme
+This is the Sugar About me settings control panel
+
+%package cp-aboutcomputer
+Summary: Sugar About computer control panel
+Group: User Interface/Desktops
+Requires: %{name} = 1:%{version}-%{release}
+
+%description cp-aboutcomputer
+This is the Sugar About computer settings control panel
+
 #%package cp-updater
 #Summary: Sugar Activity Update control panel
 #Group: User Interface/Desktops
@@ -274,9 +290,9 @@ fi
 
 %{_bindir}/*
 %exclude %{_bindir}/sugar-emulator
-%dir %{_datadir}/sugar/extensions/cpsection/
-%exclude %{_datadir}/sugar/extensions/cpsection/[b-z]*
-%{_datadir}/sugar/extensions/cpsection/about*
+#%dir %{_datadir}/sugar/extensions/cpsection/
+%exclude %{_datadir}/sugar/extensions/cpsection/
+#%exclude %{_datadir}/sugar/extensions/cpsection/about*
 
 %{_datadir}/mime/packages/sugar.xml
 
@@ -311,6 +327,11 @@ fi
 %files cp-accessibility
 %{_datadir}/sugar/extensions/cpsection/accessibility
 
+%files cp-accessibility
+%{_datadir}/sugar/extensions/cpsection/aboutme
+
+%files cp-accessibility
+%{_datadir}/sugar/extensions/cpsection/aboutcomputer
 #%files cp-updater
 #%{_datadir}/sugar/extensions/cpsection/updater
 
