@@ -85,16 +85,16 @@ class Screen:
 
     def get_contrast(self):
         client = GConf.Client.get_default()
-        value = client.get_string("/desktop/sugar/interface/Gtk_theme")
+        value = client.get_string("/desktop/sugar/interface/gtk_theme")
         return value==self.CONTRAST_THEME
 
     def set_contrast(self, activar):
         client = GConf.Client.get_default()
         if (activar):
-            client.set_string("/desktop/sugar/interface/Gtk_theme", self.CONTRAST_THEME)
+            client.set_string("/desktop/sugar/interface/gtk_theme", self.CONTRAST_THEME)
             client.set_float('/desktop/sugar/font/default_size', self.CONTRAST_FONT_SIZE)
         else:
-            client.set_string("/desktop/sugar/interface/Gtk_theme", self.DEFAULT_THEME)
+            client.set_string("/desktop/sugar/interface/gtk_theme", self.DEFAULT_THEME)
             client.set_float('/desktop/sugar/font/default_size', self.DEFAULT_FONT_SIZE)
 
     def get_capital_letters(self):
@@ -106,8 +106,10 @@ class Screen:
         client = GConf.Client.get_default()
         if (activar):
             client.set_string('/desktop/sugar/font/default_face', self.CAPITAL_LETTERS_FONT_FACE)
+            client.set_float('/desktop/sugar/font/default_size', self.CONTRAST_FONT_SIZE)
         else:
             client.set_string('/desktop/sugar/font/default_face', self.DEFAULT_FONT_FACE)
+            client.set_float('/desktop/sugar/font/default_size', self.DEFAULT_FONT_SIZE)
 
 
 class Mouse:
