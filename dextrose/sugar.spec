@@ -117,9 +117,9 @@ multiple instances of sugar.
 Summary: All control panel modules 
 Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
-Requires: 1:%{name}-cp-datetime 1:%{name}-cp-frame 1:%{name}-cp-language
-Requires: 1:%{name}-cp-modemconfiguration 1:%{name}-cp-network 1:%{name}-cp-power
-Requires: 1:%{name}-cp-accessibility 1:%{name}-cp-aboutme 1:%{name}-cp-aboutcomputer
+Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
+Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
+Requires: %{name}-cp-accessibility %{name}-cp-aboutme %{name}-cp-aboutcomputer
 #Disabled in dx4
 # %{name}-cp-updater
 # Currently broken
@@ -201,12 +201,13 @@ Requires: %{name} = 1:%{version}-%{release}
 This is the Sugar About me settings control panel
 
 %package cp-aboutcomputer
-Summary: Sugar About computer control panel
+Summary: Sugar About Computer control panel
 Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-aboutcomputer
-This is the Sugar About computer settings control panel
+This is the Sugar About Computer settings control panel
+
 
 #%package cp-updater
 #Summary: Sugar Activity Update control panel
@@ -291,9 +292,9 @@ fi
 
 %{_bindir}/*
 %exclude %{_bindir}/sugar-emulator
-#%dir %{_datadir}/sugar/extensions/cpsection/
-%exclude %{_datadir}/sugar/extensions/cpsection/
-#%exclude %{_datadir}/sugar/extensions/cpsection/about*
+%dir %{_datadir}/sugar/extensions/cpsection/
+%exclude %{_datadir}/sugar/extensions/cpsection/[b-z]*
+#%{_datadir}/sugar/extensions/cpsection/about*
 
 %{_datadir}/mime/packages/sugar.xml
 
@@ -337,6 +338,9 @@ fi
 #%{_datadir}/sugar/extensions/cpsection/updater
 
 %changelog
+* Sun Dec  16 2012 Santiago Rodriguez <scollazo@activitycentral.com> 0.98
+- Split out aboutme and aboutcomputer panels to sub packages
+
 * Thu Dec  6  2012 Santiago Rodriguez <scollazo@activitycentral.com> 0.98
 - Split out accessibility control panel to sub package
 
