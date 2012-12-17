@@ -1043,7 +1043,7 @@ class Teclado:
 
 
     def combo_tiempos_botones(self):
-        cb = Gtk.combo_box_new_text()
+        cb = Gtk.ComboBoxText()
         cb.append_text("RÁPIDO")
         cb.append_text("MEDIO")
         cb.append_text("LENTO")
@@ -1066,7 +1066,7 @@ class Teclado:
 
 
     def combo_size_botones(self):
-        cb = Gtk.combo_box_new_text()
+        cb = Gtk.ComboBoxText()
         cb.append_text("CHICO")
         cb.append_text("MEDIANO")
         cb.append_text("GRANDE")
@@ -1087,7 +1087,7 @@ class Teclado:
         return cb
 
     def combo_tipo_teclados(self):
-        cb = Gtk.combo_box_new_text()
+        cb = Gtk.ComboBoxText()
         cb.append_text("COMPLETO")
         cb.append_text("NUMÉRICO")
         cb.append_text("LETRAS")
