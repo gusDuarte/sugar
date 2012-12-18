@@ -47,6 +47,7 @@ class Separator(Gtk.VBox):
 class BuddyList(Gtk.Alignment):
     def __init__(self, buddies):
         Gtk.Alignment.__init__(self)
+        self.set(0, 0, 0, 0)
 
         hbox = Gtk.HBox()
         for buddy in buddies:
@@ -105,7 +106,9 @@ class ExpandedEntry(Gtk.EventBox):
         header.pack_start(self._date, False, False, style.DEFAULT_SPACING)
 
         if Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL:
-            header.reverse()
+            # Reverse header children.
+            for child in header.get_children():
+                header.reorder_child(child, 0)
 
         # First body column
         self._preview_box = Gtk.Frame()
