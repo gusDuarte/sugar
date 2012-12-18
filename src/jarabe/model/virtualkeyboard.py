@@ -85,7 +85,7 @@ class Teclado:
     def is_shifted(self, ch) :
         if ch.isupper() :
             return True
-        if "/=~!@#$%^&()_*{}|:;\">?Ñ".find(ch) >= 0 :
+        if "/+~!@#$%^&()_*{}|:;\">?Ñ".find(ch) >= 0 :
             return True
         return False
 
