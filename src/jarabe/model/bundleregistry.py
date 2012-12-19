@@ -431,6 +431,12 @@ class BundleRegistry(GObject.GObject):
         key = self._get_favorite_key(bundle_id, version)
         return key in self._favorite_bundles
 
+    def is_bundle_favorite_by_id(self, bundle_id):
+        for key in self._favorite_bundles:
+            if key.startswith(bundle_id + ' '):
+                return True
+        return False
+
     def is_activity_protected(self, bundle_id):
         return bundle_id in self._protected_activities
 
