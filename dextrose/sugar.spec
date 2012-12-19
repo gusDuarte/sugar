@@ -119,7 +119,7 @@ Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
 Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
 Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
-RequireS: %{name}-cp-accessibility 
+Requires: %{name}-cp-accessibility 
 #Disabled in dx4
 # %{name}-cp-updater
 # Currently broken
@@ -188,6 +188,10 @@ This is the Sugar Power settings control panel
 Summary: Sugar Accessibility control panel
 Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
+Requires: CapitalFont
+Requires: magnifier-Ceibal
+Requires: FlatbedCursors
+Requires: ax
 
 %description cp-accessibility
 This is the Sugar Accessibility settings control panel
