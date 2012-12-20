@@ -34,6 +34,7 @@ from jarabe.model.session import get_session_manager
 from jarabe.controlpanel.gui import ControlPanel
 import jarabe.desktop.homewindow
 
+control_panel = None
 
 class BuddyMenu(Palette):
     def __init__(self, buddy):
@@ -189,6 +190,9 @@ class BuddyMenu(Palette):
         panel = ControlPanel()
         panel.show()
 
+        global control_panel
+        control_panel = panel
+
     def _update_invite_menu(self, activity):
         buddy_activity = self._buddy.props.current_activity
         if buddy_activity is not None:
@@ -248,3 +252,6 @@ class BuddyMenu(Palette):
                     raise
         else:
             logging.error('Invite failed, activity service not ')
+
+def get_control_panel():
+    return control_panel
