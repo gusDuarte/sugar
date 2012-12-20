@@ -164,9 +164,6 @@ class KeyHandler(object):
         journalactivity.get_journal().show_journal()
 
     def _key_pressed_cb(self, grabber, keycode, state, event_time):
-        if not self._key_handlers_active:
-            return
-
         key = grabber.get_key(keycode, state)
         logging.debug('_key_pressed_cb: %i %i %s', keycode, state, key)
         if key is not None:
@@ -185,6 +182,9 @@ class KeyHandler(object):
             if hasattr(action, 'handle_key_press'):
                 action.handle_key_press(key)
             elif isinstance(action, basestring):
+                if not self._key_handlers_active:
+                    return
+
                 method = getattr(self, 'handle_' + action)
                 method(event_time)
             else:
