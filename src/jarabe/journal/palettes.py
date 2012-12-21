@@ -937,7 +937,7 @@ class ClipboardMenu(BaseCopyMenuItem):
             return False
 
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        clipboard.set_with_data([('text/uri-list', 0, 0)],
+        clipboard.set_with_data([Gtk.TargetEntry.new('text/uri-list', 0, 0)],
                                 self.__clipboard_get_func_cb,
                                 self.__clipboard_clear_func_cb,
                                 metadata)
