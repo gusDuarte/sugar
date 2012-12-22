@@ -1277,17 +1277,17 @@ class Teclado:
         box_hablar = Gtk.VBox(False, 10)
         box_hablar.set_border_width(20)
 
-        button = Gtk.RadioButton(None, "HABLAR AL BARRER BOTONES.")
+        button = Gtk.RadioButton.new_with_label(None, "HABLAR AL BARRER BOTONES.")
         button.connect("toggled", self.set_opciones_hablar, "BARRER")
         if (self.get_opciones_hablar()=="BARRER"):
             button.set_active(True)
         box_hablar.pack_start(button, True, True, 0)
-        button = Gtk.RadioButton(button, "HABLAR AL ESCRIBIR.")
+        button = Gtk.RadioButton.new_with_label_from_widget(button, "HABLAR AL ESCRIBIR.")
         button.connect("toggled", self.set_opciones_hablar, "ESCRIBIR")
         if (self.get_opciones_hablar()=="ESCRIBIR"):
             button.set_active(True)
         box_hablar.pack_start(button, True, True, 0)
-        button = Gtk.RadioButton(button, "NO HABLAR.")
+        button = Gtk.RadioButton.new_with_label_from_widget(button, "NO HABLAR.")
         button.connect("toggled", self.set_opciones_hablar, "NUNCA")
         if (self.get_opciones_hablar()=="NUNCA"):
             button.set_active(True)
