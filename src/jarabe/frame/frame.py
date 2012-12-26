@@ -302,7 +302,7 @@ class Frame(object):
         window.destroy()
         del self._notif_by_icon[icon]
 
-    def add_message(self, body, summary='', icon_name=_DEFAULT_ICON,
+    def add_message(self, body, summary='', link=None, link_text=None, icon_name=_DEFAULT_ICON,
                     xo_color=None, corner=Gtk.CornerType.TOP_LEFT,
                     duration=_NOTIFICATION_DURATION):
 
@@ -326,7 +326,7 @@ class Frame(object):
 
         button.start_pulsing()
 
-        palette.push_message(body, summary, icon_name, xo_color)
+        palette.push_message(body, summary, link, link_text, icon_name, xo_color)
         if not self.visible:
             self._launch_notification_icon(_DEFAULT_ICON, xo_color, corner, duration)
 

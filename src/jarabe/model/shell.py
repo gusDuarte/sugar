@@ -170,6 +170,11 @@ class Activity(GObject.GObject):
         """
         return self._activity_id
 
+    def get_bundle_id(self):
+        if self._activity_info:
+            return self._activity_info.get_bundle_id()
+        return None
+
     def get_xid(self):
         """Retrieve the X-windows ID of our root window"""
         if self._windows:
@@ -588,6 +593,12 @@ class ShellModel(GObject.GObject):
     def get_activity_by_id(self, activity_id):
         for home_activity in self._activities:
             if home_activity.get_activity_id() == activity_id:
+                return home_activity
+        return None
+
+    def get_activity_by_bundle_id(self, bundle_id):
+        for home_activity in self._activities:
+            if home_activity.get_bundle_id() == bundle_id:
                 return home_activity
         return None
 

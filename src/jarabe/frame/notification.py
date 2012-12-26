@@ -20,6 +20,9 @@ from gi.repository import Gdk
 
 import re
 import os
+import dbus
+import logging
+import subprocess
 
 from gettext import gettext as _
 
@@ -30,6 +33,7 @@ from sugar3.graphics.toolbutton import ToolButton
 from sugar3.graphics.palettemenu import PaletteMenuItem
 from sugar3 import profile
 
+from jarabe.journal import  misc
 from jarabe.frame.frameinvoker import FrameWidgetInvoker
 
 from jarabe.view.pulsingicon import PulsingIcon
@@ -120,7 +124,7 @@ class _MessagesHistoryBox(Gtk.VBox):
         ''' % (link_color, visited_link_color)
         Gtk.rc_parse_string(links_style)
 
-    def push_message(self, body, summary, icon_name, xo_color):
+    def push_message(self, body, summary, link, link_text, icon_name, xo_color):
         entry = Gtk.HBox()
 
         icon_widget = _HistoryIconWidget(icon_name, xo_color)
@@ -140,6 +144,19 @@ class _MessagesHistoryBox(Gtk.VBox):
             body_widget = _HistoryBodyWidget(body)
             message.pack_start(body_widget, True, True, 0)
 
+        if link:
+            if link_text:
+                widget_link_text = link_text
+            else:
+                widget_link_text = link
+
+            link_widget = Gtk.LinkButton(link,
+                    '<span color="white">%s</span>' % widget_link_text)
+            link_widget.get_child().set_use_markup(True)
+            link_widget.connect('clicked', self.__connect_to_uri, link)
+
+            message.pack_start(link_widget, True, True, 0)
+
         entry.show_all()
         self.pack_start(entry, True, True, 0)
         self.reorder_child(entry, 0)
@@ -149,6 +166,46 @@ class _MessagesHistoryBox(Gtk.VBox):
         if (self_height > Gdk.Screen.height() / 4 * 3) and \
                 (len(self.get_children()) > 1):
             self.remove(self.get_children()[-1])
+
+    def __connect_to_uri(self, link_widget, link):
+        from jarabe.model.bundleregistry import get_registry
+        registry = get_registry()
+        from jarabe.model.shell import get_model
+        shell_model = get_model()
+
+        browse_activity_id = 'org.laptop.WebActivity'
+        browse_acivity_bundle = \
+                registry.get_bundle(browse_activity_id)
+
+        current_activity_running = \
+                shell_model.get_activity_by_bundle_id(browse_activity_id)
+
+        # If there is no instance of "Browse" running, launch a new
+        # instance, and load the URL.
+        #
+        # Else, switch to the window of the
+        # already-running-"Browse"-instance, and load the URL.
+        if current_activity_running is None:
+            misc.launch(browse_acivity_bundle, None, None, link)
+        else:
+            current_activity_running.get_window().activate(Gtk.get_current_event_time())
+
+            # Now, send the signal to "Browse" activity, which is
+            # running in a different process.
+            environment = os.environ.copy()
+            try:
+                process = subprocess.Popen(['dbus-send '
+                                            '--session '
+                                            '/org/laptop/WebActivity '
+                                            'org.laptop.WebActivity.Load_URI '
+                                            'string:\'%s\'' % link],
+                                           stdout=subprocess.PIPE,
+                                           env=environment,
+                                           shell=True)
+                process.wait()
+            except Exception, e:
+                logging.exception(e)
+
 
 class HistoryPalette(Palette):
     __gtype_name__ = 'SugarHistoryPalette'
@@ -190,8 +247,8 @@ class HistoryPalette(Palette):
     def __notice_messages_cb(self, palette):
         self.emit('notice-messages')
 
-    def push_message(self, body, summary, icon_name, xo_color):
-        self._messages_box.push_message(body, summary, icon_name, xo_color)
+    def push_message(self, body, summary, link, link_text, icon_name, xo_color):
+        self._messages_box.push_message(body, summary, link, link_text, icon_name, xo_color)
 
 
 class NotificationButton(ToolButton):
