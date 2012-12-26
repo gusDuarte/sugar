@@ -279,9 +279,28 @@ def set_fonts():
 def set_theme():
     settings = Gtk.Settings.get_default()
     sugar_theme = 'sugar-72'
+
+    """
+    Fetch the theme from Gconf.
+    """
+    client = GConf.Client.get_default()
+    theme = client.get_string('/desktop/sugar/interface/gtk_theme')
+
+    """
+    See if 'SUGAR_SCALING' is set.
+    """
+    scaling_set = False
     if 'SUGAR_SCALING' in os.environ:
         if os.environ['SUGAR_SCALING'] == '100':
-            sugar_theme = 'sugar-100'
+            scaling_set = True
+
+    if (theme == 'sugar-contrast') and (scaling_set):
+	sugar_theme = 'sugar-100-contrast'
+    elif (theme == 'sugar-contrast') and (not scaling_set):
+	sugar_theme = 'sugar-72-contrast'
+    elif scaling_set:
+	sugar_theme = 'sugar-100'
+
     settings.set_property('gtk-theme-name', sugar_theme)
     settings.set_property('gtk-icon-theme-name', 'sugar')
 
