@@ -36,6 +36,7 @@ import jarabe.model.virtualkeyboard
 from sugar3.graphics.icon import Icon, get_icon_file_name
 
 GObject.threads_init()
+Gdk.threads_init()
 
 velocidades = {'lenta': 4500, 'media': 3000, 'rapida':1500}
 hablar = {'lenta': "170", 'media': "180", 'rapida':"275"}
@@ -84,8 +85,6 @@ class Teclado:
         logging.debug('close virtual keyboard')
         self.dialog.destroy()
         try:
-            self.hilo_type._Thread__stop()
-            self.hilo_size._Thread__stop()
             self.hilo_bloquear._Thread__stop()
             self.hilo_hablar._Thread__stop()
         except:
@@ -1119,12 +1118,8 @@ class Teclado:
 
         self.set_tipo_teclado(tipo)
 
-        self.hilo_type = threading.Thread(target = self.reset)
-        self.hilo_type.start()
-        self.hilo_type.quit = True
-
-        self.dialog_opciones.destroy()
-        self.close()
+        self.dialog_opciones.hide()
+        self.reset()
 
 
     def on_changed_cbo_size_btn(self, widget):
@@ -1139,12 +1134,8 @@ class Teclado:
 
         self.set_size_botones(size)
 
-        self.hilo_size = threading.Thread(target = self.reset)
-        self.hilo_size.start()
-        self.hilo_size.quit = True
-
-        self.dialog_opciones.destroy()
-        self.close()
+        self.dialog_opciones.hide()
+        self.reset()
 
 
     def on_changed_cbo_time_btn(self, widget):
@@ -1806,11 +1797,7 @@ class Teclado:
 
         self.set_tipo_teclado(tipo)
 
-        self.hilo_type = threading.Thread(target = self.reset)
-        self.hilo_type.start()
-        self.hilo_type.quit = True
-
-        self.close()
+        self.reset()
 
 class Boton(Gtk.Button):
     font_desc = ''
