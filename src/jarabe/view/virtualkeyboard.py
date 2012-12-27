@@ -1786,7 +1786,7 @@ class Teclado:
             if size == "MEDIANO":
                 return "sans bold 13"
             if size == "GRANDE":
-                return "sans bold 26"
+                return "sans bold 17"
 
     def cambiar_tipo(self, w):
 
