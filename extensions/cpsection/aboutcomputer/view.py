@@ -24,11 +24,13 @@ from gi.repository import Gdk
 from sugar3.graphics import style
 
 from jarabe.controlpanel.sectionview import SectionView
+from jarabe.view.buddymenu import get_control_panel
 
 
 class AboutComputer(SectionView):
     def __init__(self, model, alerts=None):
         SectionView.__init__(self)
+        get_control_panel()._section_toolbar.cancel_button.hide()
 
         self._model = model
 
@@ -220,3 +222,6 @@ class AboutComputer(SectionView):
             expander.add(view_license)
         else:
             expander.get_child().destroy()
+
+    def perform_accept_actions(self):
+        get_control_panel()._section_toolbar.cancel_button.show()
