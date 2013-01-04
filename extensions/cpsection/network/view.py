@@ -55,7 +55,6 @@ client = GConf.Client.get_default()
 class GConfMixin(object):
     """Mix-in class for GTK widgets backed by GConf"""
     def __init__(self, gconf_key, gsettings_dconf, dconf_key, widget=None, signal='changed'):
-        self._timeout_id = None
         self._gconf_key = gconf_key
         self._gsettings_dconf = gsettings_dconf
         self._dconf_key = dconf_key
@@ -64,7 +63,6 @@ class GConfMixin(object):
         self._undo_value = initial_value
         self.set_value_from_gconf(initial_value)
         widget = widget or self
-        widget.connect(signal, self.__changed_cb)
 
     def undo(self):
         """Revert to original value if modified"""
@@ -88,12 +86,6 @@ class GConfMixin(object):
         """
         raise NotImplementedError()
 
-    def __changed_cb(self, widget):
-        if self._timeout_id is not None:
-            GObject.source_remove(self._timeout_id)
-        self._timeout_id = GObject.timeout_add(_APPLY_TIMEOUT, self._commit,
-                                               widget)
-
     def __gconf_notify_cb(self, client, transaction_id_, entry, user_data_):
         new_value = _gconf_value_to_python(entry.value)
         self.set_value_from_gconf(new_value)
@@ -102,11 +94,7 @@ class GConfMixin(object):
         new_value = self.get_value_for_gconf()
         logging.debug('Setting %r to %r', self._gconf_key, new_value)
 
-        widget.handler_block_by_func(self.__changed_cb)
-        try:
-            self._set_gconf_value(new_value)
-        finally:
-            widget.handler_unblock_by_func(self.__changed_cb)
+        self._set_gconf_value(new_value)
 
     def _set_gconf_value(self, new_value):
         gconf_type = client.get(self._gconf_key).type
@@ -240,6 +228,9 @@ class GConfStringSettingBox(SettingBox):
         """Revert to original value if modified"""
         self.string_entry.undo()
 
+    def _commit(self, widget):
+        self.string_entry._commit(self.string_entry)
+
     @property
     def changed(self):
         return self.string_entry.changed
@@ -267,6 +258,9 @@ class GConfHostListSettingBox(GConfStringSettingBox):
     def undo(self):
         """Revert to original value if modified"""
         self.hosts_entry.undo()
+
+    def _commit(self, widget):
+        self.hosts_entry._commit(self.hosts_entry)
 
     @property
     def changed(self):
@@ -297,6 +291,10 @@ class GConfHostPortSettingBox(SettingBox):
         """Revert to original values if modified"""
         self.host_name_entry.undo()
         self.port_spin_button.undo()
+
+    def _commit(self, widget):
+        self.host_name_entry._commit(self.host_name_entry)
+        self.port_spin_button._commit(self.port_spin_button)
 
     @property
     def changed(self):
@@ -897,6 +895,10 @@ class Network(SectionView):
 
     def __launch_button_clicked_cb(self, launch_button):
         self._model.launch_nm_connection_editor()
+
+    def perform_accept_actions(self):
+        for setting in self._undo_objects:
+            setting._commit(setting)
 
 
 def _gconf_value_to_python(gconf_value):
