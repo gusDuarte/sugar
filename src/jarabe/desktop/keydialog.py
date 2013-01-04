@@ -281,6 +281,9 @@ class KeyValuesDialog(Gtk.Dialog):
             key_dialog.destroy()
             self._final_callback(self._settings,
                                  self._selected_auth_list)
+        else:
+            key_dialog.destroy()
+            response.set_error(CanceledKeyRequestError())
 
     def _add_key_value(self, key, value):
         for auth_param in self._selected_auth_list._params_list:
