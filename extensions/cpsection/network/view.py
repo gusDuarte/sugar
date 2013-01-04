@@ -403,6 +403,50 @@ class GConfExclusiveOptionSetsBox(ExclusiveOptionSetsBox, GConfMixin):
         raise ValueError('Invalid value %r' % (value, ))
 
 
+class SpecialGConfExclusiveOptionSetsBox(GConfExclusiveOptionSetsBox):
+    def __init__(self, top_name, top_gconf_key, gsettings_dconf,
+                 dconf_key, option_sets, size_group=None):
+        GConfExclusiveOptionSetsBox.__init__(self, top_name, top_gconf_key,
+                                             gsettings_dconf, dconf_key,
+                                             option_sets, size_group)
+        self._initial_enabled_value = True
+        if self._undo_value == 'none':
+            self._initial_enabled_value = False
+
+    def undo(self):
+        """Revert to original value if modified"""
+        if not self.changed:
+            return
+        logging.debug('Reverting %r to %r', self._gconf_key, self._undo_value)
+        self._set_gconf_value(self._undo_value)
+
+        # Also, set the initial value for "org.gnome.system.proxy.http enabled"
+        logging.debug('Reverting org.gnome.system.proxy.http enabled to %r', self._initial_enabled_value)
+        GSETTINGS_PROXY_HTTP.set_boolean('enabled', self._initial_enabled_value)
+
+    def _commit(self, widget):
+        """Commit the base key."""
+        super(SpecialGConfExclusiveOptionSetsBox, self)._commit(None)
+
+        """Plus commit the dconf key :: org.gnome.system.proxy.http enabled"""
+        # The logic to set the value is ::
+        #
+        # * If the mode is "none", the key is to  be set to false.
+        #
+        # * If the mode is not "none" (in other words, it is "manual"
+        #   or "automatic"), the key is to be set to true.
+        enabled_value = True
+        mode = self.get_value_for_gconf()
+        if mode == 'none':
+            enabled_value = False
+
+        logging.debug('Setting org.gnome.system.proxy.http enabled to %r', enabled_value)
+        GSETTINGS_PROXY_HTTP.set_boolean('enabled', enabled_value)
+
+    def changed(self):
+        return self._undo_value != self.get_value_for_gconf()
+
+
 class OptionalSettingsBox(Gtk.VBox):
     """
     Container for settings (de)activated by a top-level setting
@@ -770,7 +814,7 @@ class Network(SectionView):
         option_sets = [('None', 'none', Gtk.VBox()),
                        ('Automatic', 'auto', automatic_proxy_box),
                        ('Manual', 'manual', manual_proxy_box)]
-        option_sets_box = GConfExclusiveOptionSetsBox(_('Method:'),
+        option_sets_box = SpecialGConfExclusiveOptionSetsBox(_('Method:'),
                                                       '/system/proxy/mode',
                                                       GSETTINGS_PROXY,
                                                       'mode',
