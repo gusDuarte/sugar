@@ -16,15 +16,19 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GConf
 from gi.repository import GObject
 from gettext import gettext as _
 
 from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor, colors
 from sugar3.graphics.icon import CanvasIcon
+from sugar3.graphics.icon import Icon
 
 from jarabe.controlpanel.sectionview import SectionView
 from jarabe.controlpanel.inlinealert import InlineAlert
+import os
 
 _STROKE_COLOR = 0
 _FILL_COLOR = 1
@@ -118,8 +122,8 @@ class ColorPicker(CanvasIcon):
                           ([object])),
         }
 
-    def __init__(self, picker):
-        CanvasIcon.__init__(self, icon_name='computer-xo',
+    def __init__(self, picker, icon):
+        CanvasIcon.__init__(self, icon_name=icon,
                             pixel_size=style.XLARGE_ICON_SIZE)
         self._picker = picker
         self._color = None
@@ -156,25 +160,58 @@ class AboutMe(SectionView):
         self._nick_valid = True
 
         self.set_border_width(style.DEFAULT_SPACING * 2)
-        self.set_spacing(style.DEFAULT_SPACING)
+        #self.set_spacing(style.DEFAULT_SPACING)
         self._group = Gtk.SizeGroup(Gtk.SizeGroupMode.HORIZONTAL)
 
         self._color_label = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         self._color_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         self._color_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         self._color_alert = None
+        # Examples. #
+        self._scroll_icon = Gtk.ScrolledWindow()
+        self._scroll_icon.set_policy(Gtk.PolicyType.AUTOMATIC,
+        Gtk.PolicyType.NEVER)
+        self._hbox_icon = Gtk.HBox(spacing=style.DEFAULT_SPACING)
+        self._scroll_icon.add_with_viewport(self._hbox_icon)
+        self._frame_icon = Gtk.Frame()
+        self._vbox_icon = Gtk.VBox()
+        self._vbox_icon.pack_start(self._scroll_icon, True, True, 0)
+
+        self._alert = InlineAlert()
+        label_color = \
+Gtk.Label(_('Example icons: Copyright (c) TheNounProject'))
+        label_color.modify_fg(Gtk.StateType.NORMAL,
+        style.COLOR_SELECTION_GREY.get_gdk_color())
+        self._vbox_icon.pack_start(label_color, False, False, 0)
+        self._vbox_icon.pack_start(self._alert, False, False, 0)
+
+        self._frame_icon.add(self._vbox_icon)
+        self._widgets = []
+        self._widget = []
+        self._icons_images = []
+        self._join = os.path.join(os.path.expanduser('~'), '.sugar', 'skins')
+        if os.path.exists(os.path.join(self._join)):
+                self._path = self._join
+                self._icons = os.listdir(self._path)
+                self._icons.sort()
+
+        for x in self._icons:
+                if "svg" in x:
+                        self._create_pixbuf_button(x[:-4])
+                else:
+                    pass
 
         self._pickers = {
-            _PREVIOUS_FILL_COLOR: ColorPicker(_PREVIOUS_FILL_COLOR),
-            _NEXT_FILL_COLOR: ColorPicker(_NEXT_FILL_COLOR),
-            _CURRENT_COLOR: ColorPicker(_CURRENT_COLOR),
-            _NEXT_STROKE_COLOR: ColorPicker(_NEXT_STROKE_COLOR),
-            _PREVIOUS_STROKE_COLOR: ColorPicker(_PREVIOUS_STROKE_COLOR),
+            _PREVIOUS_FILL_COLOR: ColorPicker(_PREVIOUS_FILL_COLOR, 'computer-xo'),
+            _NEXT_FILL_COLOR: ColorPicker(_NEXT_FILL_COLOR, 'computer-xo'),
+            _CURRENT_COLOR: ColorPicker(_CURRENT_COLOR, 'computer-xo'),
+            _NEXT_STROKE_COLOR: ColorPicker(_NEXT_STROKE_COLOR, 'computer-xo'),
+            _PREVIOUS_STROKE_COLOR: ColorPicker(_PREVIOUS_STROKE_COLOR, 'computer-xo'),
         }
 
         self._setup_color()
-        initial_color = XoColor(self._model.get_color_xo())
-        self._update_pickers(initial_color)
+        self.initial_color = XoColor(self._model.get_color_xo())
+        self._update_pickers(self.initial_color)
 
         self._nick_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
         self._nick_alert_box = Gtk.HBox(spacing=style.DEFAULT_SPACING)
@@ -182,6 +219,82 @@ class AboutMe(SectionView):
         self._nick_alert = None
         self._setup_nick()
         self.setup()
+        self.pack_end(self._frame_icon, False, False, style.DEFAULT_SPACING)
+        self._frame_icon.show_all()
+        self._alert.hide()
+
+    def _update_icon(self, widget, event):
+        self._icon_name = widget.get_tooltip_text()
+        self._current.set_sensitive(True)
+        widget.set_sensitive(False)
+        # Removes. #
+        for x in self._widget:
+                self._color_alert_box.remove(x)
+        self.remove(self._color_box)
+        for x in self._widgets:
+            self._color_box.remove(x)
+            try:
+                self._color_label.remove(x)
+            except:
+                pass
+            try:
+                self._group.remove_widget(x)
+            except:
+                pass
+
+        self._pickers = {
+        _PREVIOUS_FILL_COLOR: ColorPicker(_PREVIOUS_FILL_COLOR, self._icon_name),
+        _NEXT_FILL_COLOR: ColorPicker(_NEXT_FILL_COLOR, self._icon_name),
+        _CURRENT_COLOR: ColorPicker(_CURRENT_COLOR, self._icon_name),
+        _NEXT_STROKE_COLOR: ColorPicker(_NEXT_STROKE_COLOR, self._icon_name),
+        _PREVIOUS_STROKE_COLOR: ColorPicker(_PREVIOUS_STROKE_COLOR, self._icon_name),
+        }
+        try:
+                self._update_pickers(self._current_color)
+        except AttributeError:
+                self._update_pickers(self.initial_color)
+        self.setup()
+        self._setup_color()
+        self.show()
+        self._current = widget
+        self.restart_alerts.append('icon')
+        if 'icon' in self.restart_alerts:
+            self._alert.props.msg = self.restart_msg
+            self._alert.show()
+        path = self._path + "/" + self._icon_name + ".svg"
+        self._model.set_xo_icon(path, self._icon_name)
+        self.needs_restart = True
+
+    def _create_pixbuf_button(self, name):
+        icon_theme = Gtk.IconTheme.get_default()
+        icon_theme.append_search_path(self._path)
+        self._icon_area = Gtk.EventBox()
+        try:
+                pt = os.path.join(os.path.expanduser('~'), '.current')
+                fd = open(pt, 'r')
+                self._ex_icon = fd.read()
+                fd.close()
+        except:
+                self._ex_icon = '1xo'
+        if name == self._ex_icon:
+                self._icon_area.set_sensitive(False)
+                self._current = self._icon_area
+        if name == '1xo' and self._ex_icon == '1xo':
+                self._icon_area.set_sensitive(False)
+                self._image = Icon(icon_name=name)
+                self._current = self._icon_area
+        self._image = Icon(icon_name=name, pixel_size=100)
+        self._client = GConf.Client.get_default()
+        color = self._client.get_string('/desktop/sugar/user/color')
+        self._color = XoColor(color)
+        self._icon_area.set_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+        self._icon_area.connect('button-press-event', self._update_icon)
+        self._icon_area.set_tooltip_text(name)
+        self._icon_area.props.has_tooltip = False
+        self._image.set_xo_color(self._color)
+        self._icon_area.add(self._image)
+        self._hbox_icon.pack_start(self._icon_area, True, True, 0)
+        self._icons_images.append(self._image)
 
     def _setup_nick(self):
         self._nick_entry = Gtk.Entry()
@@ -215,32 +328,37 @@ class AboutMe(SectionView):
         self._group.add_widget(label_color)
         self._color_label.pack_start(label_color, False, True, 0)
         label_color.show()
+        self._widgets.append(label_color)
 
         for picker_index in sorted(self._pickers.keys()):
             if picker_index == _CURRENT_COLOR:
                 left_separator = Gtk.SeparatorToolItem()
                 left_separator.show()
                 self._color_box.pack_start(left_separator, False, True, 0)
-
+                self._widgets.append(left_separator)
             picker = self._pickers[picker_index]
             picker.show()
             self._color_box.pack_start(picker, False, True, 0)
+            self._widgets.append(picker)
 
             if picker_index == _CURRENT_COLOR:
                 right_separator = Gtk.SeparatorToolItem()
                 right_separator.show()
                 self._color_box.pack_start(right_separator, False, True, 0)
+                self._widgets.append(right_separator)
 
         label_color_error = Gtk.Label()
         self._group.add_widget(label_color_error)
         self._color_alert_box.pack_start(label_color_error, False, True, 0)
         label_color_error.show()
+        self._widgets.append(label_color)
 
         self._color_alert = InlineAlert()
         self._color_alert_box.pack_start(self._color_alert, True, True, 0)
         if 'color' in self.restart_alerts:
             self._color_alert.props.msg = self.restart_msg
             self._color_alert.show()
+        self._widgets.append(self._color_alert)
 
         self._center_in_panel = Gtk.Alignment.new(0.5, 0, 0, 0)
         self._center_in_panel.add(self._color_box)
@@ -266,6 +384,9 @@ class AboutMe(SectionView):
         self._model.undo()
         self._nick_alert.hide()
         self._color_alert.hide()
+        self._alert.hide()
+        path = self._path + "/" + self._ex_icon + '.svg'
+        self._model.set_xo_icon(path, self._ex_icon)
 
     def _update_pickers(self, color):
         for picker in self._pickers.values():
@@ -304,6 +425,9 @@ class AboutMe(SectionView):
 
     def __color_changed_cb(self, colorpicker, color):
         self._model.set_color_xo(color.to_string())
+        for x in self._icons_images:
+            x.set_xo_color(color)
+            x.show()
         self.needs_restart = True
         self._color_alert.props.msg = self.restart_msg
         self._color_valid = True
