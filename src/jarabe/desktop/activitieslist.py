@@ -81,6 +81,8 @@ class ActivitiesTreeView(Gtk.TreeView):
         column.add_attribute(cell_icon, 'file-name', ListModel.COLUMN_ICON)
         self.append_column(column)
 
+        self._icon_column = column
+
         cell_text = Gtk.CellRendererText()
         cell_text.props.ellipsize = Pango.EllipsizeMode.MIDDLE
         cell_text.props.ellipsize_set = True
@@ -145,6 +147,9 @@ class ActivitiesTreeView(Gtk.TreeView):
                                      True)
 
     def __icon_clicked_cb(self, cell, path):
+        self._start_activity(path)
+
+    def _start_activity(self, path):
         row = self.get_model()[path]
 
         registry = bundleregistry.get_registry()
@@ -166,6 +171,10 @@ class ActivitiesTreeView(Gtk.TreeView):
         title = model[tree_iter][ListModel.COLUMN_TITLE]
         title = normalize_string(title.decode('utf-8'))
         return title is not None and title.find(self._query) > -1
+
+    def do_row_activated(self, path, column):
+        if column == self._icon_column:
+            self._start_activity(path)
 
 
 class ListModel(Gtk.TreeModelSort):
