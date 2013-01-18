@@ -74,7 +74,7 @@ def handle_key_press(key):
     if content_title is None:
         title = _('Screenshot')
     else:
-        title = _('Screenshot of \"%s\"') % content_title
+        title = _('Screenshot of %s') % content_title
 
     jobject = datastore.create()
     try:

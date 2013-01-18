@@ -31,8 +31,8 @@ from sugar3 import util
 from sugar3.graphics import style
 from sugar3.graphics.icon import Icon, CellRendererIcon
 from sugar3.graphics.xocolor import XoColor
-from sugar3.graphics.menuitem import MenuItem
 from sugar3.graphics.alert import Alert
+from sugar3.graphics.palettemenu import PaletteMenuItem
 
 from jarabe.model import bundleregistry
 from jarabe.view.palettes import ActivityPalette
@@ -80,6 +80,8 @@ class ActivitiesTreeView(Gtk.TreeView):
         column.pack_start(cell_icon, True)
         column.add_attribute(cell_icon, 'file-name', ListModel.COLUMN_ICON)
         self.append_column(column)
+
+        self._icon_column = column
 
         cell_text = Gtk.CellRendererText()
         cell_text.props.ellipsize = Pango.EllipsizeMode.MIDDLE
@@ -145,6 +147,9 @@ class ActivitiesTreeView(Gtk.TreeView):
                                      True)
 
     def __icon_clicked_cb(self, cell, path):
+        self._start_activity(path)
+
+    def _start_activity(self, path):
         row = self.get_model()[path]
 
         registry = bundleregistry.get_registry()
@@ -166,6 +171,10 @@ class ActivitiesTreeView(Gtk.TreeView):
         title = model[tree_iter][ListModel.COLUMN_TITLE]
         title = normalize_string(title.decode('utf-8'))
         return title is not None and title.find(self._query) > -1
+
+    def do_row_activated(self, path, column):
+        if column == self._icon_column:
+            self._start_activity(path)
 
 
 class ListModel(Gtk.TreeModelSort):
@@ -342,8 +351,8 @@ class ClearMessageBox(Gtk.EventBox):
 
         icon = Icon(pixel_size=style.LARGE_ICON_SIZE,
                     icon_name='system-search',
-                    stroke_color=style.COLOR_TRANSPARENT.get_svg(),
-                    fill_color=style.COLOR_BUTTON_GREY.get_svg())
+                    stroke_color=style.COLOR_BUTTON_GREY.get_svg(),
+                    fill_color=style.COLOR_TRANSPARENT.get_svg())
         box.pack_start(icon, expand=True, fill=False, padding=0)
         icon.show()
 
@@ -511,13 +520,14 @@ class ActivityListPalette(ActivityPalette):
         self._favorite = registry.is_bundle_favorite(self._bundle_id,
                                                      self._version)
 
-        self._favorite_item = MenuItem('')
+        self._favorite_item = PaletteMenuItem()
         self._favorite_icon = Icon(icon_name='emblem-favorite',
                 icon_size=Gtk.IconSize.MENU)
         self._favorite_item.set_image(self._favorite_icon)
+        self._favorite_icon.show()
         self._favorite_item.connect('activate',
                                     self.__change_favorite_activate_cb)
-        self.menu.append(self._favorite_item)
+        self.menu_box.append_item(self._favorite_item)
         self._favorite_item.show()
 
         if activity_info.is_user_activity():
@@ -528,12 +538,12 @@ class ActivityListPalette(ActivityPalette):
                 self.__activity_changed_cb)
         self._update_favorite_item()
 
-        self.menu.connect('destroy', self.__destroy_cb)
+        self.menu_box.connect('destroy', self.__destroy_cb)
 
     def _add_erase_option(self, registry, activity_info):
-        menu_item = MenuItem(_('Erase'), 'list-remove')
+        menu_item = PaletteMenuItem(_('Erase'), 'list-remove')
         menu_item.connect('activate', self.__erase_activate_cb)
-        self.menu.append(menu_item)
+        self.menu_box.append_item(menu_item)
         menu_item.show()
 
         if not os.access(activity_info.get_path(), os.W_OK) or \
@@ -545,13 +555,12 @@ class ActivityListPalette(ActivityPalette):
         registry.disconnect(self._activity_changed_sid)
 
     def _update_favorite_item(self):
-        label = self._favorite_item.get_child()
         if self._favorite:
-            label.set_text(_('Remove favorite'))
+            self._favorite_item.set_label(_('Remove favorite'))
             xo_color = XoColor('%s,%s' % (style.COLOR_WHITE.get_svg(),
                                          style.COLOR_TRANSPARENT.get_svg()))
         else:
-            label.set_text(_('Make favorite'))
+            self._favorite_item.set_label(_('Make favorite'))
             client = GConf.Client.get_default()
             xo_color = XoColor(client.get_string('/desktop/sugar/user/color'))
 
