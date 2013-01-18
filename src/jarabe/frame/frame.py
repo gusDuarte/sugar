@@ -368,7 +368,7 @@ class Frame(object):
         body = kwargs.get('body', '')
 
         if summary or body:
-            self.add_message(body, summary, icon_name,
+            self.add_message(body, summary, None, None, icon_name,
                             icon_colors, position, duration)
         else:
             self._launch_notification_icon(icon_name, icon_colors,
