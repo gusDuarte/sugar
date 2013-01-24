@@ -152,6 +152,16 @@ def get_model_laptop():
 
     if model is None or not model:
         model = _not_available
+
+    # Remove trailing binary-unprintable character
+    model = model.rstrip('\x00')
+
+    if _is_model_change_required():
+        model_converter = { 'XO-4 HS Touch' : 'XO Duo' }
+
+        if model in model_converter.keys():
+            model = model_converter[model]
+
     return model
 
 
@@ -367,3 +377,10 @@ def get_act():
         for seccion in parser.sections():
             version = "%s%s: %s\n" %(version,seccion,parser.get(seccion,'version'))
     return version
+
+
+def _is_model_change_required():
+    from gi.repository import GConf
+    client = GConf.Client.get_default()
+
+    return client.get_bool('/desktop/sugar/extensions/aboutcomputer/change_model') is True
