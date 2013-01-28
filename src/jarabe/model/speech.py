@@ -211,6 +211,15 @@ class _GstSpeechPlayer(GObject.GObject):
            Fall back to espeak's voice called Default."""
         voices = self.get_all_voices()
 
+        # Select a "chosen" dialect, if necessary.
+        client = GConf.Client.get_default()
+        chosen_dialect = client.get_string('/desktop/sugar/frame/chosen_text_to_speech')
+        if chosen_dialect is not None:
+            if chosen_dialect in voices.keys():
+                dialect = voices.get(chosen_dialect)
+                logging.debug('Returning %s as the chosen '
+                              'text-to-speech dialect', dialect)
+
         locale = os.environ.get('LANG', '')
         language_location = locale.split('.', 1)[0].lower()
         language = language_location.split('_')[0]

@@ -120,29 +120,6 @@ AUTHENTICATION_LIST = \
                                   )
                                 ]
                             ),
-          AuthenticationType('LEAP',
-                             'leap',
-                                [
-                                   AuthenticationParameter(
-                                   'eap',
-                                   'Authentication',
-                                   SETTING_TYPE_LIST,
-                                   [['LEAP', 'leap']]
-                                   ),
-                                   AuthenticationParameter(
-                                   'identity',
-                                   'Username',
-                                   SETTING_TYPE_STRING,
-                                   []
-                                   ),
-                                   AuthenticationParameter(
-                                   'password',
-                                   'Password',
-                                   SETTING_TYPE_STRING,
-                                   []
-                                   )
-                                 ]
-                             ),
            AuthenticationType('Tunnelled TLS',
                               'ttls',
                                  [

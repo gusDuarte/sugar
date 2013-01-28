@@ -432,6 +432,20 @@ class BundleRegistry(GObject.GObject):
         return key in self._favorite_bundles
 
     def is_bundle_favorite_by_id(self, bundle_id):
+        # If the bundle is not present in self._bundles, it means that
+        # the bundle is not present by default. Thus, it is a
+        # "favorite" by default (for it is to be installed).
+        bundle_installed = False
+        for bundle in self._bundles:
+            if bundle.get_bundle_id() == bundle_id:
+                bundle_installed = True
+                break
+
+        if bundle_installed is False:
+            return True
+
+        # Control reaches here, only if "bundle_installed" is True.
+        # So, we now check for its favoriteness.
         for key in self._favorite_bundles:
             if key.startswith(bundle_id + ' '):
                 return True

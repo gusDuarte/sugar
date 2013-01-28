@@ -21,6 +21,7 @@ import logging
 import dbus
 from gi.repository import Gtk
 from gi.repository import Gdk
+from gi.repository import GConf
 
 from gi.repository import SugarExt
 
@@ -37,6 +38,9 @@ _VOLUME_STEP = sound.VOLUME_STEP
 _VOLUME_MAX = 100
 _TABBING_MODIFIER = Gdk.ModifierType.MOD1_MASK
 
+screen = Gdk.Screen.get_default()
+_SCREEN_WIDTH = screen.get_width()
+_SCREEN_HEIGHT = screen.get_height()
 
 _actions_table = {
     'F1': 'zoom_mesh',
@@ -45,6 +49,8 @@ _actions_table = {
     'F4': 'zoom_activity',
     'F5': 'open_search',
     'F6': 'frame',
+    'KP_Prior': 'accumulate_osk',
+    'KP_Next': 'unaccumulate_osk',
     'XF86AudioMute': 'volume_mute',
     'F11': 'volume_down',
     'XF86AudioLowerVolume': 'volume_down',
@@ -163,6 +169,17 @@ class KeyHandler(object):
     def handle_open_search(self, event_time):
         journalactivity.get_journal().show_journal()
 
+    def handle_accumulate_osk(self, event_time):
+        active_window = screen.get_active_window()
+
+        client = GConf.Client.get_default()
+        factor = client.get_float('/desktop/sugar/graphics/window_osk_scaling_factor')
+        active_window.resize(_SCREEN_WIDTH, _SCREEN_HEIGHT * factor)
+
+    def handle_unaccumulate_osk(self, event_time):
+        active_window = screen.get_active_window()
+        active_window.resize(_SCREEN_WIDTH, _SCREEN_HEIGHT)
+
     def _key_pressed_cb(self, grabber, keycode, state, event_time):
         key = grabber.get_key(keycode, state)
         logging.debug('_key_pressed_cb: %i %i %s', keycode, state, key)
@@ -231,3 +248,7 @@ def set_key_handlers_active(active):
     """
 
     _instance._key_handlers_active = active
+
+
+def get_handle_unaccumulate_osk_func():
+    return _instance.handle_unaccumulate_osk

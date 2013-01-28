@@ -80,7 +80,8 @@ class BuddyMenu(Palette):
         self.menu_box.pack_start(menu_item, True, True, 0)
         menu_item.show()
 
-        if jarabe.journal.model.is_peer_to_peer_sharing_available():
+        if (jarabe.journal.model.is_peer_to_peer_sharing_available()) and \
+                (self._buddy.props.ip_address is not None):
             remote_share_menu_item = None
             if not jarabe.journal.model.mount_point_button_exists(
                     jarabe.journal.model.WEBDAV_MOUNT_POINT + self._buddy.props.ip_address):

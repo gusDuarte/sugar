@@ -550,7 +550,9 @@ class ShellModel(GObject.GObject):
                                                                       xid)
                 gdk_window.set_decorations(0)
 
-                window.maximize()
+                from jarabe.view.keyhandler import get_handle_unaccumulate_osk_func
+                get_handle_unaccumulate_osk_func()(None)
+
 
             if not home_activity:
                 logging.debug('first window registered for %s', activity_id)
