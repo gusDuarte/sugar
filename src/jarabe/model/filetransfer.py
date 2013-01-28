@@ -34,6 +34,9 @@ from sugar3 import dispatch
 from jarabe.util.telepathy import connection_watcher
 from jarabe.model import neighborhood
 
+# Avoid "Fatal Python error: GC object already tracked"
+# http://stackoverflow.com/questions/7496629/gstreamer-appsrc-causes-random-crashes
+GObject.threads_init()
 
 FT_STATE_NONE = 0
 FT_STATE_PENDING = 1
@@ -74,6 +77,9 @@ class StreamSplicer(GObject.GObject):
         self._pending_buffers = []
 
     def start(self):
+        self.read_next_data()
+
+    def read_next_data(self):
         self._input_stream.read_bytes_async(
             self._CHUNK_SIZE, GLib.PRIORITY_LOW,
             None, self.__read_async_cb, None)
@@ -84,37 +90,29 @@ class StreamSplicer(GObject.GObject):
         if data is None:
             # TODO: an error occured. Report something
             logging.error('An error occured in the file transfer.')
+            self._input_stream.close(None)
+            self._output_stream.close(None)
+            self.emit('finished')
         elif data.get_size() == 0:
             # We read the file completely
             logging.debug('Closing input stream. Reading finished.')
             self._input_stream.close(None)
+
+            logging.debug('Closing output stream. Writing finished.')
+            self._output_stream.close(None)
+            self.emit('finished')
         else:
-            logging.debug('Data received (bytes): %s', data.get_size())
-            self._pending_buffers.append(data)
-            self._input_stream.read_bytes_async(
-                self._CHUNK_SIZE, GLib.PRIORITY_LOW,
-                None, self.__read_async_cb, None)
-        self._write_next_buffer()
+            self._write_next_buffer(data)
 
     def __write_async_cb(self, output_stream, result, user_data):
         size = output_stream.write_bytes_finish(result)
         logging.debug('Size written (bytes): %s', size)
 
-        if not self._pending_buffers and \
-                not self._output_stream.has_pending() and \
-                not self._input_stream.has_pending():
-            logging.debug('Closing output stream. Writing finished.')
-            output_stream.close(None)
-            self.emit('finished')
-        else:
-            self._write_next_buffer()
+        self.read_next_data()
 
-    def _write_next_buffer(self):
-        if self._pending_buffers and not self._output_stream.has_pending():
-            data = self._pending_buffers.pop(0)
-            self._output_stream.write_bytes_async(
-                data, GLib.PRIORITY_LOW, None,
-                self.__write_async_cb, None)
+    def _write_next_buffer(self, data):
+        self._output_stream.write_bytes_async(data, GLib.PRIORITY_LOW, None,
+                                              self.__write_async_cb, None)
 
 
 class BaseFileTransfer(GObject.GObject):
