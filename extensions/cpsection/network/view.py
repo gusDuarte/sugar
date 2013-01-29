@@ -831,7 +831,8 @@ class Network(SectionView):
         self._undo_objects.append(no_proxy_box)
 
     def setup(self):
-        self._entry.set_text(self._model.get_jabber())
+        self._old_jabber_entry = self._model.get_jabber()
+        self._entry.set_text(self._old_jabber_entry)
         try:
             radio_state = self._model.get_radio()
         except self._model.ReadError, detail:
@@ -845,17 +846,15 @@ class Network(SectionView):
         self.needs_restart = False
         self._radio_change_handler = self._button.connect( \
                 'toggled', self.__radio_toggled_cb)
-        self._jabber_change_handler = self._entry.connect( \
-                'changed', self.__jabber_changed_cb)
         self._network_configuration_reset_handler =  \
                 self._clear_history_button.connect( \
                         'clicked', self.__network_configuration_reset_cb)
 
     def undo(self):
         self._button.disconnect(self._radio_change_handler)
-        self._entry.disconnect(self._jabber_change_handler)
         self._model.undo()
         self._jabber_alert.hide()
+        self._entry.set_text(self._old_jabber_entry)
         self._radio_alert.hide()
         for setting in self._undo_objects:
             setting.undo()
@@ -867,6 +866,9 @@ class Network(SectionView):
         # use environment variables rather than gconf for proxy
         # settings, so we need to restart for the changes to take
         # _full_ effect.
+        if self._entry.get_text() != self._old_jabber_entry:
+            return True
+
         for setting in self._undo_objects:
             if setting.changed():
                 return True
@@ -880,12 +882,6 @@ class Network(SectionView):
         # Panel, but SectionView.__init__() wants to initialise it to False,
         # so we need to provide a (fake) setter.
         pass
-
-    def _validate(self):
-        if self._jabber_valid and self._radio_valid:
-            self.props.is_valid = True
-        else:
-            self.props.is_valid = False
 
     def __radio_toggled_cb(self, widget, data=None):
         radio_state = widget.get_active()
@@ -902,34 +898,6 @@ class Network(SectionView):
         self._validate()
         return False
 
-    def __jabber_changed_cb(self, widget, data=None):
-        if self._jabber_sid:
-            GObject.source_remove(self._jabber_sid)
-        self._jabber_sid = GObject.timeout_add(_APPLY_TIMEOUT,
-                                               self.__jabber_timeout_cb,
-                                               widget)
-
-    def __jabber_timeout_cb(self, widget):
-        self._jabber_sid = 0
-        if widget.get_text() == self._model.get_jabber:
-            return
-        try:
-            self._model.set_jabber(widget.get_text())
-        except self._model.ReadError, detail:
-            self._jabber_alert.props.msg = detail
-            self._jabber_valid = False
-            self._jabber_alert.show()
-            self.restart_alerts.append('jabber')
-        else:
-            self._jabber_valid = True
-            self._jabber_alert.hide()
-
-        for setting in self._undo_objects:
-            setting.undo()
-
-        self._validate()
-        return False
-
     def __network_configuration_reset_cb(self, widget):
         # FIXME: takes effect immediately, not after CP is closed with
         # confirmation button
@@ -941,6 +909,10 @@ class Network(SectionView):
         self._model.launch_nm_connection_editor()
 
     def perform_accept_actions(self):
+        current_jabber_entry = self._entry.get_text()
+        if current_jabber_entry != self._old_jabber_entry:
+            self._model.set_jabber(current_jabber_entry)
+
         for setting in self._undo_objects:
             setting._commit(setting)
 
