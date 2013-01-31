@@ -105,8 +105,6 @@ class BaseListView(Gtk.Bin):
         self._inhibit_refresh = False
         self._selected_entries = 0
 
-        self.enable_drag_and_copy()
-
 
         # Auto-update stuff
         self._fully_obscured = True

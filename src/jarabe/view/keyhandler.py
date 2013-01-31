@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+import subprocess
 import logging
 
 import dbus
@@ -170,6 +171,22 @@ class KeyHandler(object):
         journalactivity.get_journal().show_journal()
 
     def handle_accumulate_osk(self, event_time):
+        # If we are not in ebook-mode, do not do anything.
+        is_ebook_mode = False
+
+        command = 'evtest --query /dev/input/event4 EV_SW SW_TABLET_MODE; echo $?'
+        try:
+            return_code = subprocess.Popen([command],
+                                           stdout=subprocess.PIPE,
+                                           shell=True).stdout.readlines()[0].rstrip('\n')
+            if return_code == '10':
+                is_ebook_mode = True
+        except Exception, e:
+            logging.exception(e)
+
+        if not is_ebook_mode:
+            return
+
         active_window = screen.get_active_window()
 
         client = GConf.Client.get_default()
