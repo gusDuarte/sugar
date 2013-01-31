@@ -450,7 +450,7 @@ class ActivityIcon(CanvasIcon):
     def _update(self):
         self.palette = None
         if not self._resume_mode or not self._journal_entries:
-            xo_color = XoColor('%s,%s' % (style.COLOR_BUTTON_GREY.get_svg(),
+            xo_color = XoColor('%s,%s' % (style.COLOR_DESKTOP_ICON.get_svg(),
                                           style.COLOR_TRANSPARENT.get_svg()))
         else:
             xo_color = misc.get_icon_color(self._journal_entries[0])
