@@ -133,6 +133,7 @@ class accessibility(SectionView):
     def _set_bounce_keys(self, widget):
         state = widget.get_active()
         self._model.set_bounce_keys(state)
+        self.needs_restart = True
 
     def _set_virtualkeyboard(self, widget):
         state = widget.get_active()
