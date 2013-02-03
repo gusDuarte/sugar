@@ -128,14 +128,14 @@ class HomeWindow(Gtk.Window):
     def __reboot_cb(self):
         self._system_alert(_SYSTEM_REBOOT_ID, 'system-restart',
                 _('Please restart your computer'),
-                _('System updates have been installed. Restarting ' \
+                _('System updates have been installed.\nRestarting ' \
                   'your computer will ensure that they are ' \
                   'applied correctly.'))
 
     def __relogin_cb(self):
         self._system_alert(_SYSTEM_RELOGIN_ID, 'system-logout',
                 _('Please restart Sugar'),
-                _('Please, restart Sugar to take into account ' \
+                _('Please restart Sugar to take into account ' \
                         'new updates'))
 
     def _deactivate_view(self, level):

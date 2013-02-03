@@ -30,7 +30,7 @@ from sugar3.graphics import style
 from sugar3.graphics.xocolor import XoColor
 from sugar3.graphics.palette import Palette
 from sugar3.graphics.toolbutton import ToolButton
-from sugar3.graphics.palettemenu import PaletteMenuItem
+from sugar3.graphics.palettemenu import PaletteMenuItem, PaletteMenuItemSeparator
 from sugar3 import profile
 
 from jarabe.journal import  misc
@@ -77,30 +77,25 @@ class _HistoryIconWidget(Gtk.Alignment):
         self.add(icon)
 
 
-class _HistorySummaryWidget(Gtk.Alignment):
+class _HistorySummaryWidget(Gtk.Label):
     __gtype_name__ = 'SugarHistorySummaryWidget'
 
     def __init__(self, summary):
-        summary_label = Gtk.Label()
-        summary_label.props.wrap = True
-        summary_label.set_markup(
+        Gtk.Label.__init__(self)
+        self.set_line_wrap_mode(True)
+        self.set_max_width_chars(60)
+        self.set_markup(
                 '<b>%s</b>' % GObject.markup_escape_text(summary))
 
-        Gtk.Alignment.__init__(self, xalign=0.0, yalign=1.0)
-        self.props.right_padding = style.DEFAULT_SPACING
-        self.add(summary_label)
 
-
-class _HistoryBodyWidget(Gtk.Alignment):
+class _HistoryBodyWidget(Gtk.Label):
     __gtype_name__ = 'SugarHistoryBodyWidget'
-    def __init__(self, body):
-        body_label = Gtk.Label()
-        body_label.props.wrap = True
-        body_label.set_markup(body)
 
-        Gtk.Alignment.__init__(self, xalign=0, yalign=0.0)
-        self.props.right_padding = style.DEFAULT_SPACING
-        self.add(body_label)
+    def __init__(self, body):
+        Gtk.Label.__init__(self)
+        self.set_line_wrap_mode(True)
+        self.set_max_width_chars(60)
+        self.set_markup(body)
 
 
 class _MessagesHistoryBox(Gtk.VBox):
@@ -125,24 +120,34 @@ class _MessagesHistoryBox(Gtk.VBox):
         Gtk.rc_parse_string(links_style)
 
     def push_message(self, body, summary, link, link_text, icon_name, xo_color):
+        entry_box = Gtk.VBox()
         entry = Gtk.HBox()
+
+        entry_box.pack_start(entry, False, False, 0)
+        entry_box.pack_start(PaletteMenuItemSeparator(), False, False, 0)
 
         icon_widget = _HistoryIconWidget(icon_name, xo_color)
         entry.pack_start(icon_widget, False, False, 0)
 
         message = Gtk.VBox()
         message.props.border_width = style.DEFAULT_PADDING
-        entry.pack_start(message, True, True, 0)
+        entry.pack_start(message, False, False, 0)
 
         if summary:
+            alignment_box = Gtk.HBox()
             summary_widget = _HistorySummaryWidget(summary)
-            message.pack_start(summary_widget, False, False, 0)
+            alignment_box.pack_start(summary_widget, False, False, 0)
+            message.pack_start(alignment_box, False, False, 0)
+            message.set_spacing(2* style.DEFAULT_SPACING)
 
         body = re.sub(_BODY_FILTERS, '', body)
 
         if body:
+            alignment_box = Gtk.HBox()
             body_widget = _HistoryBodyWidget(body)
-            message.pack_start(body_widget, True, True, 0)
+            alignment_box.pack_start(body_widget, False, False, 0)
+            message.pack_start(alignment_box, False, False, 0)
+            message.set_spacing(style.DEFAULT_SPACING)
 
         if link:
             if link_text:
@@ -155,11 +160,13 @@ class _MessagesHistoryBox(Gtk.VBox):
             link_widget.get_child().set_use_markup(True)
             link_widget.connect('clicked', self.__connect_to_uri, link)
 
-            message.pack_start(link_widget, True, True, 0)
+            alignment_box = Gtk.HBox()
+            alignment_box.pack_start(link_widget, False, False, 0)
+            message.pack_start(alignment_box, False, False, 0)
 
-        entry.show_all()
-        self.pack_start(entry, True, True, 0)
-        self.reorder_child(entry, 0)
+        self.pack_start(entry_box, False, False, 0)
+        self.show_all()
+        self.reorder_child(entry_box, 0)
 
         self_width_ = self.props.width_request
         self_height = self.props.height_request
@@ -225,8 +232,11 @@ class HistoryPalette(Palette):
 
         palette_box = self._palette_box
         primary_box = self._primary_box
-        primary_box.hide()
-        palette_box.add(self._messages_box)
+
+        self._palette_box.remove(self._primary_box)
+        self._secondary_box.remove(self.action_bar)
+
+        palette_box.pack_start(self._messages_box, False, False, 0)
         palette_box.reorder_child(self._messages_box, 0)
 
         clear_option = PaletteMenuItem(_('Clear history'), 'dialog-cancel')
@@ -237,7 +247,7 @@ class HistoryPalette(Palette):
         self.set_content(vbox)
         vbox.show()
 
-        vbox.add(clear_option)
+        vbox.pack_end(clear_option, False, False, 0)
 
         self.connect('popup', self.__notice_messages_cb)
 
