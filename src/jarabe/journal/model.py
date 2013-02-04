@@ -918,7 +918,8 @@ def write(metadata, file_path='', update_mtime=True, transfer_ownership=True):
                                                  file_path,
                                                  transfer_ownership)
     elif metadata.get('mountpoint', '/') == (WEBDAV_MOUNT_POINT + SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME):
-        filename = metadata['title']
+        filename = get_file_name(metadata['title'], metadata['mime_type'])
+        metadata['title'] = filename
 
         ip_address_or_dns_name = SCHOOL_SERVER_IP_ADDRESS_OR_DNS_NAME
         webdavmanager.get_remote_webdav_share_metadata(ip_address_or_dns_name)
@@ -1161,6 +1162,12 @@ def get_file_name(title, mime_type):
     invalid_chars.extend([chr(x) for x in range(0, 32)])
     for char in invalid_chars:
         file_name = file_name.replace(char, '_')
+
+    extension = mime.get_primary_extension(mime_type)
+    if extension is not None and extension:
+        extension = '.' + extension
+        if not file_name.endswith(extension):
+            file_name += extension
 
     return file_name
 
