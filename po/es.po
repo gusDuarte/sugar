@@ -908,14 +908,16 @@ msgid ""
 "System updates have been installed.\n"
 "Restarting your computer will ensure that they are applied correctly."
 msgstr ""
+"Las actualizaciones del sistema han sido instaladas.\n"
+"Reiniciar su computador asegurara que estos sean aplicados correctamente."
 
 #: src/jarabe/desktop/homewindow.py:137
 msgid "Please restart Sugar"
-msgstr ""
+msgstr "Por favor reinicie sugar"
 
 #: src/jarabe/desktop/homewindow.py:138
 msgid "Please restart Sugar to take into account new updates"
-msgstr ""
+msgstr "Por favor reinicie sugar para tener en cuenta nuevas actualizaciones"
 
 #: src/jarabe/desktop/homewindow.py:265 src/jarabe/frame/zoomtoolbar.py:48
 msgid "Neighborhood"
