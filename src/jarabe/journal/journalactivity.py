@@ -447,7 +447,6 @@ class JournalActivity(JournalWindow):
             self.show_main_view()
         elif (not switch) and (self._editing_mode):
             self._editing_mode = False
-            self.get_list_view().enable_drag_and_copy()
             self.show_main_view()
 
     def get_list_view(self):
