@@ -550,7 +550,8 @@ class ShellModel(GObject.GObject):
                                                                       xid)
                 gdk_window.set_decorations(0)
 
-                if service_name == 'org.laptop.JournalActivity':
+                if (service_name == 'org.laptop.JournalActivity') or \
+                   (service_name == 'org.laptop.Oficina'):
                     window.maximize()
                 else:
                     from jarabe.view.keyhandler import get_handle_unaccumulate_osk_func
