@@ -47,9 +47,12 @@ def read_all_languages():
 
     #FIXME: This is a temporary workaround for locales that are essential to
     # OLPC, but are not in Glibc yet.
-    locales.append(('Kreyol', 'Haiti', 'ht_HT.utf8'))
-    locales.append(('Dari', 'Afghanistan', 'fa_AF.utf8'))
-    locales.append(('Pashto', 'Afghanistan', 'ps_AF.utf8'))
+    from gi.repository import GConf
+    client = GConf.Client.get_default()
+    if client.get_bool('/desktop/sugar/extensions/language/show_additional_olpc_languages'):
+        locales.append(('Kreyol', 'Haiti', 'ht_HT.utf8'))
+        locales.append(('Dari', 'Afghanistan', 'fa_AF.utf8'))
+        locales.append(('Pashto', 'Afghanistan', 'ps_AF.utf8'))
 
     locales.sort()
     return locales

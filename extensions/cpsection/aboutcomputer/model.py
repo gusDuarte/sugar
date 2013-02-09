@@ -157,7 +157,7 @@ def get_model_laptop():
     model = model.rstrip('\x00')
 
     if _is_model_change_required():
-        model_converter = { 'XO-4 HS Touch' : 'XO Duo' }
+        model_converter = { 'XO-4 HS Touch' : 'XO-duo' }
 
         if model in model_converter.keys():
             model = model_converter[model]
