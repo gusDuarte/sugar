@@ -618,6 +618,11 @@ class WirelessDeviceView(ToolButton):
                         % channel
             else:
                 self._icon.props.icon_name = 'network-adhoc-%s' % channel
+
+            from jarabe.desktop.networkviews import USE_CEIBAL_SPECIFIC_ADHOC_ICONS
+            if USE_CEIBAL_SPECIFIC_ADHOC_ICONS is True:
+                self._icon.props.icon_name = 'ceibal-' + self._icon.props.icon_name
+
             self._icon.props.base_color = profile.get_color()
 
         if (state >= network.NM_DEVICE_STATE_PREPARE) and \

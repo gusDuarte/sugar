@@ -23,7 +23,7 @@ import uuid
 
 import dbus
 from gi.repository import GLib
-
+from gi.repository import GConf
 from gi.repository import Gtk
 
 import string
@@ -57,6 +57,10 @@ _FILTERED_ALPHA = 0.33
 SETTING_TYPE_STRING = 1
 SETTING_TYPE_LIST = 2
 SETTING_TYPE_CHOOSER = 3
+
+gconf_client = GConf.Client.get_default()
+USE_CEIBAL_SPECIFIC_ADHOC_ICONS = \
+        gconf_client.get_bool('/desktop/sugar/network/use_ceibal_specific_adhoc_icons') is True
 
 
 class AuthenticationType:
@@ -370,6 +374,10 @@ class WirelessNetworkView(EventPulsingIcon):
                 icon_name = 'network-adhoc-%s-connected' % channel
             else:
                 icon_name = 'network-adhoc-%s' % channel
+
+            if USE_CEIBAL_SPECIFIC_ADHOC_ICONS:
+                icon_name = 'ceibal-' + icon_name
+
             self.props.icon_name = icon_name
             icon = self._palette.props.icon
             icon.props.icon_name = icon_name
@@ -675,6 +683,9 @@ class SugarAdhocView(EventPulsingIcon):
     """
 
     _ICON_NAME = 'network-adhoc-'
+    if USE_CEIBAL_SPECIFIC_ADHOC_ICONS:
+        _ICON_NAME = 'ceibal-' + _ICON_NAME
+
     _NAME = 'Ad-hoc Network '
 
     def __init__(self, channel):
