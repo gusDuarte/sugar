@@ -14,6 +14,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import logging
+
 from gi.repository import Gdk
 
 from gi.repository import SugarExt
@@ -21,7 +23,11 @@ from gi.repository import SugarGestures
 
 from sugar3.graphics import style
 
+from jarabe.model import shell
+
 _instance = None
+
+
 
 
 class GestureHandler(object):
@@ -36,6 +42,7 @@ class GestureHandler(object):
 
     def __init__(self, frame):
         self._frame = frame
+        self._shell_model = shell.get_model()
 
         self._gesture_grabber = SugarExt.GestureGrabber()
         self._controller = []
@@ -52,7 +59,9 @@ class GestureHandler(object):
         for controller in self._controller:
             self._gesture_grabber.remove(controller)
 
-        self._track_gesture_for_area(SugarGestures.SwipeDirectionFlags.DOWN,
+        self._track_gesture_for_area(SugarGestures.SwipeDirectionFlags.DOWN |
+                                     SugarGestures.SwipeDirectionFlags.LEFT |
+                                     SugarGestures.SwipeDirectionFlags.RIGHT,
                                      0, 0, Gdk.Screen.width(),
                                      style.GRID_CELL_SIZE)
 
@@ -68,10 +77,18 @@ class GestureHandler(object):
         self._controller.append(swipe)
 
     def __swipe_ended_cb(self, controller, event_direction):
-        if self._frame.is_visible():
-            self._frame.hide()
-        else:
-            self._frame.show()
+        if event_direction == SugarGestures.SwipeDirection.DOWN:
+            if self._frame.is_visible():
+                self._frame.hide()
+            else:
+                self._frame.show()
+
+        elif event_direction == SugarGestures.SwipeDirection.LEFT:
+            self._shell_model.set_previous_zoom_level()
+
+        elif event_direction == SugarGestures.SwipeDirection.RIGHT:
+            self._shell_model.set_next_zoom_level()
+
 
 
 def setup(frame):

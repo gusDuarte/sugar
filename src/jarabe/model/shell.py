@@ -356,6 +356,8 @@ class ShellModel(GObject.GObject):
     ZOOM_HOME = 2
     ZOOM_ACTIVITY = 3
 
+    _ZOOM_LEVELS = [ZOOM_MESH, ZOOM_GROUP, ZOOM_HOME, ZOOM_ACTIVITY]
+
     def __init__(self):
         GObject.GObject.__init__(self)
 
@@ -434,6 +436,19 @@ class ShellModel(GObject.GObject):
         return self._zoom_level
 
     zoom_level = property(_get_zoom_level)
+
+    def _get_zoom_level_by_index(self, idx):
+        # Use the modulo operator to iterate the list as a circular
+        # list.
+        return self._ZOOM_LEVELS[(idx) % len(self._ZOOM_LEVELS)]
+
+    def set_previous_zoom_level(self):
+        new_level = self._get_zoom_level_by_index(self.zoom_level - 1)
+        self.set_zoom_level(new_level)
+
+    def set_next_zoom_level(self):
+        new_level = self._get_zoom_level_by_index(self.zoom_level + 1)
+        self.set_zoom_level(new_level)
 
     def _get_activities_with_window(self):
         ret = []
