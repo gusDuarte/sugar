@@ -49,7 +49,13 @@ def read_all_languages():
     # OLPC, but are not in Glibc yet.
     from gi.repository import GConf
     client = GConf.Client.get_default()
-    if client.get_bool('/desktop/sugar/extensions/language/show_additional_olpc_languages'):
+
+    show_additional_languages = True
+    gconf_key = client.get_bool('/desktop/sugar/extensions/language/disable_showing_additional_olpc_languages')
+    if gconf_key is True:
+        show_additional_languages = False
+
+    if show_additional_languages is True:
         locales.append(('Kreyol', 'Haiti', 'ht_HT.utf8'))
         locales.append(('Dari', 'Afghanistan', 'fa_AF.utf8'))
         locales.append(('Pashto', 'Afghanistan', 'ps_AF.utf8'))
