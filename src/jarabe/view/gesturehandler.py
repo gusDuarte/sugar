@@ -83,10 +83,10 @@ class GestureHandler(object):
             else:
                 self._frame.show()
 
-        elif event_direction == SugarGestures.SwipeDirection.LEFT:
+        elif event_direction == SugarGestures.SwipeDirection.RIGHT:
             self._shell_model.set_previous_zoom_level()
 
-        elif event_direction == SugarGestures.SwipeDirection.RIGHT:
+        elif event_direction == SugarGestures.SwipeDirection.LEFT:
             self._shell_model.set_next_zoom_level()
 
 
