@@ -39,10 +39,6 @@ _VOLUME_STEP = sound.VOLUME_STEP
 _VOLUME_MAX = 100
 _TABBING_MODIFIER = Gdk.ModifierType.MOD1_MASK
 
-screen = Gdk.Screen.get_default()
-_SCREEN_WIDTH = screen.get_width()
-_SCREEN_HEIGHT = screen.get_height()
-
 _actions_table = {
     'F1': 'zoom_mesh',
     'F2': 'zoom_group',
@@ -187,15 +183,18 @@ class KeyHandler(object):
         if not is_ebook_mode:
             return
 
+        screen = Gdk.Screen.get_default()
         active_window = screen.get_active_window()
 
         client = GConf.Client.get_default()
         factor = client.get_float('/desktop/sugar/graphics/window_osk_scaling_factor')
-        active_window.resize(_SCREEN_WIDTH, _SCREEN_HEIGHT * factor)
+
+        active_window.resize(screen.get_width(), screen.get_height() * factor)
 
     def handle_unaccumulate_osk(self, event_time):
+        screen = Gdk.Screen.get_default()
         active_window = screen.get_active_window()
-        active_window.resize(_SCREEN_WIDTH, _SCREEN_HEIGHT)
+        active_window.resize(screen.get_width(), screen.get_height())
 
     def _key_pressed_cb(self, grabber, keycode, state, event_time):
         key = grabber.get_key(keycode, state)
