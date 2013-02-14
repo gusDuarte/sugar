@@ -203,6 +203,19 @@ class AboutComputer(SectionView):
         label_info.show()
         vbox_copyright.pack_start(label_info, False, True, 0)
 
+        from gi.repository import GConf
+        client = GConf.Client.get_default()
+        if client.get_bool('/desktop/sugar/extensions/aboutcomputer/show_additional_au_copyright') is True:
+            fonts_text = _('School Fonts © 2011 Free for use as part of'
+                           ' the One Laptop per Child and Sugar projects.'
+                           ' For any other use, visit: http://www.schoolfonts.com.au/')
+            label_fonts = Gtk.Label(label=fonts_text)
+            label_fonts.set_alignment(0, 0)
+            label_fonts.set_line_wrap(True)
+            label_fonts.set_size_request(Gdk.Screen.width() / 2, -1)
+            label_fonts.show()
+            vbox_copyright.pack_start(label_fonts, False, True, 0)
+
         expander = Gtk.Expander(label=_('Full license:'))
         expander.connect('notify::expanded', self.license_expander_cb)
         expander.show()
