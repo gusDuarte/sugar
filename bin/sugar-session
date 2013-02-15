@@ -219,6 +219,14 @@ def setup_keyboard_cb():
     except Exception:
         logging.exception('Error during keyboard configuration')
 
+
+def show_hidden_wireless_networks():
+    from jarabe.journal.misc import get_hidden_ssids
+    for ssid in get_hidden_ssids():
+        subprocess.call('sudo iwconfig eth0 essid ' + ssid, shell=True)
+	subprocess.call('sleep 10', shell=True)
+
+
 def setup_window_manager():
     logging.debug('STARTUP: window_manager')
 
@@ -250,6 +258,7 @@ def arrange_for_setup_frame_cb():
     MONITORS.append(monitor)
 
 def bootstrap():
+    show_hidden_wireless_networks()
     setup_window_manager()
 
     from jarabe.view import launcher
