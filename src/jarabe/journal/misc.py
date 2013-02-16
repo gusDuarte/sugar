@@ -41,7 +41,6 @@ from jarabe.journal import model
 from jarabe.journal import journalwindow
 
 _NOT_AVAILABLE = _('Not available')
-HIDDEN_SSID_FILE = os.path.expanduser('~/.sugar/default/hidden_ssid')
 
 def _get_icon_for_mime(mime_type):
     generic_types = mime.get_all_generic_types()
@@ -359,18 +358,3 @@ def get_backup_identifier():
     if serial_number is _NOT_AVAILABLE:
         serial_number = get_nick()
     return serial_number
-
-
-def get_hidden_ssids():
-    ssids = []
-
-    # If the file does not exist, return.
-    if not os.path.exists(HIDDEN_SSID_FILE):
-        return ssids
-
-    f = open(HIDDEN_SSID_FILE, 'r')
-    for ssid in f.readlines():
-        ssids.append(ssid.rstrip('\n'))
-    f.close()
-
-    return ssids
