@@ -26,6 +26,7 @@ from gettext import gettext as _
 from gi.repository import GConf
 
 from jarabe.model import network
+from jarabe.journal.misc import HIDDEN_SSID_FILE
 
 
 _NM_SERVICE = 'org.freedesktop.NetworkManager'
@@ -160,6 +161,33 @@ def set_publish_information(value):
     client = GConf.Client.get_default()
     client.set_bool('/desktop/sugar/collaboration/publish_gadget', value)
     return 0
+
+
+def get_ssids():
+    from jarabe.journal.misc import get_hidden_ssids
+    return get_hidden_ssids()
+
+
+def set_ssids(ssids):
+
+    # First remove the old ssid-file, if it exists.
+    if os.path.exists(HIDDEN_SSID_FILE):
+        try:
+            os.remove(HIDDEN_SSID_FILE)
+        except:
+            _logger.exception('Error removing file.')
+            return
+
+    # Do nothing and return, if the values-list is empty
+    if len(ssids) == 0:
+        return
+
+    # If we reach here, we have a non-empty ssid-values-list.
+    f = open(HIDDEN_SSID_FILE, 'w')
+    for ssid in ssids:
+        if len(ssid) > 0:
+            f.write(ssid + '\n')
+    f.close()
 
 
 def launch_nm_connection_editor():

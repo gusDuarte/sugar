@@ -27,6 +27,8 @@ import subprocess
 import logging
 
 from sugar3.graphics import style
+from sugar3.graphics.alert import Alert
+from sugar3.graphics.icon import Icon
 
 from jarabe.controlpanel.sectionview import SectionView
 from jarabe.controlpanel.inlinealert import InlineAlert
@@ -505,6 +507,152 @@ class GConfOptionalSettingsBox(OptionalSettingsBox, GConfMixin):
         self.pack_start(self._settings_box, False, False, 0)
 
 
+class AddRemoveWidget(Gtk.HBox):
+
+    def __init__(self, label, add_button_clicked_cb,
+                 remove_button_clicked_cb, index):
+        Gtk.Box.__init__(self)
+        self.set_homogeneous(False)
+        self.set_spacing(10)
+
+        self._index = index
+        self._add_button_added = False
+        self._remove_button_added = False
+
+        self._entry_box = Gtk.Entry()
+        self._entry_box.set_text(label)
+        self.pack_start(self._entry_box, False, False, 0)
+        self._entry_box.show()
+
+        add_icon = Icon(icon_name='list-add')
+        self._add_button = Gtk.Button()
+        self._add_button.set_image(add_icon)
+        self._add_button.connect('clicked',
+                                 add_button_clicked_cb,
+                                 self)
+
+        remove_icon = Icon(icon_name='list-remove')
+        self._remove_button = Gtk.Button()
+        self._remove_button.set_image(remove_icon)
+        self._remove_button.connect('clicked',
+                                    remove_button_clicked_cb,
+                                    self)
+
+        self.__add_add_button()
+        self.__add_remove_button()
+
+    def _get_index(self):
+        return self._index
+
+    def _set_index(self, value):
+        self._index = value
+
+    def _get_entry(self):
+        return self._entry_box.get_text()
+
+    def __add_add_button(self):
+        self.pack_start(self._add_button, False, False, 0)
+        self._add_button.show()
+        self._add_button_added = True
+
+    def _remove_remove_button_if_not_already(self):
+        if self._remove_button_added:
+            self.__remove_remove_button()
+
+    def __remove_remove_button(self):
+        self.remove(self._remove_button)
+        self._remove_button_added = False
+
+    def _add_remove_button_if_not_already(self):
+        if not self._remove_button_added:
+            self.__add_remove_button()
+
+    def __add_remove_button(self):
+        self.pack_start(self._remove_button, False, False, 0)
+        self._remove_button.show()
+        self._remove_button_added = True
+
+
+class MultiWidget(Gtk.VBox):
+
+    def __init__(self, current_entries, model):
+        Gtk.VBox.__init__(self)
+        self._initial_entries = current_entries
+        self._model = model
+
+        self.fill_entries(self._initial_entries)
+
+    def fill_entries(self, entries_list):
+        if len(entries_list) == 0:
+            self._add_widget('')
+        else:
+            for entry in entries_list:
+                self._add_widget(entry)
+
+    def _add_widget(self, label):
+        new_widget = AddRemoveWidget(label,
+                                     self.__add_button_clicked_cb,
+                                     self.__remove_button_clicked_cb,
+                                     len(self.get_children()))
+        self.add(new_widget)
+        new_widget.show()
+        self.show()
+        self._update_remove_button_statuses()
+
+    def __add_button_clicked_cb(self, add_button,
+                                      add_button_container):
+        self._add_widget('')
+        self._update_remove_button_statuses()
+
+    def __remove_button_clicked_cb(self, remove_button,
+                                   remove_button_container):
+        for child in self.get_children():
+            if child._get_index() > remove_button_container._get_index():
+                child._set_index(child._get_index() - 1)
+
+        self.remove(remove_button_container)
+        self._update_remove_button_statuses()
+
+    def _update_remove_button_statuses(self):
+        children = self.get_children()
+
+        # Now, if there is only one entry, remove-button
+        # should not be shown.
+        if len(children) == 1:
+            children[0]._remove_remove_button_if_not_already()
+
+        # Alternatively, if there are more than 1 entries,
+        # remove-button should be shown for all.
+        if len(children) > 1:
+            for child in children:
+                child._add_remove_button_if_not_already()
+
+    def _get_entries(self):
+        entries = []
+        for child in self.get_children():
+            entry = child._get_entry()
+            if len(entry) > 0:
+                entries.append(child._get_entry())
+
+        return entries
+
+    def _commit(self, widget):
+        current_list = self._get_entries()
+        self._model.set_ssids(current_list)
+
+    def undo(self):
+        current_list = self._get_entries()
+        if current_list != self._initial_entries:
+            for child in self.get_children():
+                self.remove(child)
+
+            self.fill_entries(self._initial_entries)
+
+    def changed(self):
+        current_list = self._get_entries()
+        return current_list != self._initial_entries
+
+
 class Network(SectionView):
     def __init__(self, model, alerts):
         SectionView.__init__(self)
@@ -657,6 +805,9 @@ class Network(SectionView):
         proxy_separator.show()
 
         self._add_proxy_section(workspace)
+
+        if client.get_bool('/desktop/sugar/extensions/network/configure_hidden_ssids_feature_available') is True:
+            self._setup_hidden_ssid_section(workspace)
 
         if client.get_bool('/desktop/sugar/extensions/network/show_nm_connection_editor') is True:
             box_nm_connection_editor = self.add_nm_connection_editor_launcher(workspace)
@@ -829,6 +980,35 @@ class Network(SectionView):
         no_proxy_box.show()
         proxy_box.pack_start(no_proxy_box, False, False, 0)
         self._undo_objects.append(no_proxy_box)
+
+
+    def _setup_hidden_ssid_section(self, workspace):
+        separator_hidden_network = Gtk.HSeparator()
+        workspace.pack_start(separator_hidden_network, False, False, 0)
+        separator_hidden_network.show()
+
+        label_hidden_network = Gtk.Label(_('Hidden Networks'))
+        label_hidden_network.set_alignment(0, 0)
+        workspace.pack_start(label_hidden_network, False, False, 0)
+        label_hidden_network.show()
+        box_hidden_network = Gtk.VBox()
+        box_hidden_network.set_border_width(style.DEFAULT_SPACING * 2)
+        box_hidden_network.set_spacing(style.DEFAULT_SPACING)
+
+        info = Gtk.Label(_("Enter the SSIDs of the hidden networks."))
+        info.set_alignment(0, 0)
+        info.set_line_wrap(True)
+        box_hidden_network.pack_start(info, False, False, 0)
+        info.show()
+
+        self._widget_table = MultiWidget(self._model.get_ssids(), self._model)
+        box_hidden_network.pack_start(self._widget_table, False, False, 0)
+        self._widget_table.show()
+
+        workspace.pack_start(box_hidden_network, False, False, 0)
+        box_hidden_network.show()
+
+        self._undo_objects.append(self._widget_table)
 
     def setup(self):
         self._old_jabber_entry = self._model.get_jabber()
