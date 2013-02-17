@@ -186,10 +186,16 @@ class KeyHandler(object):
         screen = Gdk.Screen.get_default()
         active_window = screen.get_active_window()
 
-        client = GConf.Client.get_default()
-        factor = client.get_float('/desktop/sugar/graphics/window_osk_scaling_factor')
+        screen_width  = screen.get_width()
+        screen_height = screen.get_height()
 
-        active_window.resize(screen.get_width(), screen.get_height() * factor)
+        client = GConf.Client.get_default()
+        if screen_width > screen_height:
+            factor = client.get_float('/desktop/sugar/graphics/window_osk_scaling_factor')
+        else:
+            factor = client.get_float('/desktop/sugar/graphics/window_osk_scaling_factor_in_portrait_mode')
+
+        active_window.resize(screen_width, screen_height * factor)
 
     def handle_unaccumulate_osk(self, event_time):
         screen = Gdk.Screen.get_default()
