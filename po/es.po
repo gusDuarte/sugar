@@ -346,7 +346,7 @@ msgid ""
 "network."
 msgstr ""
 "El servidor es equivalente al cuarto en el cual se está; la gente en el "
-"mismo servidor podrá verse entre sí, aun cuando no esten en la misma red."
+"mismo servidor podrá verse entre sí, aun cuando no estén en la misma red."
 
 #: extensions/cpsection/network/view.py:625
 msgid "Server:"
