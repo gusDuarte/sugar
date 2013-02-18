@@ -40,6 +40,14 @@ from jarabe.journal import misc
 from jarabe.util.normalize import normalize_string
 
 
+gconf_client = GConf.Client.get_default()
+DISPLAY_USER_FRIENDLY_MESSAGE_FOR_NEVER_USED_ACTIVITIES = \
+        gconf_client.get_bool('/desktop/sugar/display_user_friendly_message_for_never_used_activities')
+if DISPLAY_USER_FRIENDLY_MESSAGE_FOR_NEVER_USED_ACTIVITIES is True:
+    NEVER_USED_ACTIVITIES_TIME = \
+            gconf_client.get_string('/desktop/sugar/never_used_activities_time')
+
+
 class ActivitiesTreeView(Gtk.TreeView):
     __gtype_name__ = 'SugarActivitiesTreeView'
 
@@ -262,6 +270,11 @@ class ListModel(Gtk.TreeModelSort):
                     '<span style="italic" weight="light">%s</span>' % \
                             (activity_info.get_name(), tags)
 
+        elapsed_string = util.timestamp_to_elapsed_string(timestamp)
+        if DISPLAY_USER_FRIENDLY_MESSAGE_FOR_NEVER_USED_ACTIVITIES is True:
+            if str(timestamp) == NEVER_USED_ACTIVITIES_TIME:
+                elapsed_string = _('Not used yet')
+
         self._model.append([activity_info.get_bundle_id(),
                             favorite,
                             activity_info.get_icon(),
@@ -269,7 +282,7 @@ class ListModel(Gtk.TreeModelSort):
                             version,
                             _('Version %s') % version,
                             int(timestamp),
-                            util.timestamp_to_elapsed_string(timestamp)])
+                            elapsed_string])
 
     def set_visible_func(self, func):
         self._model_filter.set_visible_func(func)
