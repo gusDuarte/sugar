@@ -59,9 +59,7 @@ class GestureHandler(object):
         for controller in self._controller:
             self._gesture_grabber.remove(controller)
 
-        self._track_gesture_for_area(SugarGestures.SwipeDirectionFlags.DOWN |
-                                     SugarGestures.SwipeDirectionFlags.LEFT |
-                                     SugarGestures.SwipeDirectionFlags.RIGHT,
+        self._track_gesture_for_area(SugarGestures.SwipeDirectionFlags.DOWN,
                                      0, 0, Gdk.Screen.width(),
                                      style.GRID_CELL_SIZE)
 
