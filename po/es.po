@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-04 12:23+0530\n"
+"POT-Creation-Date: 2013-02-22 09:40+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,13 +71,13 @@ msgstr "No disponible"
 msgid "%s days remaining"
 msgstr ""
 
-#: extensions/cpsection/aboutcomputer/model.py:306
-#: extensions/cpsection/aboutcomputer/model.py:342
-#: extensions/cpsection/aboutcomputer/model.py:347
+#: extensions/cpsection/aboutcomputer/model.py:307
+#: extensions/cpsection/aboutcomputer/model.py:343
+#: extensions/cpsection/aboutcomputer/model.py:348
 msgid "Information not available."
 msgstr "Información no disponible."
 
-#: extensions/cpsection/aboutcomputer/model.py:311
+#: extensions/cpsection/aboutcomputer/model.py:312
 msgid "No update yet!"
 msgstr "¡Actualización no disponible aún!"
 
@@ -147,9 +147,97 @@ msgstr ""
 "esta invitado a cambiarla y/o distribuir copias bajo ciertas condiciones que "
 "se describen en ella."
 
-#: extensions/cpsection/aboutcomputer/view.py:206
+#: extensions/cpsection/aboutcomputer/view.py:209
+msgid ""
+"School Fonts © 2011 Free for use as part of the One Laptop per Child and "
+"Sugar projects. For any other use, visit: http://www.schoolfonts.com.au/"
+msgstr ""
+
+#: extensions/cpsection/aboutcomputer/view.py:219
 msgid "Full license:"
 msgstr "Licencia completa:"
+
+#: extensions/cpsection/accessibility/view.py:68
+#: extensions/cpsection/keyboard/__init__.py:21
+#: extensions/cpsection/keyboard/view.py:32
+msgid "Keyboard"
+msgstr "Teclado"
+
+#: extensions/cpsection/accessibility/view.py:90
+msgid "Screen"
+msgstr "Pantalla"
+
+#: extensions/cpsection/accessibility/view.py:110
+msgid "Mouse"
+msgstr "Ratón"
+
+#: extensions/cpsection/accessibility/view.py:196
+msgid "Mouse Keys"
+msgstr "Teclas del Ratón"
+
+#: extensions/cpsection/accessibility/view.py:203
+msgid "Move the mouse pointer with keyboard number."
+msgstr "Mueve el puntero del ratón con el teclado numérico."
+
+#: extensions/cpsection/accessibility/view.py:209
+msgid "Sticky Keys"
+msgstr "Teclas Pegajosas"
+
+#: extensions/cpsection/accessibility/view.py:216
+msgid ""
+"Instead of having to press two keys at once (such as CTRL + Q), you can "
+"press one key at a time."
+msgstr ""
+"En lugar de tener que presionar dos teclas a la vez (tales como CTRL + Q), "
+"puedes presionar de a una por vez."
+
+#: extensions/cpsection/accessibility/view.py:223
+msgid "Bounce Keys"
+msgstr "Teclas de Rebote"
+
+#: extensions/cpsection/accessibility/view.py:230
+msgid "Ignore rapid, repeated keypresses of the same key."
+msgstr "Ignora rápidas y repetidas pulsaciones de la misma tecla."
+
+#: extensions/cpsection/accessibility/view.py:236
+msgid "Virtual keyboard"
+msgstr "Teclado virtual"
+
+#: extensions/cpsection/accessibility/view.py:248
+msgid "Show virtual keyboard on frame."
+msgstr "Muestra un teclado virtual en el cuadro."
+
+#: extensions/cpsection/accessibility/view.py:254
+msgid "Contrast"
+msgstr "Contraste"
+
+#: extensions/cpsection/accessibility/view.py:266
+msgid "Enables the color contrast of the graphic interface."
+msgstr "Habilita el contraste de color de la interfaz gráfica."
+
+#: extensions/cpsection/accessibility/view.py:272
+msgid "Capital letters"
+msgstr "Letras mayúsculas"
+
+#: extensions/cpsection/accessibility/view.py:284
+msgid "Shows capital letters in the user interface."
+msgstr "Muestra letras mayúsculas en la interfaz de usuario."
+
+#: extensions/cpsection/accessibility/view.py:290
+msgid "White Mouse"
+msgstr "Ratón Blanco"
+
+#: extensions/cpsection/accessibility/view.py:302
+msgid "Show the mouse cursor white."
+msgstr "Muestra el cursor del ratón blanco."
+
+#: extensions/cpsection/accessibility/view.py:310
+msgid "Acceleration: "
+msgstr "Aceleración:"
+
+#: extensions/cpsection/accessibility/view.py:326
+msgid "Controller acceleration mouse."
+msgstr "Controla la aceleración del ratón."
 
 #: extensions/cpsection/datetime/__init__.py:21
 msgid "Date & Time"
@@ -201,11 +289,6 @@ msgstr "Esquina"
 msgid "Edge"
 msgstr "Borde"
 
-#: extensions/cpsection/keyboard/__init__.py:21
-#: extensions/cpsection/keyboard/view.py:32
-msgid "Keyboard"
-msgstr "Teclado"
-
 #: extensions/cpsection/keyboard/view.py:190
 msgid "Keyboard Model"
 msgstr "Modelo de teclado"
@@ -228,12 +311,12 @@ msgid "Could not access ~/.i18n. Create standard settings."
 msgstr ""
 "No se puede acceder a ~/.i18n. Crear configuración internacional estándar."
 
-#: extensions/cpsection/language/model.py:129
+#: extensions/cpsection/language/model.py:138
 #, python-format
 msgid "Language for code=%s could not be determined."
 msgstr "El lenguaje del código=%s no pudo ser determinado."
 
-#: extensions/cpsection/language/model.py:152
+#: extensions/cpsection/language/model.py:161
 #, python-format
 msgid "Sorry I do not speak '%s'."
 msgstr "Lo siento, yo no hablo '%s'."
@@ -271,12 +354,12 @@ msgid "Plan:"
 msgstr "Plan:"
 
 #: extensions/cpsection/modemconfiguration/view.py:123
-#: extensions/cpsection/network/view.py:760
+#: extensions/cpsection/network/view.py:911
 msgid "Username:"
 msgstr "Nombre de usuario:"
 
 #: extensions/cpsection/modemconfiguration/view.py:126
-#: extensions/cpsection/network/view.py:766
+#: extensions/cpsection/network/view.py:917
 msgid "Password:"
 msgstr "Contraseña:"
 
@@ -293,53 +376,53 @@ msgid "Personal Identity Number (PIN):"
 msgstr "Número de identificación personal (PIN):"
 
 #: extensions/cpsection/network/__init__.py:21
-#: extensions/cpsection/network/view.py:37
+#: extensions/cpsection/network/view.py:39
 msgid "Network"
 msgstr "Red"
 
-#: extensions/cpsection/network/model.py:79
+#: extensions/cpsection/network/model.py:80
 msgid "State is unknown."
 msgstr "Estado desconocido."
 
-#: extensions/cpsection/network/model.py:107
+#: extensions/cpsection/network/model.py:108
 msgid "Error in specified radio argument use on/off."
 msgstr "Error en argumento especificado de radio use on/off."
 
-#: extensions/cpsection/network/model.py:158
+#: extensions/cpsection/network/model.py:159
 msgid "Error in specified argument use 0/1."
 msgstr "Error en argumento especificado use 0/1."
 
-#: extensions/cpsection/network/view.py:40
+#: extensions/cpsection/network/view.py:42
 msgid "Please restart your computer for changes to take effect."
 msgstr "Por favor reinicia tu computadora para que los cambios tengan efecto."
 
-#: extensions/cpsection/network/view.py:546
+#: extensions/cpsection/network/view.py:694
 msgid "Wireless"
 msgstr "Inalámbrica"
 
-#: extensions/cpsection/network/view.py:554
+#: extensions/cpsection/network/view.py:702
 msgid "Turn off the wireless radio to save battery life"
 msgstr "Apague la radio inalámbrica y ahorre vida de batería"
 
-#: extensions/cpsection/network/view.py:567
+#: extensions/cpsection/network/view.py:715
 msgid "Radio"
 msgstr "Radio"
 
-#: extensions/cpsection/network/view.py:583
+#: extensions/cpsection/network/view.py:731
 #, fuzzy
 msgid "Discard network history if you have trouble connecting to the network"
 msgstr ""
 "Descartar el historial de la red si tiene problemas conectandose a la red."
 
-#: extensions/cpsection/network/view.py:592
+#: extensions/cpsection/network/view.py:740
 msgid "Discard network history"
 msgstr "Descarte historial de la red"
 
-#: extensions/cpsection/network/view.py:607
+#: extensions/cpsection/network/view.py:755
 msgid "Collaboration"
 msgstr "Colaboración"
 
-#: extensions/cpsection/network/view.py:615
+#: extensions/cpsection/network/view.py:763
 msgid ""
 "The server is the equivalent of what room you are in; people on the same "
 "server will be able to see each other, even when they aren't on the same "
@@ -348,34 +431,34 @@ msgstr ""
 "El servidor es equivalente al cuarto en el cual se está; la gente en el "
 "mismo servidor podrá verse entre sí, aun cuando no estén en la misma red."
 
-#: extensions/cpsection/network/view.py:625
+#: extensions/cpsection/network/view.py:773
 msgid "Server:"
 msgstr "Servidor:"
 
-#: extensions/cpsection/network/view.py:671
+#: extensions/cpsection/network/view.py:822
 msgid "Advanced Network Settings"
 msgstr "Configuración Avanzada de Red"
 
-#: extensions/cpsection/network/view.py:680
+#: extensions/cpsection/network/view.py:831
 msgid ""
 "For more specific network settings, use the NetworkManager Connection Editor."
 msgstr ""
 "Para opciones de configuración más específicas, use el Editor de Conexión "
 "NetworkManager."
 
-#: extensions/cpsection/network/view.py:698
+#: extensions/cpsection/network/view.py:849
 msgid "Launch"
 msgstr "Lanzar"
 
-#: extensions/cpsection/network/view.py:711
+#: extensions/cpsection/network/view.py:862
 msgid "Proxy"
 msgstr "Proxy"
 
-#: extensions/cpsection/network/view.py:728
+#: extensions/cpsection/network/view.py:879
 msgid "Configuration URL:"
 msgstr "Configuración de URL:"
 
-#: extensions/cpsection/network/view.py:737
+#: extensions/cpsection/network/view.py:888
 msgid ""
 "Web Proxy Autodiscovery (WPAD) is used when a Configuration URL is not "
 "provided. This is not recommended for untrusted public networks."
@@ -384,33 +467,41 @@ msgstr ""
 "Configuración de URL. Esto no es recomendable para redes públicas no "
 "confiables."
 
-#: extensions/cpsection/network/view.py:749
+#: extensions/cpsection/network/view.py:900
 msgid "HTTP Proxy:"
 msgstr "Proxy HTTP:"
 
-#: extensions/cpsection/network/view.py:772
+#: extensions/cpsection/network/view.py:923
 msgid "Use authentication"
 msgstr "Usar autentificación"
 
-#: extensions/cpsection/network/view.py:781
+#: extensions/cpsection/network/view.py:932
 msgid "HTTPS Proxy:"
 msgstr "Proxy HTTPS:"
 
-#: extensions/cpsection/network/view.py:792
+#: extensions/cpsection/network/view.py:943
 msgid "FTP Proxy:"
 msgstr "Proxy FTP:"
 
-#: extensions/cpsection/network/view.py:803
+#: extensions/cpsection/network/view.py:954
 msgid "SOCKS Proxy:"
 msgstr "Proxy SOCKS:"
 
-#: extensions/cpsection/network/view.py:817
+#: extensions/cpsection/network/view.py:968
 msgid "Method:"
 msgstr "Método:"
 
-#: extensions/cpsection/network/view.py:826
+#: extensions/cpsection/network/view.py:977
 msgid "Ignored Hosts"
 msgstr "Anfitriónes Ignorados"
+
+#: extensions/cpsection/network/view.py:990
+msgid "Hidden Networks"
+msgstr "Redes Ocultas"
+
+#: extensions/cpsection/network/view.py:998
+msgid "Enter the SSIDs of the hidden networks."
+msgstr "Escribir el SSIDs de la redes ocultas."
 
 #: extensions/cpsection/power/__init__.py:21
 msgid "Power"
@@ -463,23 +554,23 @@ msgid "IP address: %s"
 msgstr "Direccion IP: %s"
 
 #: extensions/deviceicon/network.py:94 extensions/deviceicon/network.py:318
-#: src/jarabe/desktop/networkviews.py:302
-#: src/jarabe/desktop/networkviews.py:726
+#: src/jarabe/desktop/networkviews.py:306
+#: src/jarabe/desktop/networkviews.py:737
 msgid "Disconnect"
 msgstr "Desconectar"
 
 #: extensions/deviceicon/network.py:119 extensions/deviceicon/network.py:310
-#: src/jarabe/desktop/networkviews.py:417
-#: src/jarabe/desktop/networkviews.py:767
-#: src/jarabe/desktop/networkviews.py:906
+#: src/jarabe/desktop/networkviews.py:425
+#: src/jarabe/desktop/networkviews.py:778
+#: src/jarabe/desktop/networkviews.py:917
 msgid "Connecting..."
 msgstr "Conectando..."
 
 # TODO: show the channel number
 #: extensions/deviceicon/network.py:124 extensions/deviceicon/network.py:192
-#: src/jarabe/desktop/networkviews.py:424
-#: src/jarabe/desktop/networkviews.py:773
-#: src/jarabe/desktop/networkviews.py:912
+#: src/jarabe/desktop/networkviews.py:432
+#: src/jarabe/desktop/networkviews.py:784
+#: src/jarabe/desktop/networkviews.py:923
 msgid "Connected"
 msgstr "Conectado"
 
@@ -511,9 +602,9 @@ msgstr "Privada (Clic para compartir)"
 msgid "Please wait..."
 msgstr "Espere por favor..."
 
-#: extensions/deviceicon/network.py:301 src/jarabe/desktop/networkviews.py:296
-#: src/jarabe/desktop/networkviews.py:720
-#: src/jarabe/desktop/networkviews.py:859
+#: extensions/deviceicon/network.py:301 src/jarabe/desktop/networkviews.py:300
+#: src/jarabe/desktop/networkviews.py:731
+#: src/jarabe/desktop/networkviews.py:870
 msgid "Connect"
 msgstr "Conectar"
 
@@ -526,7 +617,7 @@ msgstr "Desconectado"
 #: src/jarabe/desktop/keydialog.py:320 src/jarabe/frame/activitiestray.py:635
 #: src/jarabe/frame/activitiestray.py:737
 #: src/jarabe/frame/activitiestray.py:765
-#: src/jarabe/journal/journaltoolbox.py:461 src/jarabe/journal/palettes.py:230
+#: src/jarabe/journal/journaltoolbox.py:456 src/jarabe/journal/palettes.py:230
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -575,20 +666,20 @@ msgstr "Revise su configuración."
 msgid "Neighborhood (Click to unshare)"
 msgstr "Vecindario (Clic para dejar de compartir)"
 
-#: extensions/deviceicon/network.py:679
+#: extensions/deviceicon/network.py:684
 msgid "Mesh Network"
 msgstr "Red Malla"
 
-#: extensions/deviceicon/network.py:723
+#: extensions/deviceicon/network.py:728
 #, python-format
 msgid "Mesh Network %s"
 msgstr "Red Malla %s"
 
-#: extensions/deviceicon/network.py:846
+#: extensions/deviceicon/network.py:851
 msgid "No GSM connection available."
 msgstr "No se dispone de conexión GSM."
 
-#: extensions/deviceicon/network.py:847
+#: extensions/deviceicon/network.py:852
 msgid "Create a connection in the control panel."
 msgstr "Crear una conexión en el panel de control."
 
@@ -788,25 +879,30 @@ msgstr "Hecho"
 msgid "Ok"
 msgstr "Aceptar"
 
-#: src/jarabe/desktop/activitieslist.py:270
+#: src/jarabe/desktop/activitieslist.py:276
+#, fuzzy
+msgid "Not used yet"
+msgstr "¡Actualización no disponible aún!"
+
+#: src/jarabe/desktop/activitieslist.py:283
 #, python-format
 msgid "Version %s"
 msgstr "Versión %s"
 
-#: src/jarabe/desktop/activitieslist.py:371 src/jarabe/journal/listview.py:563
+#: src/jarabe/desktop/activitieslist.py:384 src/jarabe/journal/listview.py:563
 msgid "Clear search"
 msgstr "Limpiar búsqueda"
 
-#: src/jarabe/desktop/activitieslist.py:444
+#: src/jarabe/desktop/activitieslist.py:457
 #, fuzzy
 msgid "No matching activities"
 msgstr "No hay entradas coincidentes"
 
-#: src/jarabe/desktop/activitieslist.py:480
+#: src/jarabe/desktop/activitieslist.py:493
 msgid "Confirm erase"
 msgstr "Confirmar borrado"
 
-#: src/jarabe/desktop/activitieslist.py:482
+#: src/jarabe/desktop/activitieslist.py:495
 #, python-format
 msgid "Confirm erase: Do you want to permanently erase %s?"
 msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
@@ -815,27 +911,27 @@ msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
 # TODO: Implement stopping downloads
 # self._stop_item.connect('activate', self._stop_item_activate_cb)
 # self.append_menu_item(self._stop_item)
-#: src/jarabe/desktop/activitieslist.py:486
-#: src/jarabe/frame/clipboardmenu.py:65 src/jarabe/view/viewsource.py:285
+#: src/jarabe/desktop/activitieslist.py:499
+#: src/jarabe/frame/clipboardmenu.py:65 src/jarabe/view/viewsource.py:286
 msgid "Keep"
 msgstr "Guardar"
 
-#: src/jarabe/desktop/activitieslist.py:489
-#: src/jarabe/desktop/activitieslist.py:543
-#: src/jarabe/journal/journaltoolbox.py:409
-#: src/jarabe/journal/journaltoolbox.py:456
-#: src/jarabe/journal/journaltoolbox.py:651
-#: src/jarabe/journal/journaltoolbox.py:664
-#: src/jarabe/journal/journaltoolbox.py:672 src/jarabe/journal/palettes.py:203
+#: src/jarabe/desktop/activitieslist.py:502
+#: src/jarabe/desktop/activitieslist.py:557
+#: src/jarabe/journal/journaltoolbox.py:404
+#: src/jarabe/journal/journaltoolbox.py:451
+#: src/jarabe/journal/journaltoolbox.py:646
+#: src/jarabe/journal/journaltoolbox.py:659
+#: src/jarabe/journal/journaltoolbox.py:667 src/jarabe/journal/palettes.py:203
 #: src/jarabe/journal/palettes.py:225
 msgid "Erase"
 msgstr "Borrar"
 
-#: src/jarabe/desktop/activitieslist.py:559
+#: src/jarabe/desktop/activitieslist.py:572
 msgid "Remove favorite"
 msgstr "Remover favorito"
 
-#: src/jarabe/desktop/activitieslist.py:563
+#: src/jarabe/desktop/activitieslist.py:576
 msgid "Make favorite"
 msgstr "Hacer favorito"
 
@@ -850,17 +946,17 @@ msgid "Ring"
 msgstr "Anillo"
 
 # TRANS: label for the spiral layout in the favorites view
-#: src/jarabe/desktop/favoriteslayout.py:450
+#: src/jarabe/desktop/favoriteslayout.py:460
 msgid "Spiral"
 msgstr "Espiral"
 
 # TRANS: label for the box layout in the favorites view
-#: src/jarabe/desktop/favoriteslayout.py:518
+#: src/jarabe/desktop/favoriteslayout.py:528
 msgid "Box"
 msgstr "Caja"
 
 # TRANS: label for the box layout in the favorites view
-#: src/jarabe/desktop/favoriteslayout.py:561
+#: src/jarabe/desktop/favoriteslayout.py:571
 msgid "Triangle"
 msgstr "Triángulo"
 
@@ -966,7 +1062,7 @@ msgid "Wireless Security:"
 msgstr "Seguridad inalámbrica:"
 
 # TRANS: Action label for resuming an activity.
-#: src/jarabe/desktop/meshbox.py:86 src/jarabe/journal/journaltoolbox.py:512
+#: src/jarabe/desktop/meshbox.py:86 src/jarabe/journal/journaltoolbox.py:507
 #: src/jarabe/journal/palettes.py:133 src/jarabe/view/palettes.py:100
 msgid "Resume"
 msgstr "Retomar"
@@ -975,12 +1071,12 @@ msgstr "Retomar"
 msgid "Join"
 msgstr "Unirse"
 
-#: src/jarabe/desktop/networkviews.py:714
+#: src/jarabe/desktop/networkviews.py:725
 #, python-format
 msgid "Ad-hoc Network %d"
 msgstr "Red específica %d"
 
-#: src/jarabe/desktop/networkviews.py:854
+#: src/jarabe/desktop/networkviews.py:865
 #, python-format
 msgid "Mesh Network %d"
 msgstr "Red Malla %d"
@@ -1172,7 +1268,7 @@ msgstr "Fecha: %s"
 msgid "Size: %s"
 msgstr "Tamaño: %s"
 
-#: src/jarabe/journal/expandedentry.py:321 src/jarabe/journal/misc.py:109
+#: src/jarabe/journal/expandedentry.py:321 src/jarabe/journal/misc.py:110
 msgid "No date"
 msgstr "Sin fecha"
 
@@ -1202,66 +1298,66 @@ msgstr "Parar"
 msgid "Continue"
 msgstr "Continuar"
 
-#: src/jarabe/journal/journaltoolbox.py:143
+#: src/jarabe/journal/journaltoolbox.py:141
 msgid "Anytime"
 msgstr "Cualquier momento"
 
-#: src/jarabe/journal/journaltoolbox.py:145
+#: src/jarabe/journal/journaltoolbox.py:143
 msgid "Today"
 msgstr "Hoy"
 
-#: src/jarabe/journal/journaltoolbox.py:147
+#: src/jarabe/journal/journaltoolbox.py:145
 msgid "Since yesterday"
 msgstr "Desde ayer"
 
 # TRANS: Filter entries modified during the last 7 days.
-#: src/jarabe/journal/journaltoolbox.py:149
+#: src/jarabe/journal/journaltoolbox.py:147
 msgid "Past week"
 msgstr "semana pasada"
 
 # TRANS: Filter entries modified during the last 30 days.
-#: src/jarabe/journal/journaltoolbox.py:151
+#: src/jarabe/journal/journaltoolbox.py:149
 msgid "Past month"
 msgstr "Mes pasado"
 
 # TRANS: Filter entries modified during the last 356 days.
-#: src/jarabe/journal/journaltoolbox.py:153
+#: src/jarabe/journal/journaltoolbox.py:151
 msgid "Past year"
 msgstr "Último año"
 
-#: src/jarabe/journal/journaltoolbox.py:160
+#: src/jarabe/journal/journaltoolbox.py:158
 msgid "Anyone"
 msgstr "Cualquiera"
 
-#: src/jarabe/journal/journaltoolbox.py:162
+#: src/jarabe/journal/journaltoolbox.py:160
 msgid "My friends"
 msgstr "Mis amigos"
 
-#: src/jarabe/journal/journaltoolbox.py:163
+#: src/jarabe/journal/journaltoolbox.py:161
 msgid "My class"
 msgstr "Mi clase"
 
 # TRANS: Item in a combo box that filters by entry type.
-#: src/jarabe/journal/journaltoolbox.py:305
+#: src/jarabe/journal/journaltoolbox.py:300
 msgid "Anything"
 msgstr "Cualquiera"
 
-#: src/jarabe/journal/journaltoolbox.py:391 src/jarabe/journal/palettes.py:159
+#: src/jarabe/journal/journaltoolbox.py:386 src/jarabe/journal/palettes.py:159
 msgid "Copy to"
 msgstr "Copiar a"
 
-#: src/jarabe/journal/journaltoolbox.py:399 src/jarabe/journal/palettes.py:179
-#: src/jarabe/view/viewsource.py:279
+#: src/jarabe/journal/journaltoolbox.py:394 src/jarabe/journal/palettes.py:179
+#: src/jarabe/view/viewsource.py:280
 msgid "Duplicate"
 msgstr "Duplicar"
 
-#: src/jarabe/journal/journaltoolbox.py:451 src/jarabe/journal/palettes.py:220
+#: src/jarabe/journal/journaltoolbox.py:446 src/jarabe/journal/palettes.py:220
 #: src/jarabe/journal/palettes.py:776
 #, python-format
 msgid "Error while copying the entry. %s"
 msgstr "Error mientras se copiaba la entrada. %s"
 
-#: src/jarabe/journal/journaltoolbox.py:452 src/jarabe/journal/palettes.py:221
+#: src/jarabe/journal/journaltoolbox.py:447 src/jarabe/journal/palettes.py:221
 #: src/jarabe/journal/palettes.py:669 src/jarabe/journal/palettes.py:730
 #: src/jarabe/journal/palettes.py:753 src/jarabe/journal/palettes.py:780
 #: src/jarabe/journal/palettes.py:799 src/jarabe/journal/palettes.py:872
@@ -1269,70 +1365,70 @@ msgstr "Error mientras se copiaba la entrada. %s"
 msgid "Error"
 msgstr "Error"
 
-#: src/jarabe/journal/journaltoolbox.py:458 src/jarabe/journal/palettes.py:227
+#: src/jarabe/journal/journaltoolbox.py:453 src/jarabe/journal/palettes.py:227
 #, fuzzy, python-format
 msgid "Do you want to permanently erase \"%s\"?"
 msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
 
 # TRANS: Action label for starting an entry.
-#: src/jarabe/journal/journaltoolbox.py:515 src/jarabe/journal/palettes.py:136
+#: src/jarabe/journal/journaltoolbox.py:510 src/jarabe/journal/palettes.py:136
 msgid "Start"
 msgstr "Iniciar"
 
-#: src/jarabe/journal/journaltoolbox.py:584
+#: src/jarabe/journal/journaltoolbox.py:579
 msgid "Deselect all"
 msgstr "Desseleccionar todo"
 
-#: src/jarabe/journal/journaltoolbox.py:609
-#: src/jarabe/journal/journaltoolbox.py:615
+#: src/jarabe/journal/journaltoolbox.py:604
+#: src/jarabe/journal/journaltoolbox.py:610
 msgid "Select all"
 msgstr "Seleccionar todo"
 
-#: src/jarabe/journal/journaltoolbox.py:618
+#: src/jarabe/journal/journaltoolbox.py:613
 msgid "Selecting"
 msgstr "Seleccionando"
 
-#: src/jarabe/journal/journaltoolbox.py:627
+#: src/jarabe/journal/journaltoolbox.py:622
 #, python-format
 msgid "You have selected %d entry."
 msgid_plural "You have selected %d entries."
 msgstr[0] "Ha seleccionado %d entrada."
 msgstr[1] "Ha seleccionado %d entradas."
 
-#: src/jarabe/journal/journaltoolbox.py:667
+#: src/jarabe/journal/journaltoolbox.py:662
 #, python-format
 msgid "Do you want to erase %d entry?"
 msgid_plural "Do you want to erase %d entries?"
 msgstr[0] "¿Deseas borrar %d entrada?"
 msgstr[1] "¿Deseas borrar %d entradas?"
 
-#: src/jarabe/journal/journaltoolbox.py:675
+#: src/jarabe/journal/journaltoolbox.py:670
 msgid "Erasing"
 msgstr "Borrando"
 
-#: src/jarabe/journal/journaltoolbox.py:696 src/jarabe/journal/palettes.py:845
+#: src/jarabe/journal/journaltoolbox.py:691 src/jarabe/journal/palettes.py:845
 #: src/jarabe/journal/palettes.py:853
 msgid "Copy"
 msgstr "Copiar"
 
-#: src/jarabe/journal/journaltoolbox.py:777
+#: src/jarabe/journal/journaltoolbox.py:772
 #, python-format
 msgid "Selected %d of %d"
 msgstr "Seleccionados %d de %d"
 
-#: src/jarabe/journal/journaltoolbox.py:807
+#: src/jarabe/journal/journaltoolbox.py:802
 msgid "Sort by date modified"
 msgstr "Ordenar por fecha de modificación"
 
-#: src/jarabe/journal/journaltoolbox.py:808
+#: src/jarabe/journal/journaltoolbox.py:803
 msgid "Sort by date created"
 msgstr "Ordenar por fecha de creación"
 
-#: src/jarabe/journal/journaltoolbox.py:809
+#: src/jarabe/journal/journaltoolbox.py:804
 msgid "Sort by size"
 msgstr "Ordenar por tamaño"
 
-#: src/jarabe/journal/journaltoolbox.py:818
+#: src/jarabe/journal/journaltoolbox.py:813
 msgid "Sort view"
 msgstr "Ordenar vista"
 
@@ -1352,12 +1448,12 @@ msgstr "El dispositivo está vacío"
 msgid "No matching entries"
 msgstr "No hay entradas coincidentes"
 
-#: src/jarabe/journal/misc.py:274
+#: src/jarabe/journal/misc.py:275
 #, python-format
 msgid "Older Version Of %s Activity"
 msgstr "Versión más antigua de la actividad %s"
 
-#: src/jarabe/journal/misc.py:275
+#: src/jarabe/journal/misc.py:276
 #, python-format
 msgid "Do you want to downgrade to version %s"
 msgstr "¿Desea instalar la versión %s, mas antigua?"
@@ -1381,11 +1477,11 @@ msgstr ""
 msgid "Show Journal"
 msgstr "Mostrar Diario"
 
-#: src/jarabe/journal/objectchooser.py:171
+#: src/jarabe/journal/objectchooser.py:172
 msgid "Choose an object"
 msgstr "Escoja un objeto"
 
-#: src/jarabe/journal/objectchooser.py:176 src/jarabe/view/viewsource.py:415
+#: src/jarabe/journal/objectchooser.py:177 src/jarabe/view/viewsource.py:416
 msgid "Close"
 msgstr "Cerrar"
 
@@ -1792,28 +1888,28 @@ msgstr "Restaurar Diario"
 msgid "Backup Journal"
 msgstr "Respaldar Diario"
 
-#: src/jarabe/view/viewsource.py:268
+#: src/jarabe/view/viewsource.py:269
 msgid "Instance Source"
 msgstr "Fuente de la instancia"
 
-#: src/jarabe/view/viewsource.py:317
+#: src/jarabe/view/viewsource.py:318
 msgid "Source"
 msgstr "Fuente"
 
-#: src/jarabe/view/viewsource.py:379
+#: src/jarabe/view/viewsource.py:380
 msgid "Activity Bundle Source"
 msgstr "Fuente del paquete de la actividad"
 
-#: src/jarabe/view/viewsource.py:398
+#: src/jarabe/view/viewsource.py:399
 msgid "Sugar Toolkit Source"
 msgstr "Fuente del paquete SugarToolkit"
 
-#: src/jarabe/view/viewsource.py:405
+#: src/jarabe/view/viewsource.py:406
 #, fuzzy, python-format
 msgid "View source: %s"
 msgstr "Ver código fuente: %r"
 
-#: src/jarabe/view/viewsource.py:406
+#: src/jarabe/view/viewsource.py:407
 #, python-format
 msgid "View source: %r"
 msgstr "Ver código fuente: %r"
@@ -1828,75 +1924,11 @@ msgstr "Sugar en una ventana"
 #~ msgid "Personal Unblocking Key (PUK):"
 #~ msgstr "Clave personal de desbloqueo (PUK):"
 
-#~ msgid "Hidden Networks"
-#~ msgstr "Redes Ocultas"
-
-#~ msgid "Enter the SSIDs of the hidden networks."
-#~ msgstr "Escribir el SSIDs de la redes ocultas."
-
 #~ msgid "Configure proxies to access the Internet."
 #~ msgstr "Configure los proxies para acceder a Internet."
 
 #~ msgid "Accessibility"
 #~ msgstr "Accesibilidad"
-
-#~ msgid "Screen"
-#~ msgstr "Pantalla"
-
-#~ msgid "Mouse"
-#~ msgstr "Ratón"
-
-#~ msgid "Mouse Keys"
-#~ msgstr "Teclas del Ratón"
-
-#~ msgid "Move the mouse pointer with keyboard number."
-#~ msgstr "Mueve el puntero del ratón con el teclado numérico."
-
-#~ msgid "Sticky Keys"
-#~ msgstr "Teclas Pegajosas"
-
-#~ msgid ""
-#~ "Instead of having to press two keys at once (such as CTRL + Q), you can "
-#~ "press one key at a time."
-#~ msgstr ""
-#~ "En lugar de tener que presionar dos teclas a la vez (tales como CTRL + "
-#~ "Q), puedes presionar de a una por vez."
-
-#~ msgid "Bounce Keys"
-#~ msgstr "Teclas de Rebote"
-
-#~ msgid "Ignore rapid, repeated keypresses of the same key."
-#~ msgstr "Ignora rápidas y repetidas pulsaciones de la misma tecla."
-
-#~ msgid "Virtual keyboard"
-#~ msgstr "Teclado virtual"
-
-#~ msgid "Show virtual keyboard on frame."
-#~ msgstr "Muestra un teclado virtual en el cuadro."
-
-#~ msgid "Contrast"
-#~ msgstr "Contraste"
-
-#~ msgid "Enables the color contrast of the graphic interface."
-#~ msgstr "Habilita el contraste de color de la interfaz gráfica."
-
-#~ msgid "Capital letters"
-#~ msgstr "Letras mayúsculas"
-
-#~ msgid "Shows capital letters in the user interface."
-#~ msgstr "Muestra letras mayúsculas en la interfaz de usuario."
-
-#~ msgid "White Mouse"
-#~ msgstr "Ratón Blanco"
-
-#~ msgid "Show the mouse cursor white."
-#~ msgstr "Muestra el cursor del ratón blanco."
-
-#~ msgid "Acceleration: "
-#~ msgstr "Aceleración:"
-
-#~ msgid "Controller acceleration mouse."
-#~ msgstr "Controla la aceleración del ratón."
 
 #~ msgid "Error in extreme pm argument, use on/off."
 #~ msgstr "Error en argumento extremo de manejo de energía, use on/off."
