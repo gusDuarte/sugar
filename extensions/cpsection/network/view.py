@@ -983,6 +983,8 @@ class Network(SectionView):
 
 
     def _setup_hidden_ssid_section(self, workspace):
+        return
+
         separator_hidden_network = Gtk.HSeparator()
         workspace.pack_start(separator_hidden_network, False, False, 0)
         separator_hidden_network.show()
