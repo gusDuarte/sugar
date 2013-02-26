@@ -16,6 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import os
+from math import ceil
 import logging
 from gettext import gettext as _
 
@@ -43,14 +44,8 @@ class ControlPanel(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self)
 
-        self._max_columns = int(0.285 * (float(Gdk.Screen.width()) /
-            style.GRID_CELL_SIZE - 3))
-
+        self._calculate_max_columns()
         self.set_border_width(style.LINE_WIDTH)
-        offset = style.GRID_CELL_SIZE
-        width = Gdk.Screen.width() - offset * 2
-        height = Gdk.Screen.height() - offset * 2
-        self.set_size_request(width, height)
         self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
         self.set_decorated(False)
         self.set_resizable(False)
@@ -89,14 +84,29 @@ class ControlPanel(Gtk.Window):
         self._setup_main()
         self._setup_section()
         self._show_main_view()
+        Gdk.Screen.get_default().connect('size-changed', self.__size_changed_cb)
 
     def __realize_cb(self, widget):
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         self.get_window().set_accept_focus(True)
 
+    def __size_changed_cb(self, event):
+        self._calculate_max_columns()
+
     def grab_focus(self):
         # overwrite grab focus in order to grab focus on the view
         self._main_view.get_child().grab_focus()
+
+    def _calculate_max_columns(self):
+        self._max_columns = int(0.285 * (float(Gdk.Screen.width()) /
+            style.GRID_CELL_SIZE - 3))
+        offset = style.GRID_CELL_SIZE
+        width = Gdk.Screen.width() - offset * 2
+        height = Gdk.Screen.height() - offset * 2
+        self.set_size_request(width, height)
+        if hasattr(self, '_table'):
+            rows = int(ceil(len(self._options.keys()) / self._max_columns))
+            self._table.resize(rows, self._max_columns)
 
     def _set_canvas(self, canvas):
         if self._canvas:
