@@ -178,7 +178,7 @@ class GConfIntegerSpinButton(Gtk.SpinButton, GConfMixin):
         GConfMixin.__init__(self, gconf_key, gsettings_dconf, dconf_key)
 
     def get_value_for_gconf(self):
-        return self.get_value_as_int()
+        return int(self.props.text)
 
     def set_value_from_gconf(self, value):
         self.set_value(value)
@@ -233,9 +233,8 @@ class GConfStringSettingBox(SettingBox):
     def _commit(self, widget):
         self.string_entry._commit(self.string_entry)
 
-    @property
     def changed(self):
-        return self.string_entry.changed
+        return self.string_entry.changed()
 
 
 class GConfPasswordSettingBox(GConfStringSettingBox):
@@ -298,9 +297,8 @@ class GConfHostPortSettingBox(SettingBox):
         self.host_name_entry._commit(self.host_name_entry)
         self.port_spin_button._commit(self.port_spin_button)
 
-    @property
     def changed(self):
-        return self.host_name_entry.changed or self.port_spin_button.changed
+        return self.host_name_entry.changed() or self.port_spin_button.changed()
 
 
 class ExclusiveOptionSetsBox(Gtk.VBox):
@@ -444,9 +442,6 @@ class SpecialGConfExclusiveOptionSetsBox(GConfExclusiveOptionSetsBox):
 
         logging.debug('Setting org.gnome.system.proxy.http enabled to %r', enabled_value)
         GSETTINGS_PROXY_HTTP.set_boolean('enabled', enabled_value)
-
-    def changed(self):
-        return self._undo_value != self.get_value_for_gconf()
 
 
 class OptionalSettingsBox(Gtk.VBox):
