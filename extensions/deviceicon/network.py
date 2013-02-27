@@ -898,8 +898,6 @@ class GsmDeviceView(TrayIcon):
                         1, self.__connection_timecount_cb)
                 self._palette.update_connection_time()
                 self._palette.update_stats(0, 0)
-                if self._palette is not None:
-                    self._palette.connection_info_box.show()
 
         elif state is network.NM_DEVICE_STATE_DISCONNECTED:
             gsm_state = _GSM_STATE_DISCONNECTED
