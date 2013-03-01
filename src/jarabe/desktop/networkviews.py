@@ -61,6 +61,8 @@ SETTING_TYPE_CHOOSER = 3
 gconf_client = GConf.Client.get_default()
 USE_CEIBAL_SPECIFIC_ADHOC_ICONS = \
         gconf_client.get_bool('/desktop/sugar/network/use_ceibal_specific_adhoc_icons') is True
+CONNECT_TO_NETWORKS_ON_SINGLE_CLICK = \
+        gconf_client.get_bool('/desktop/sugar/network/connect_to_networks_on_single_click') is True
 
 
 class AuthenticationType:
@@ -285,6 +287,9 @@ class WirelessNetworkView(EventPulsingIcon):
                                       signal_name='PropertiesChanged',
                                       path=self._device.object_path,
                                       dbus_interface=network.NM_WIRELESS_IFACE)
+
+        if CONNECT_TO_NETWORKS_ON_SINGLE_CLICK is True:
+            self.connect('button-release-event', self.__connect_activate_cb)
 
     def _create_palette(self):
         icon_name = get_icon_state(_AP_ICON_NAME, self._strength)
@@ -537,7 +542,7 @@ class WirelessNetworkView(EventPulsingIcon):
             wireless_security.group = group
             return wireless_security
 
-    def __connect_activate_cb(self, icon):
+    def __connect_activate_cb(self, icon, event=None):
         self._connect()
 
     def _connect(self):
@@ -717,6 +722,9 @@ class SugarAdhocView(EventPulsingIcon):
         self.set_palette(self._palette)
         self._palette_icon.props.xo_color = self._state_color
 
+        if CONNECT_TO_NETWORKS_ON_SINGLE_CLICK is True:
+            self.connect('button-release-event', self.__connect_activate_cb)
+
     def _create_palette(self):
         self._palette_icon = Icon( \
                 icon_name=self._ICON_NAME + str(self._channel),
@@ -748,7 +756,7 @@ class SugarAdhocView(EventPulsingIcon):
  
         return palette_
 
-    def __connect_activate_cb(self, icon):
+    def __connect_activate_cb(self, icon, event=None):
         get_adhoc_manager_instance().activate_channel(self._channel)
 
     def __disconnect_activate_cb(self, icon):
