@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-02-22 09:40+0530\n"
+"POT-Creation-Date: 2013-03-07 20:50+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -156,6 +156,10 @@ msgstr ""
 #: extensions/cpsection/aboutcomputer/view.py:219
 msgid "Full license:"
 msgstr "Licencia completa:"
+
+#: extensions/cpsection/accessibility/__init__.py:24
+msgid "Accessibility"
+msgstr "Accesibilidad"
 
 #: extensions/cpsection/accessibility/view.py:68
 #: extensions/cpsection/keyboard/__init__.py:21
@@ -354,12 +358,12 @@ msgid "Plan:"
 msgstr "Plan:"
 
 #: extensions/cpsection/modemconfiguration/view.py:123
-#: extensions/cpsection/network/view.py:911
+#: extensions/cpsection/network/view.py:906
 msgid "Username:"
 msgstr "Nombre de usuario:"
 
 #: extensions/cpsection/modemconfiguration/view.py:126
-#: extensions/cpsection/network/view.py:917
+#: extensions/cpsection/network/view.py:912
 msgid "Password:"
 msgstr "Contraseña:"
 
@@ -396,33 +400,33 @@ msgstr "Error en argumento especificado use 0/1."
 msgid "Please restart your computer for changes to take effect."
 msgstr "Por favor reinicia tu computadora para que los cambios tengan efecto."
 
-#: extensions/cpsection/network/view.py:694
+#: extensions/cpsection/network/view.py:689
 msgid "Wireless"
 msgstr "Inalámbrica"
 
-#: extensions/cpsection/network/view.py:702
+#: extensions/cpsection/network/view.py:697
 msgid "Turn off the wireless radio to save battery life"
 msgstr "Apague la radio inalámbrica y ahorre vida de batería"
 
-#: extensions/cpsection/network/view.py:715
+#: extensions/cpsection/network/view.py:710
 msgid "Radio"
 msgstr "Radio"
 
-#: extensions/cpsection/network/view.py:731
+#: extensions/cpsection/network/view.py:726
 #, fuzzy
 msgid "Discard network history if you have trouble connecting to the network"
 msgstr ""
 "Descartar el historial de la red si tiene problemas conectandose a la red."
 
-#: extensions/cpsection/network/view.py:740
+#: extensions/cpsection/network/view.py:735
 msgid "Discard network history"
 msgstr "Descarte historial de la red"
 
-#: extensions/cpsection/network/view.py:755
+#: extensions/cpsection/network/view.py:750
 msgid "Collaboration"
 msgstr "Colaboración"
 
-#: extensions/cpsection/network/view.py:763
+#: extensions/cpsection/network/view.py:758
 msgid ""
 "The server is the equivalent of what room you are in; people on the same "
 "server will be able to see each other, even when they aren't on the same "
@@ -431,34 +435,34 @@ msgstr ""
 "El servidor es equivalente al cuarto en el cual se está; la gente en el "
 "mismo servidor podrá verse entre sí, aun cuando no estén en la misma red."
 
-#: extensions/cpsection/network/view.py:773
+#: extensions/cpsection/network/view.py:768
 msgid "Server:"
 msgstr "Servidor:"
 
-#: extensions/cpsection/network/view.py:822
+#: extensions/cpsection/network/view.py:817
 msgid "Advanced Network Settings"
 msgstr "Configuración Avanzada de Red"
 
-#: extensions/cpsection/network/view.py:831
+#: extensions/cpsection/network/view.py:826
 msgid ""
 "For more specific network settings, use the NetworkManager Connection Editor."
 msgstr ""
 "Para opciones de configuración más específicas, use el Editor de Conexión "
 "NetworkManager."
 
-#: extensions/cpsection/network/view.py:849
+#: extensions/cpsection/network/view.py:844
 msgid "Launch"
 msgstr "Lanzar"
 
-#: extensions/cpsection/network/view.py:862
+#: extensions/cpsection/network/view.py:857
 msgid "Proxy"
 msgstr "Proxy"
 
-#: extensions/cpsection/network/view.py:879
+#: extensions/cpsection/network/view.py:874
 msgid "Configuration URL:"
 msgstr "Configuración de URL:"
 
-#: extensions/cpsection/network/view.py:888
+#: extensions/cpsection/network/view.py:883
 msgid ""
 "Web Proxy Autodiscovery (WPAD) is used when a Configuration URL is not "
 "provided. This is not recommended for untrusted public networks."
@@ -467,39 +471,39 @@ msgstr ""
 "Configuración de URL. Esto no es recomendable para redes públicas no "
 "confiables."
 
-#: extensions/cpsection/network/view.py:900
+#: extensions/cpsection/network/view.py:895
 msgid "HTTP Proxy:"
 msgstr "Proxy HTTP:"
 
-#: extensions/cpsection/network/view.py:923
+#: extensions/cpsection/network/view.py:918
 msgid "Use authentication"
 msgstr "Usar autentificación"
 
-#: extensions/cpsection/network/view.py:932
+#: extensions/cpsection/network/view.py:927
 msgid "HTTPS Proxy:"
 msgstr "Proxy HTTPS:"
 
-#: extensions/cpsection/network/view.py:943
+#: extensions/cpsection/network/view.py:938
 msgid "FTP Proxy:"
 msgstr "Proxy FTP:"
 
-#: extensions/cpsection/network/view.py:954
+#: extensions/cpsection/network/view.py:949
 msgid "SOCKS Proxy:"
 msgstr "Proxy SOCKS:"
 
-#: extensions/cpsection/network/view.py:968
+#: extensions/cpsection/network/view.py:963
 msgid "Method:"
 msgstr "Método:"
 
-#: extensions/cpsection/network/view.py:977
+#: extensions/cpsection/network/view.py:972
 msgid "Ignored Hosts"
 msgstr "Anfitriónes Ignorados"
 
-#: extensions/cpsection/network/view.py:990
+#: extensions/cpsection/network/view.py:987
 msgid "Hidden Networks"
 msgstr "Redes Ocultas"
 
-#: extensions/cpsection/network/view.py:998
+#: extensions/cpsection/network/view.py:995
 msgid "Enter the SSIDs of the hidden networks."
 msgstr "Escribir el SSIDs de la redes ocultas."
 
@@ -554,23 +558,23 @@ msgid "IP address: %s"
 msgstr "Direccion IP: %s"
 
 #: extensions/deviceicon/network.py:94 extensions/deviceicon/network.py:318
-#: src/jarabe/desktop/networkviews.py:306
-#: src/jarabe/desktop/networkviews.py:737
+#: src/jarabe/desktop/networkviews.py:311
+#: src/jarabe/desktop/networkviews.py:745
 msgid "Disconnect"
 msgstr "Desconectar"
 
 #: extensions/deviceicon/network.py:119 extensions/deviceicon/network.py:310
-#: src/jarabe/desktop/networkviews.py:425
-#: src/jarabe/desktop/networkviews.py:778
-#: src/jarabe/desktop/networkviews.py:917
+#: src/jarabe/desktop/networkviews.py:430
+#: src/jarabe/desktop/networkviews.py:786
+#: src/jarabe/desktop/networkviews.py:925
 msgid "Connecting..."
 msgstr "Conectando..."
 
 # TODO: show the channel number
 #: extensions/deviceicon/network.py:124 extensions/deviceicon/network.py:192
-#: src/jarabe/desktop/networkviews.py:432
-#: src/jarabe/desktop/networkviews.py:784
-#: src/jarabe/desktop/networkviews.py:923
+#: src/jarabe/desktop/networkviews.py:437
+#: src/jarabe/desktop/networkviews.py:792
+#: src/jarabe/desktop/networkviews.py:931
 msgid "Connected"
 msgstr "Conectado"
 
@@ -602,9 +606,9 @@ msgstr "Privada (Clic para compartir)"
 msgid "Please wait..."
 msgstr "Espere por favor..."
 
-#: extensions/deviceicon/network.py:301 src/jarabe/desktop/networkviews.py:300
-#: src/jarabe/desktop/networkviews.py:731
-#: src/jarabe/desktop/networkviews.py:870
+#: extensions/deviceicon/network.py:301 src/jarabe/desktop/networkviews.py:305
+#: src/jarabe/desktop/networkviews.py:739
+#: src/jarabe/desktop/networkviews.py:878
 msgid "Connect"
 msgstr "Conectar"
 
@@ -614,9 +618,9 @@ msgstr "Desconectado"
 
 #: extensions/deviceicon/network.py:309 src/jarabe/controlpanel/toolbar.py:121
 #: src/jarabe/desktop/homebox.py:68 src/jarabe/desktop/keydialog.py:227
-#: src/jarabe/desktop/keydialog.py:320 src/jarabe/frame/activitiestray.py:635
-#: src/jarabe/frame/activitiestray.py:737
-#: src/jarabe/frame/activitiestray.py:765
+#: src/jarabe/desktop/keydialog.py:320 src/jarabe/frame/activitiestray.py:649
+#: src/jarabe/frame/activitiestray.py:768
+#: src/jarabe/frame/activitiestray.py:800
 #: src/jarabe/journal/journaltoolbox.py:456 src/jarabe/journal/palettes.py:230
 msgid "Cancel"
 msgstr "Cancelar"
@@ -666,20 +670,20 @@ msgstr "Revise su configuración."
 msgid "Neighborhood (Click to unshare)"
 msgstr "Vecindario (Clic para dejar de compartir)"
 
-#: extensions/deviceicon/network.py:684
+#: extensions/deviceicon/network.py:689
 msgid "Mesh Network"
 msgstr "Red Malla"
 
-#: extensions/deviceicon/network.py:728
+#: extensions/deviceicon/network.py:733
 #, python-format
 msgid "Mesh Network %s"
 msgstr "Red Malla %s"
 
-#: extensions/deviceicon/network.py:851
+#: extensions/deviceicon/network.py:856
 msgid "No GSM connection available."
 msgstr "No se dispone de conexión GSM."
 
-#: extensions/deviceicon/network.py:852
+#: extensions/deviceicon/network.py:857
 msgid "Create a connection in the control panel."
 msgstr "Crear una conexión en el panel de control."
 
@@ -835,25 +839,25 @@ msgstr ""
 msgid "To apply your changes you have to restart Sugar.\n"
 msgstr "Para aplicar sus cambios tiene que reiniciar Azúcar.\n"
 
-#: src/jarabe/controlpanel/gui.py:322 src/jarabe/journal/palettes.py:258
+#: src/jarabe/controlpanel/gui.py:332 src/jarabe/journal/palettes.py:258
 #: src/jarabe/journal/palettes.py:763
 msgid "Warning"
 msgstr "Advertencia"
 
-#: src/jarabe/controlpanel/gui.py:323
+#: src/jarabe/controlpanel/gui.py:333
 #: src/jarabe/controlpanel/sectionview.py:41
 msgid "Changes require restart"
 msgstr "Los cambios requieren reiniciar"
 
-#: src/jarabe/controlpanel/gui.py:326
+#: src/jarabe/controlpanel/gui.py:336
 msgid "Cancel changes"
 msgstr "Cancelar cambios"
 
-#: src/jarabe/controlpanel/gui.py:331 src/jarabe/desktop/homebox.py:70
+#: src/jarabe/controlpanel/gui.py:341 src/jarabe/desktop/homebox.py:70
 msgid "Later"
 msgstr "Después"
 
-#: src/jarabe/controlpanel/gui.py:335
+#: src/jarabe/controlpanel/gui.py:345
 msgid "Restart now"
 msgstr "Reiniciar ahora"
 
@@ -1067,16 +1071,16 @@ msgstr "Seguridad inalámbrica:"
 msgid "Resume"
 msgstr "Retomar"
 
-#: src/jarabe/desktop/meshbox.py:92 src/jarabe/frame/activitiestray.py:187
+#: src/jarabe/desktop/meshbox.py:92 src/jarabe/frame/activitiestray.py:190
 msgid "Join"
 msgstr "Unirse"
 
-#: src/jarabe/desktop/networkviews.py:725
+#: src/jarabe/desktop/networkviews.py:733
 #, python-format
 msgid "Ad-hoc Network %d"
 msgstr "Red específica %d"
 
-#: src/jarabe/desktop/networkviews.py:865
+#: src/jarabe/desktop/networkviews.py:873
 #, python-format
 msgid "Mesh Network %d"
 msgstr "Red Malla %d"
@@ -1109,51 +1113,51 @@ msgstr "Vista de favoritos"
 msgid "<Ctrl>1"
 msgstr "<Ctrl>1"
 
-#: src/jarabe/frame/activitiestray.py:192
-#: src/jarabe/frame/activitiestray.py:607
+#: src/jarabe/frame/activitiestray.py:195
+#: src/jarabe/frame/activitiestray.py:617
 msgid "Decline"
 msgstr "Rechazar"
 
-#: src/jarabe/frame/activitiestray.py:555
+#: src/jarabe/frame/activitiestray.py:558
 #, python-format
 msgid "%dB"
 msgstr "%dB"
 
-#: src/jarabe/frame/activitiestray.py:557
+#: src/jarabe/frame/activitiestray.py:560
 #, python-format
 msgid "%dKB"
 msgstr "%dKB"
 
-#: src/jarabe/frame/activitiestray.py:559
+#: src/jarabe/frame/activitiestray.py:562
 #, python-format
 msgid "%dMB"
 msgstr "%dMB"
 
-#: src/jarabe/frame/activitiestray.py:577
+#: src/jarabe/frame/activitiestray.py:580
 #, python-format
 msgid "%s of %s"
 msgstr "%s de %s"
 
-#: src/jarabe/frame/activitiestray.py:591
+#: src/jarabe/frame/activitiestray.py:594
 #, python-format
 msgid "Transfer from %s"
 msgstr "Transferencia desde %s"
 
-#: src/jarabe/frame/activitiestray.py:602
+#: src/jarabe/frame/activitiestray.py:609
 msgid "Accept"
 msgstr "Aceptar"
 
-#: src/jarabe/frame/activitiestray.py:659
-#: src/jarabe/frame/activitiestray.py:672
-#: src/jarabe/frame/activitiestray.py:790
+#: src/jarabe/frame/activitiestray.py:677
+#: src/jarabe/frame/activitiestray.py:690
+#: src/jarabe/frame/activitiestray.py:829
 msgid "Dismiss"
 msgstr "Descartar"
 
-#: src/jarabe/frame/activitiestray.py:676
+#: src/jarabe/frame/activitiestray.py:704
 msgid "The other participant canceled the file transfer"
 msgstr "El otro participante canceló la transferencia del archivo"
 
-#: src/jarabe/frame/activitiestray.py:724
+#: src/jarabe/frame/activitiestray.py:752
 #, python-format
 msgid "Transfer to %s"
 msgstr "Transferir a %s"
@@ -1926,9 +1930,6 @@ msgstr "Sugar en una ventana"
 
 #~ msgid "Configure proxies to access the Internet."
 #~ msgstr "Configure los proxies para acceder a Internet."
-
-#~ msgid "Accessibility"
-#~ msgstr "Accesibilidad"
 
 #~ msgid "Error in extreme pm argument, use on/off."
 #~ msgstr "Error en argumento extremo de manejo de energía, use on/off."
