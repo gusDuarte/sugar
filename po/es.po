@@ -69,7 +69,7 @@ msgstr "No disponible"
 #: extensions/cpsection/aboutcomputer/model.py:89
 #, python-format
 msgid "%s days remaining"
-msgstr ""
+msgstr "%s dias restantes"
 
 #: extensions/cpsection/aboutcomputer/model.py:307
 #: extensions/cpsection/aboutcomputer/model.py:343
@@ -432,8 +432,8 @@ msgid ""
 "server will be able to see each other, even when they aren't on the same "
 "network."
 msgstr ""
-"El servidor es equivalente al cuarto en el cual se está; la gente en el "
-"mismo servidor podrá verse entre sí, aun cuando no estén en la misma red."
+"Todos las personas asociadas al siguiente servidor podrán comunicarse entre sí, "
+"aún cuando no estén dentro de la misma red"
 
 #: extensions/cpsection/network/view.py:768
 msgid "Server:"
@@ -709,29 +709,29 @@ msgstr ""
 #: extensions/deviceicon/speech.py:54
 #, fuzzy
 msgid "Speech"
-msgstr "Velocidad"
+msgstr "Hablar"
 
 #: extensions/deviceicon/speech.py:78 extensions/deviceicon/speech.py:152
 #: extensions/deviceicon/speech.py:157
 #, fuzzy
 msgid "Say selected text"
-msgstr "Instalación seleccionada"
+msgstr "Reproducir el texto seleccionado"
 
 #: extensions/deviceicon/speech.py:85
 msgid "Stop playback"
-msgstr ""
+msgstr "Detener la reproduccion"
 
 #: extensions/deviceicon/speech.py:94
 msgid "Pitch"
-msgstr ""
+msgstr "Tono"
 
 #: extensions/deviceicon/speech.py:109
 msgid "Rate"
-msgstr ""
+msgstr "Velocidad"
 
 #: extensions/deviceicon/speech.py:147
 msgid "Pause playback"
-msgstr ""
+msgstr "Pausar la reproduccion"
 
 #: extensions/deviceicon/speaker.py:61
 msgid "My Speakers"
@@ -740,7 +740,7 @@ msgstr "Mis parlantes"
 # la traducción la tome del AlsaMixer de Gnome.
 #: extensions/deviceicon/speaker.py:136
 msgid "Unmute"
-msgstr "Dar voz"
+msgstr "Activar el sonido"
 
 #: extensions/deviceicon/speaker.py:139
 msgid "Mute"
@@ -865,7 +865,7 @@ msgstr "Reiniciar ahora"
 #: src/jarabe/journal/journaltoolbox.py:91
 #, fuzzy, python-format
 msgid "Search in %s"
-msgstr "Buscar"
+msgstr "Buscar en el %s"
 
 #: src/jarabe/controlpanel/toolbar.py:56
 #, fuzzy
@@ -1197,11 +1197,11 @@ msgstr "Nombre:"
 
 #: src/jarabe/intro/window.py:158
 msgid "Age:"
-msgstr ""
+msgstr "Edad:"
 
 #: src/jarabe/intro/window.py:168
 msgid "years"
-msgstr ""
+msgstr "años"
 
 #: src/jarabe/intro/window.py:193
 msgid "Click to change color:"
@@ -2340,8 +2340,8 @@ msgstr "Sugar en una ventana"
 #~ msgstr[0] "Puedes instalar %s actualización"
 #~ msgstr[1] "Puedes instalar %s actualizaciones"
 
-#~ msgid "None"
-#~ msgstr "Ninguno"
+msgid "None"
+msgstr "Ninguno"
 
 #~ msgid "Updating %s..."
 #~ msgstr "Actualizando %s..."
