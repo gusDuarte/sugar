@@ -1197,11 +1197,11 @@ msgstr "Nombre:"
 
 #: src/jarabe/intro/window.py:158
 msgid "Age:"
-msgstr ""
+msgstr "Edad:"
 
 #: src/jarabe/intro/window.py:168
 msgid "years"
-msgstr ""
+msgstr "años"
 
 #: src/jarabe/intro/window.py:193
 msgid "Click to change color:"
