@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-07 20:50+0530\n"
+"POT-Creation-Date: 2013-03-18 22:40+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -432,7 +432,7 @@ msgid ""
 "server will be able to see each other, even when they aren't on the same "
 "network."
 msgstr ""
-"Todos las personas asociadas al siguiente servidor podrán comunicarse entre sí, "
+"Todas las personas asociadas al siguiente servidor podrán comunicarse entre sí, "
 "aún cuando no estén dentro de la misma red"
 
 #: extensions/cpsection/network/view.py:768
@@ -861,16 +861,10 @@ msgstr "Después"
 msgid "Restart now"
 msgstr "Reiniciar ahora"
 
-#: src/jarabe/controlpanel/toolbar.py:56 src/jarabe/desktop/viewtoolbar.py:100
-#: src/jarabe/journal/journaltoolbox.py:91
-#, fuzzy, python-format
-msgid "Search in %s"
-msgstr "Buscar en el %s"
-
 #: src/jarabe/controlpanel/toolbar.py:56
 #, fuzzy
-msgid "Settings"
-msgstr "Mis ajustes"
+msgid "Search in Settings"
+msgstr "Buscar en la Configuración"
 
 #: src/jarabe/controlpanel/toolbar.py:65 src/jarabe/intro/window.py:272
 msgid "Done"
@@ -1105,6 +1099,11 @@ msgstr "Vista en lista"
 msgid "<Ctrl>2"
 msgstr "<Ctrl>2"
 
+#: src/jarabe/desktop/viewtoolbar.py:100
+#, fuzzy, python-format
+msgid "Search in %s"
+msgstr "Buscar en el %s"
+
 #: src/jarabe/desktop/viewtoolbar.py:149
 msgid "Favorites view"
 msgstr "Vista de favoritos"
@@ -1289,7 +1288,7 @@ msgid "Tags:"
 msgstr "Etiquetas:"
 
 #: src/jarabe/journal/journalactivity.py:126
-#: src/jarabe/journal/journaltoolbox.py:91 src/jarabe/journal/palettes.py:1228
+#: src/jarabe/journal/palettes.py:1228
 #: src/jarabe/journal/volumestoolbar.py:472
 msgid "Journal"
 msgstr "Diario"
@@ -1301,6 +1300,11 @@ msgstr "Parar"
 #: src/jarabe/journal/journalactivity.py:149
 msgid "Continue"
 msgstr "Continuar"
+
+#: src/jarabe/journal/journaltoolbox.py:91
+#, fuzzy
+msgid "Search in Journal"
+msgstr "Buscar en el Diario"
 
 #: src/jarabe/journal/journaltoolbox.py:141
 msgid "Anytime"
