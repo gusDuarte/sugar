@@ -88,7 +88,7 @@ class MainToolbox(ToolbarBox):
         self.search_entry = iconentry.IconEntry()
         self.search_entry.set_icon_from_name(iconentry.ICON_ENTRY_PRIMARY,
                                              'system-search')
-        text = _('Search in %s') % _('Journal')
+        text = _('Search in Journal')
         self.search_entry.set_placeholder_text(text)
         self.search_entry.connect('activate', self._search_entry_activated_cb)
         self.search_entry.connect('changed', self._search_entry_changed_cb)
