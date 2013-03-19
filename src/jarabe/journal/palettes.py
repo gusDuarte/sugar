@@ -65,7 +65,7 @@ class PassphraseDialog(Gtk.Dialog):
         self.set_title(_('Passphrase required'))
 
         # TRANS: Please do not translate the '%s'.
-        label_text = _('Please enter the passphrase for "%s"' % metadata['title'])
+        label_text = _('Please enter the passphrase for "%s"') % metadata['title']
         label = Gtk.Label(label_text)
         self.vbox.pack_start(label, True, True, 0)
 
