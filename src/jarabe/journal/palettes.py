@@ -888,11 +888,11 @@ class BaseCopyMenuItem(MenuItem, ActionItem):
              if model.is_mount_point_for_school_server(get_mount_point()) == True:
                  # TRANS: Do not translate the %s.
                  successful_downloading_message = \
-                         _('Your file "%s" was correctly downloaded from the School Server.' % metadata['title'])
+                         _('Your file "%s" was correctly downloaded from the School Server.') % metadata['title']
              else:
                  # TRANS: Do not translate the %s.
                  successful_downloading_message = \
-                         _('Your file "%s" was correctly downloaded from the Peer.' % metadata['title'])
+                         _('Your file "%s" was correctly downloaded from the Peer.') % metadata['title']
 
              from jarabe.journal.journalactivity import get_journal
              get_journal().update_error_alert(self._get_editing_alert_title(),
@@ -1066,7 +1066,7 @@ class SchoolServerMenu(BaseCopyMenuItem):
         successful_uploading_message = \
                 _('Your file "%s" was correctly uploaded to the School Server.\n'
                   'The file will be available in the school server '
-                  'for %d days.' % (metadata['title'], validity_of_uploaded_file_in_days))
+                  'for %d days.') % (metadata['title'], validity_of_uploaded_file_in_days)
         get_journal().update_error_alert(self._get_editing_alert_title(),
                                          successful_uploading_message,
                                          self._post_successful_copy,
