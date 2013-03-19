@@ -97,7 +97,7 @@ class ViewToolbar(Gtk.Toolbar):
         self.search_entry.props.text = ''
 
     def set_placeholder_text_for_view(self, view_name):
-        text = _('Search in %s' % view_name)
+        text = _('Search in %s') % view_name
         self.search_entry.set_placeholder_text(text)
 
     def _add_separator(self, expand=False):

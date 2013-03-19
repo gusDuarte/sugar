@@ -94,7 +94,6 @@ msgid "Serial Number:"
 msgstr "Número de serie:"
 
 #: extensions/cpsection/aboutcomputer/view.py:80
-#, fuzzy
 msgid "Lease:"
 msgstr "Arrendamiento: "
 
@@ -413,7 +412,6 @@ msgid "Radio"
 msgstr "Radio"
 
 #: extensions/cpsection/network/view.py:726
-#, fuzzy
 msgid "Discard network history if you have trouble connecting to the network"
 msgstr ""
 "Descartar el historial de la red si tiene problemas conectandose a la red."
@@ -650,7 +648,6 @@ msgid "%d KB"
 msgstr "%d KB"
 
 #: extensions/deviceicon/network.py:381
-#, fuzzy
 msgid "Check your PIN/PUK configuration."
 msgstr "Revise la configuración de su Pin/Puk."
 
@@ -707,13 +704,11 @@ msgstr ""
 "¡No se puede calcular las estadísticas del uso de la CPU y de la memoria!"
 
 #: extensions/deviceicon/speech.py:54
-#, fuzzy
 msgid "Speech"
 msgstr "Hablar"
 
 #: extensions/deviceicon/speech.py:78 extensions/deviceicon/speech.py:152
 #: extensions/deviceicon/speech.py:157
-#, fuzzy
 msgid "Say selected text"
 msgstr "Reproducir el texto seleccionado"
 
@@ -785,7 +780,7 @@ msgid "Screenshot"
 msgstr "Captura de pantalla"
 
 #: extensions/globalkey/screenshot.py:77
-#, fuzzy, python-format
+#, python-format
 msgid "Screenshot of %s"
 msgstr "Captura pantalla de \"%s\""
 
@@ -835,7 +830,6 @@ msgstr ""
 "    "
 
 #: src/jarabe/controlpanel/cmd.py:52
-#, fuzzy
 msgid "To apply your changes you have to restart Sugar.\n"
 msgstr "Para aplicar sus cambios tiene que reiniciar Azúcar.\n"
 
@@ -862,7 +856,6 @@ msgid "Restart now"
 msgstr "Reiniciar ahora"
 
 #: src/jarabe/controlpanel/toolbar.py:56
-#, fuzzy
 msgid "Search in Settings"
 msgstr "Buscar en la Configuración"
 
@@ -878,7 +871,6 @@ msgid "Ok"
 msgstr "Aceptar"
 
 #: src/jarabe/desktop/activitieslist.py:276
-#, fuzzy
 msgid "Not used yet"
 msgstr "¡Actualización no disponible aún!"
 
@@ -892,7 +884,6 @@ msgid "Clear search"
 msgstr "Limpiar búsqueda"
 
 #: src/jarabe/desktop/activitieslist.py:457
-#, fuzzy
 msgid "No matching activities"
 msgstr "No hay entradas coincidentes"
 
@@ -993,7 +984,6 @@ msgid "Check now"
 msgstr "Pruebe ahora"
 
 #: src/jarabe/desktop/homewindow.py:130
-#, fuzzy
 msgid "Please restart your computer"
 msgstr "Por favor reinicia tu computadora para que los cambios tengan efecto."
 
@@ -1100,7 +1090,7 @@ msgid "<Ctrl>2"
 msgstr "<Ctrl>2"
 
 #: src/jarabe/desktop/viewtoolbar.py:100
-#, fuzzy, python-format
+#, python-format
 msgid "Search in %s"
 msgstr "Buscar en el %s"
 
@@ -1302,7 +1292,6 @@ msgid "Continue"
 msgstr "Continuar"
 
 #: src/jarabe/journal/journaltoolbox.py:91
-#, fuzzy
 msgid "Search in Journal"
 msgstr "Buscar en el Diario"
 
@@ -1374,7 +1363,7 @@ msgid "Error"
 msgstr "Error"
 
 #: src/jarabe/journal/journaltoolbox.py:453 src/jarabe/journal/palettes.py:227
-#, fuzzy, python-format
+#, python-format
 msgid "Do you want to permanently erase \"%s\"?"
 msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
 
@@ -1587,7 +1576,7 @@ msgid "School Server"
 msgstr "Servidor Escolar"
 
 #: src/jarabe/journal/palettes.py:1067
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "Your file \"%s\" was correctly uploaded to the School Server.\n"
 "The file will be available in the school server for %d days."
@@ -1795,23 +1784,19 @@ msgid "The device's carrier/link changed."
 msgstr "La portadora/link del dispositivo a cambiado."
 
 #: src/jarabe/model/network.py:297
-#, fuzzy
 msgid "The device's existing connection was assumed."
 msgstr ""
 "Las conexiones activas del dispositivo fueron removidas o desaparecieron."
 
 #: src/jarabe/model/network.py:299
-#, fuzzy
 msgid "The supplicant is now available."
 msgstr "El dispositivo está siendo administrado."
 
 #: src/jarabe/model/network.py:301
-#, fuzzy
 msgid "The modem could not be found."
 msgstr "El dispositivo no pudo ser preparado para su configuración."
 
 #: src/jarabe/model/network.py:303
-#, fuzzy
 msgid "The Bluetooth connection failed or timed out."
 msgstr "El servicio de conexión compartida ha fallado al iniciar."
 
@@ -1913,7 +1898,7 @@ msgid "Sugar Toolkit Source"
 msgstr "Fuente del paquete SugarToolkit"
 
 #: src/jarabe/view/viewsource.py:406
-#, fuzzy, python-format
+#, python-format
 msgid "View source: %s"
 msgstr "Ver código fuente: %r"
 
