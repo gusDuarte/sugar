@@ -1580,7 +1580,9 @@ msgstr "Servidor Escolar"
 msgid ""
 "Your file \"%s\" was correctly uploaded to the School Server.\n"
 "The file will be available in the school server for %d days."
-msgstr "Tu archivo \"%s\" fue correctamente subido al Servidor Escolar."
+msgstr ""
+"Tu archivo \"%s\" fue correctamente subido al Servidor Escolar.\n"
+"El archivo estará disponible en el Servidor Escolar por %d días."
 
 #: src/jarabe/journal/palettes.py:1100
 msgid "No friends present"
