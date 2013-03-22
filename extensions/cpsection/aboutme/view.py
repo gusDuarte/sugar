@@ -185,7 +185,10 @@ Gtk.Label(_('Example icons: Copyright (c) TheNounProject'))
         self._vbox_icon.pack_start(label_color, False, False, 0)
         self._vbox_icon.pack_start(self._alert, False, False, 0)
 
-        self._frame_icon.add(self._vbox_icon)
+        self._client = GConf.Client.get_default()
+        if self._client.get_bool('/desktop/sugar/extensions/show_icon_selector') is True:
+            self._frame_icon.add(self._vbox_icon)
+
         self._widgets = []
         self._widget = []
         self._icons_images = []
