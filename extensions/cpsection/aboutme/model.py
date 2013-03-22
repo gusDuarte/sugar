@@ -17,8 +17,6 @@
 
 from gettext import gettext as _
 from gi.repository import GConf
-import shutil
-import os
 
 
 _COLORS = {
@@ -125,19 +123,3 @@ def set_color_xo(color):
     client = GConf.Client.get_default()
     client.set_string('/desktop/sugar/user/color', color)
     return 1
-
-
-def set_xo_icon(path, icon_name):
-    """ Replace computer-xo.svg icon """
-    pt = os.path.join(os.path.expanduser('~'), '.current')
-    fd = open(pt, 'w')
-    fd.write(icon_name)
-    fd.close()
-    if os.path.exists('/usr/share/icons/sugar/scalable/device/'):
-        iconpath = '/usr/share/icons/sugar/scalable/device/computer-xo.svg'
-        shutil.copy(path, iconpath)
-    if os.path.exists('/opt/sweets/sugar-artwork/share/icons/sugar/scalable/device'):
-        iconpath = '/opt/sweets/sugar-artwork/share/icons/sugar/scalable/device/computer-xo.svg'
-        shutil.copy(path, iconpath)
-    else:
-        pass
