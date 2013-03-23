@@ -20,6 +20,9 @@ import os
 
 from gi.repository import GObject
 from gi.repository import Gtk
+from gi.repository import GdkPixbuf
+from gi.repository import GConf
+from gi.repository import Gdk
 
 from sugar3.graphics import style
 from sugar3.graphics.alert import Alert
@@ -33,6 +36,14 @@ _FAVORITES_VIEW = 0
 _LIST_VIEW = 1
 
 
+def get_bg_image_path():
+    client = GConf.Client.get_default()
+    return client.get_string('/desktop/sugar/user/background')
+
+
+BACKGROUND_IMAGE_PATH = get_bg_image_path()
+
+
 class HomeBox(Gtk.VBox):
     __gtype_name__ = 'SugarHomeBox'
 
@@ -41,7 +52,11 @@ class HomeBox(Gtk.VBox):
 
         Gtk.VBox.__init__(self)
 
+        self._favorites_eventbox = Gtk.EventBox()
+        self._favorites_eventbox.connect('draw', self._draw_background)
         self._favorites_box = favoritesview.FavoritesBox()
+        self._favorites_eventbox.add(self._favorites_box)
+
         self._list_view = ActivitiesList()
 
         toolbar.connect('query-changed', self.__toolbar_query_changed_cb)
@@ -53,6 +68,7 @@ class HomeBox(Gtk.VBox):
 
         self._set_view(_FAVORITES_VIEW)
         self._query = ''
+        self._update_background_image()
 
     def show_software_updates_alert(self):
         alert = Alert()
@@ -127,13 +143,13 @@ class HomeBox(Gtk.VBox):
             if self._list_view in self.get_children():
                 self.remove(self._list_view)
 
-            if self._favorites_box not in self.get_children():
-                self.add(self._favorites_box)
-                self._favorites_box.show()
-                self._favorites_box.grab_focus()
+            if self._favorites_eventbox not in self.get_children():
+                self.add(self._favorites_eventbox)
+                self._favorites_eventbox.show_all()
+                self._favorites_eventbox.grab_focus()
         elif view == _LIST_VIEW:
-            if self._favorites_box in self.get_children():
-                self.remove(self._favorites_box)
+            if self._favorites_eventbox in self.get_children():
+                self.remove(self._favorites_eventbox)
 
             if self._list_view not in self.get_children():
                 self.add(self._list_view)
@@ -160,3 +176,32 @@ class HomeBox(Gtk.VBox):
         if resume_mode and self._query != '':
             self._list_view.set_filter(self._query)
             self._favorites_box.set_filter(self._query)
+
+    def _draw_background(self, widget, context):
+        if self._background_pixbuf is None:
+            return
+
+        alloc = widget.get_allocation()
+
+        if self._background_pixbuf.get_width() != alloc.width or \
+           self._background_pixbuf.get_height() != alloc.height:
+            self._background_pixbuf = self._background_pixbuf.scale_simple(
+                                                 alloc.width,
+                                                 alloc.height,
+                                                 GdkPixbuf.InterpType.TILES)
+        Gdk.cairo_set_source_pixbuf(context, self._background_pixbuf, 0, 0)
+        context.paint()
+
+    def _update_background_image(self, *args):
+        self._background_pixbuf = None
+
+        if BACKGROUND_IMAGE_PATH is None:
+            return
+
+        if os.path.exists(BACKGROUND_IMAGE_PATH):
+            try:
+                self._background_pixbuf = GdkPixbuf.Pixbuf.new_from_file(
+                                                         BACKGROUND_IMAGE_PATH)
+                self._favorites_eventbox.queue_draw()
+            except:
+                pass
