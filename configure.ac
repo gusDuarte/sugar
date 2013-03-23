@@ -52,6 +52,7 @@ data/sugar-emulator.desktop
 extensions/cpsection/aboutcomputer/Makefile
 extensions/cpsection/aboutme/Makefile
 extensions/cpsection/accessibility/Makefile
+extensions/cpsection/background/Makefile
 extensions/cpsection/datetime/Makefile
 extensions/cpsection/frame/Makefile
 extensions/cpsection/keyboard/Makefile
