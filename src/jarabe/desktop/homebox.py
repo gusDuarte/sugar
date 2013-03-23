@@ -194,6 +194,10 @@ class HomeBox(Gtk.VBox):
 
     def _update_background_image(self, *args):
         self._background_pixbuf = None
+
+        if BACKGROUND_IMAGE_PATH is None:
+            return
+
         if os.path.exists(BACKGROUND_IMAGE_PATH):
             try:
                 self._background_pixbuf = GdkPixbuf.Pixbuf.new_from_file(
