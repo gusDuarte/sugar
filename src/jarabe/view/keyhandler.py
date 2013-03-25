@@ -167,6 +167,10 @@ class KeyHandler(object):
         journalactivity.get_journal().show_journal()
 
     def handle_accumulate_osk(self, event_time):
+        from jarabe.model.shell import get_model
+        if get_model().get_active_activity().get_bundle_id() == 'org.laptop.AbiWordActivity':
+            return
+
         # If we are not in ebook-mode, do not do anything.
         is_ebook_mode = False
 
@@ -271,6 +275,9 @@ def set_key_handlers_active(active):
 
     _instance._key_handlers_active = active
 
+
+def get_handle_accumulate_osk_func():
+    return _instance.handle_accumulate_osk
 
 def get_handle_unaccumulate_osk_func():
     return _instance.handle_unaccumulate_osk

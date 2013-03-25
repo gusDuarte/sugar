@@ -50,6 +50,9 @@ from gi.repository import Gio
 MONITORS = []
 MONITOR_ACTION_TAKEN = False
 
+OSK_APPEARENCE_MONITOR_FILE    = '~/.sugar/default/osk_just_appeared'
+OSK_DISAPPEARENCE_MONITOR_FILE = '~/.sugar/default/osk_just_disappeared'
+
 _USE_XKL = False
 try:
     from gi.repository import Xkl
@@ -257,6 +260,35 @@ def arrange_for_setup_frame_cb():
     monitor.connect('changed', file_monitor_changed_cb)
     MONITORS.append(monitor)
 
+def osk_appeared_cb(monitor, one_file, other_file, event_type):
+    if event_type != Gio.FileMonitorEvent.CHANGED:
+        return
+
+    if one_file.get_path() == os.path.expanduser(OSK_APPEARENCE_MONITOR_FILE):
+        from jarabe.view.keyhandler import get_handle_accumulate_osk_func
+	get_handle_accumulate_osk_func()(None)
+
+def osk_disappeared_cb(monitor, one_file, other_file, event_type):
+    if event_type != Gio.FileMonitorEvent.CHANGED:
+        return
+
+    if one_file.get_path() == os.path.expanduser(OSK_DISAPPEARENCE_MONITOR_FILE):
+        from jarabe.view.keyhandler import get_handle_unaccumulate_osk_func
+	get_handle_unaccumulate_osk_func()(None)
+
+def arrange_for_osk_appearence_disappearence_hacks():
+    osk_appearence_monitor_file_path = \
+            Gio.File.new_for_path(os.path.expanduser(OSK_APPEARENCE_MONITOR_FILE))
+    appearence_monitor = osk_appearence_monitor_file_path.monitor_file(Gio.FileMonitorFlags.NONE, None)
+    appearence_monitor.connect('changed', osk_appeared_cb)
+    MONITORS.append(appearence_monitor)
+
+    osk_disappearence_monitor_file_path = \
+            Gio.File.new_for_path(os.path.expanduser(OSK_DISAPPEARENCE_MONITOR_FILE))
+    disappearence_monitor = osk_disappearence_monitor_file_path.monitor_file(Gio.FileMonitorFlags.NONE, None)
+    disappearence_monitor.connect('changed', osk_disappeared_cb)
+    MONITORS.append(disappearence_monitor)
+
 def bootstrap():
     show_hidden_wireless_networks()
     setup_window_manager()
@@ -267,6 +299,7 @@ def bootstrap():
     GObject.idle_add(setup_keyhandler_cb)
 
     arrange_for_setup_frame_cb()
+    arrange_for_osk_appearence_disappearence_hacks()
 
     GObject.idle_add(setup_gesturehandler_cb)
     GObject.idle_add(setup_journal_cb)
