@@ -1602,19 +1602,19 @@ msgstr "No se encontró una actividad para retomar la entrada"
 
 #: src/jarabe/journal/processdialog.py:51
 msgid "RUNNING :: "
-msgstr ""
+msgstr "CORRIENDO ::"
 
 #: src/jarabe/journal/processdialog.py:52
 msgid "FAILED :: "
-msgstr ""
+msgstr "FALLO ::"
 
 #: src/jarabe/journal/processdialog.py:53
 msgid "FINISHED :: "
-msgstr ""
+msgstr "TERMINADO ::"
 
 #: src/jarabe/journal/processdialog.py:54
 msgid "PREREQUISITES WERE NOT MET :: "
-msgstr ""
+msgstr "PREREQUISITOS NO ALCANZADOS ::"
 
 #: src/jarabe/journal/processdialog.py:140 src/jarabe/view/buddymenu.py:116
 msgid "Restart"
