@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-18 22:40+0530\n"
+"POT-Creation-Date: 2013-03-27 10:58+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -430,8 +430,8 @@ msgid ""
 "server will be able to see each other, even when they aren't on the same "
 "network."
 msgstr ""
-"Todas las personas asociadas al siguiente servidor podrán comunicarse entre sí, "
-"aún cuando no estén dentro de la misma red"
+"Todas las personas asociadas al siguiente servidor podrán comunicarse entre "
+"sí, aún cuando no estén dentro de la misma red"
 
 #: extensions/cpsection/network/view.py:768
 msgid "Server:"
@@ -615,7 +615,7 @@ msgid "Disconnected"
 msgstr "Desconectado"
 
 #: extensions/deviceicon/network.py:309 src/jarabe/controlpanel/toolbar.py:121
-#: src/jarabe/desktop/homebox.py:68 src/jarabe/desktop/keydialog.py:227
+#: src/jarabe/desktop/homebox.py:84 src/jarabe/desktop/keydialog.py:227
 #: src/jarabe/desktop/keydialog.py:320 src/jarabe/frame/activitiestray.py:649
 #: src/jarabe/frame/activitiestray.py:768
 #: src/jarabe/frame/activitiestray.py:800
@@ -847,7 +847,7 @@ msgstr "Los cambios requieren reiniciar"
 msgid "Cancel changes"
 msgstr "Cancelar cambios"
 
-#: src/jarabe/controlpanel/gui.py:341 src/jarabe/desktop/homebox.py:70
+#: src/jarabe/controlpanel/gui.py:341 src/jarabe/desktop/homebox.py:86
 msgid "Later"
 msgstr "Después"
 
@@ -970,16 +970,16 @@ msgstr "Registro"
 msgid "Register again"
 msgstr "Registrar nuevamente"
 
-#: src/jarabe/desktop/homebox.py:63
+#: src/jarabe/desktop/homebox.py:79
 msgid "Software Update"
 msgstr "Actualización de Software"
 
-#: src/jarabe/desktop/homebox.py:64
+#: src/jarabe/desktop/homebox.py:80
 msgid "Update your activities to ensure compatibility with your new software"
 msgstr ""
 "Actualice sus actividades para asegurar compatibilidad con su nuevo software"
 
-#: src/jarabe/desktop/homebox.py:73
+#: src/jarabe/desktop/homebox.py:89
 msgid "Check now"
 msgstr "Pruebe ahora"
 
@@ -1369,6 +1369,7 @@ msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
 
 # TRANS: Action label for starting an entry.
 #: src/jarabe/journal/journaltoolbox.py:510 src/jarabe/journal/palettes.py:136
+#: src/jarabe/journal/processdialog.py:124
 msgid "Start"
 msgstr "Iniciar"
 
@@ -1478,7 +1479,8 @@ msgstr "Mostrar Diario"
 msgid "Choose an object"
 msgstr "Escoja un objeto"
 
-#: src/jarabe/journal/objectchooser.py:177 src/jarabe/view/viewsource.py:416
+#: src/jarabe/journal/objectchooser.py:177
+#: src/jarabe/journal/processdialog.py:132 src/jarabe/view/viewsource.py:416
 msgid "Close"
 msgstr "Cerrar"
 
@@ -1597,6 +1599,75 @@ msgstr "No se encontró una conexión válida"
 #: src/jarabe/journal/palettes.py:1133
 msgid "No activity to resume entry"
 msgstr "No se encontró una actividad para retomar la entrada"
+
+#: src/jarabe/journal/processdialog.py:51
+msgid "RUNNING :: "
+msgstr ""
+
+#: src/jarabe/journal/processdialog.py:52
+msgid "FAILED :: "
+msgstr ""
+
+#: src/jarabe/journal/processdialog.py:53
+msgid "FINISHED :: "
+msgstr ""
+
+#: src/jarabe/journal/processdialog.py:54
+msgid "PREREQUISITES WERE NOT MET :: "
+msgstr ""
+
+#: src/jarabe/journal/processdialog.py:140 src/jarabe/view/buddymenu.py:116
+msgid "Restart"
+msgstr "Reiniciar"
+
+#: src/jarabe/journal/processdialog.py:231
+msgid "Please wait, saving Journal content to"
+msgstr "Por favor espera, guardando el contenido del Diario a"
+
+#: src/jarabe/journal/processdialog.py:232
+#: src/jarabe/journal/processdialog.py:251
+msgid "Do not remove the storage device!"
+msgstr "No remueva el dispositivo de almacenamiento!"
+
+#: src/jarabe/journal/processdialog.py:234
+msgid "The Journal content has been saved."
+msgstr "El contenido del Diario ha sido guardado."
+
+#: src/jarabe/journal/processdialog.py:236
+msgid "Backup"
+msgstr "Respaldar"
+
+#: src/jarabe/journal/processdialog.py:238
+msgid "Journal content will be saved to"
+msgstr "El contenido del Diario será guardado en"
+
+#: src/jarabe/journal/processdialog.py:250
+msgid "Please wait, restoring Journal content from"
+msgstr "Por favor espere, restaurando el contenido del Diario desde"
+
+#: src/jarabe/journal/processdialog.py:253
+msgid "The Journal content has been restored."
+msgstr "El contenido del Diario ha sido restaurado."
+
+#: src/jarabe/journal/processdialog.py:255
+msgid "Restore"
+msgstr "Restaurar"
+
+#: src/jarabe/journal/processdialog.py:257
+msgid "Journal content will be restored from"
+msgstr "El contenido del Diario será restaurado desde"
+
+#: src/jarabe/journal/processdialog.py:258
+msgid "Warning:"
+msgstr "Atención:"
+
+#: src/jarabe/journal/processdialog.py:258
+msgid "Current Journal content will be deleted!"
+msgstr "El contenido actual del Diario será borrado!"
+
+#: src/jarabe/journal/processdialog.py:260
+msgid ", please close all the running activities."
+msgstr ", por favor cierre todas las actividades abiertas."
 
 #: src/jarabe/journal/volumestoolbar.py:206
 msgid "School-Server Shares"
@@ -1827,10 +1898,6 @@ msgstr "Desmontar compartidos"
 #: src/jarabe/view/buddymenu.py:108
 msgid "Shutdown"
 msgstr "Apagar"
-
-#: src/jarabe/view/buddymenu.py:116
-msgid "Restart"
-msgstr "Reiniciar"
 
 #: src/jarabe/view/buddymenu.py:122
 msgid "Logout"
@@ -2255,42 +2322,6 @@ msgstr "Sugar en una ventana"
 #~ msgid "Finished"
 #~ msgstr "Terminado"
 
-#~ msgid "Please wait, saving Journal content to"
-#~ msgstr "Por favor espera, guardando el contenido del Diario a"
-
-#~ msgid "Do not remove the storage device!"
-#~ msgstr "No remueva el dispositivo de almacenamiento!"
-
-#~ msgid "The Journal content has been saved."
-#~ msgstr "El contenido del Diario ha sido guardado."
-
-#~ msgid "Backup"
-#~ msgstr "Respaldar"
-
-#~ msgid "Journal content will be saved to"
-#~ msgstr "El contenido del Diario será guardado en"
-
-#~ msgid "Please wait, restoring Journal content from"
-#~ msgstr "Por favor espere, restaurando el contenido del Diario desde"
-
-#~ msgid "The Journal content has been restored."
-#~ msgstr "El contenido del Diario ha sido restaurado."
-
-#~ msgid "Restore"
-#~ msgstr "Restaurar"
-
-#~ msgid "Journal content will be restored from"
-#~ msgstr "El contenido del Diario será restaurado desde"
-
-#~ msgid "Warning:"
-#~ msgstr "Atención:"
-
-#~ msgid "Current Journal content will be deleted!"
-#~ msgstr "El contenido actual del Diario será borrado!"
-
-#~ msgid ", please close all the running activities."
-#~ msgstr ", por favor cierre todas las actividades abiertas."
-
 #~ msgid "The journal content has been saved."
 #~ msgstr "El contenido del Diario ha sido guardado."
 
@@ -2331,8 +2362,8 @@ msgstr "Sugar en una ventana"
 #~ msgstr[0] "Puedes instalar %s actualización"
 #~ msgstr[1] "Puedes instalar %s actualizaciones"
 
-msgid "None"
-msgstr "Ninguno"
+#~ msgid "None"
+#~ msgstr "Ninguno"
 
 #~ msgid "Updating %s..."
 #~ msgstr "Actualizando %s..."
