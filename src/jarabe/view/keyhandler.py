@@ -46,8 +46,6 @@ _actions_table = {
     'F4': 'zoom_activity',
     'F5': 'open_search',
     'F6': 'frame',
-    'KP_Prior': 'accumulate_osk',
-    'KP_Next': 'unaccumulate_osk',
     'XF86AudioMute': 'volume_mute',
     'F11': 'volume_down',
     'XF86AudioLowerVolume': 'volume_down',
