@@ -119,7 +119,7 @@ Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
 Requires: %{name}-cp-datetime %{name}-cp-frame %{name}-cp-language
 Requires: %{name}-cp-modemconfiguration %{name}-cp-network %{name}-cp-power
-Requires: %{name}-cp-accessibility 
+Requires: %{name}-cp-accessibility %{name}-cp-background
 #Disabled in dx4
 # %{name}-cp-updater
 # Currently broken
@@ -128,13 +128,21 @@ Requires: %{name}-cp-accessibility
 %description cp-all
 This is a meta package to install all Sugar Control Panel modules
 
+%package cp-background
+Summary: Sugar home background control panel
+Group: User Interface/Desktops
+Requires: %{name} = 1:%{version}-%{release}
+
+%description cp-background
+This is the Sugar background settings control panel/
+
 %package cp-datetime
 Summary: Sugar Date and Time control panel
 Group: User Interface/Desktops
 Requires: %{name} = 1:%{version}-%{release}
 
 %description cp-datetime
-This is the Sugar Date and Time settings control panel
+This is the Sugar Date and Time settings control panel/
 
 %package cp-frame
 Summary: Sugar Frame control panel
@@ -292,6 +300,9 @@ fi
 %{_datadir}/icons/hicolor/scalable/apps/sugar-xo.svg
 
 %files cp-all
+
+%files cp-background
+%{_datadir}/sugar/extensions/cpsection/background
 
 %files cp-datetime
 %{_datadir}/sugar/extensions/cpsection/datetime
