@@ -55,7 +55,7 @@ msgstr "Error en colores especificados."
 
 #: extensions/cpsection/aboutme/view.py:182
 msgid "Example icons: Copyright (c) TheNounProject"
-msgstr ""
+msgstr "Iconos de ejemplo: Copyright (c) TheNounProject"
 
 #: extensions/cpsection/aboutme/view.py:328
 msgid "Click to change your color:"
