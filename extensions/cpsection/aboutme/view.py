@@ -197,6 +197,8 @@ Gtk.Label(_('Example icons: Copyright (c) TheNounProject'))
                 self._path = self._join
                 self._icons = os.listdir(self._path)
                 self._icons.sort()
+	else:
+		self._icons = []
 
         for x in self._icons:
                 if "svg" in x:
