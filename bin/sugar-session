@@ -98,6 +98,18 @@ def cleanup_logs(logs_dir):
             dest_path = os.path.join(backup_dir, log)
             os.rename(source_path, dest_path)
 
+def show_welcome_screen():
+    path = os.path.expanduser('~/.welcome_screen')
+    if os.path.exists(path):
+        from jarabe.model import screen
+        screen.set_dcon_freeze(0)
+        welcome_file_flag = open(path, 'r')
+        welcome_file_command = welcome_file_flag.read()
+        welcome_file_flag.close()
+        os.remove(path)
+        if subprocess.call(welcome_file_command.split()):
+            logging.warning('Can not display welcome screen.')
+
 def start_ui_service():
     from jarabe.view.service import UIService
 
@@ -460,6 +472,9 @@ def main():
 
     icons_path = os.path.join(config.data_path, 'icons')
     Gtk.IconTheme.get_default().append_search_path(icons_path)
+
+    # OLPC: open welcome screen if booted for the first time
+    show_welcome_screen()
 
     if not intro.check_profile():
         win = IntroWindow()
