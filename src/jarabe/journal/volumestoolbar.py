@@ -397,7 +397,7 @@ class BaseButton(RadioToolButton):
             journal._show_alert(_('Entries cannot be copied to Peer-Shares.'), _('Error'))
             return
 
-        object_id = selection_data.data
+        object_id = selection_data.get_data()
         metadata = model.get(object_id)
 
         from jarabe.journal.palettes import CopyMenu, get_copy_menu_helper
