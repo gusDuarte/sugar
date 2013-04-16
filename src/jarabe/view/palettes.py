@@ -242,7 +242,7 @@ class VolumePalette(Palette):
         self.set_content(self.content_box)
         self.content_box.show()
 
-        menu_item = PaletteMenuItem(pgettext('Volume', 'Remove'))
+        menu_item = PaletteMenuItem(pgettext('Volume', _('Remove')))
 
         icon = Icon(icon_name='media-eject', icon_size=Gtk.IconSize.MENU)
         menu_item.set_image(icon)
@@ -324,7 +324,7 @@ class RemoteSharePalette(Palette):
 
 
         if show_unmount_option == True:
-            menu_item = PaletteMenuItem(pgettext('Share', 'Unmount'))
+            menu_item = PaletteMenuItem(pgettext('Share', _('Unmount')))
             icon = Icon(icon_name='media-eject', icon_size=Gtk.IconSize.MENU)
             menu_item.set_image(icon)
             icon.show()
