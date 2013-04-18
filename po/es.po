@@ -2499,9 +2499,6 @@ msgstr ""
 #~ msgid "%s (%s)"
 #~ msgstr "%s (%s)"
 
-#~ msgid "Clear history"
-#~ msgstr "Borrar historial"
-
 #~ msgid "Running"
 #~ msgstr "Corriendo"
 
@@ -2519,10 +2516,6 @@ msgstr ""
 
 #~ msgid "The journal content has been restored."
 #~ msgstr "El contenido del Diario ha sido restaurado."
-
-#~ msgctxt "Volume"
-#~ msgid "Remove"
-#~ msgstr "Quitar"
 
 #~ msgid "Download size: %s"
 #~ msgstr "Tamaño de descarga: %s"
