@@ -75,4 +75,11 @@ src/jarabe/view/launcher.py
 src/jarabe/view/palettes.py
 src/jarabe/view/viewsource.py
 src/jarabe/util/emulator.py
+extensions/cpsection/background/__init__.py
+extensions/cpsection/background/view.py
+extensions/cpsection/modemconfiguration/model.py
+extensions/deviceicon/virtualkeyboard.py
+src/jarabe/frame/notification.py
+src/jarabe/journal/webdavmanager.py
+src/jarabe/model/processmanagement.py
 
