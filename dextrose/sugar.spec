@@ -1,21 +1,10 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-# Environment setup:
-#
-#	mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-#	echo | bzip2 -c > ~/rpmbuild/SOURCES/sugar-0.97.7.tar.gz
-#	cd ~/build/ && git clone git://git.sugarlabs.org/dextrose/sugar.git
-#	ln -s ~/build/sugar/dextrose/sugar.spec ~/rpmbuild/SPECS/sugar.spec
-#	rpmbuild -ba ~/rpmbuild/SPECS/sugar.spec
-#
-
-%define git_repo sugar
 %define git_head devel
 
-%define git_repodir %(echo ~/build/)
-%define git_gitdir %{git_repodir}/%{git_repo}/.git
+%define git_gitdir %(echo `pwd`/.git)
 
-%define git_get_source pushd %{git_repodir}/%{git_repo} ;\
+%define git_get_source pushd %{git_gitdir} ;\
 #	/usr/bin/git pull ;\
         /usr/bin/git archive --format=tar --prefix=%{name}-%{version}/ %{git_head} | \
                 bzip2 -c > %{_sourcedir}/%{name}-%{version}.tar.bz2 ;\
