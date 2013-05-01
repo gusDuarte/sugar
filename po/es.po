@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-04-17 01:26+0530\n"
+"POT-Creation-Date: 2013-05-02 01:08+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -693,14 +693,14 @@ msgid "System resources"
 msgstr "Recursos del sistema"
 
 #: extensions/deviceicon/resources.py:168
-#, python-format
-msgid "CPU in use: %d%%"
-msgstr "CPU en uso: %d%%"
+#, fuzzy
+msgid "CPU in use: %d%%%"
+msgstr "CPU en uso: %d%%%"
 
 #: extensions/deviceicon/resources.py:170
-#, python-format
-msgid "Memory in use: %d%%"
-msgstr "Memoria en uso: %d%%"
+#, fuzzy
+msgid "Memory in use: %d%%%"
+msgstr "Memoria en uso: %d%%%"
 
 #: extensions/deviceicon/resources.py:200
 msgid "Cannot compute CPU and memory usage statistics!"
