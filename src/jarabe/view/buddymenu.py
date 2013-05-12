@@ -256,3 +256,7 @@ class BuddyMenu(Palette):
 
 def get_control_panel():
     return control_panel
+
+def set_control_panel(panel):
+    global control_panel
+    control_panel = panel

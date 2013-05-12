@@ -303,3 +303,12 @@ class TimeZone(SectionView):
 
     def perform_accept_actions(self):
         self._model.set_ntp_servers(self._widget_table._get_entries())
+
+    def perform_actions_upon_osk_appearence(self):
+        if  self._entry.has_focus() is False:
+            self._entry.hide()
+            self._scrolled_window.hide()
+
+    def perform_actions_upon_osk_disappearence(self):
+        self._entry.show()
+        self._scrolled_window.show()

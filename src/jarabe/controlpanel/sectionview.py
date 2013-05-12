@@ -60,3 +60,11 @@ class SectionView(Gtk.VBox):
     def perform_accept_actions(self):
         """Perform additional actions, when the "Ok" button is clicked."""
         pass
+
+    def perform_actions_upon_osk_appearence(self):
+        """Perform additional actions, when the OSK appears."""
+        pass
+
+    def perform_actions_upon_osk_disappearence(self):
+        """Perform additional actions, when the OSK disappears."""
+        pass
