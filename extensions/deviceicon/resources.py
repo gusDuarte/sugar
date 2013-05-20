@@ -165,9 +165,9 @@ class ResourcePalette(Palette):
             self._stop_and_show_error()
             return False
         else:
-            self._cpu_text.set_label(_('CPU in use: %d%%' % cpu_in_use))
+            self._cpu_text.set_label(_('CPU in use: %d%%%' % cpu_in_use))
             self._cpu_bar.set_fraction(float(cpu_in_use) / 100)
-            self._memory_text.set_label(_('Memory in use: %d%%' %
+            self._memory_text.set_label(_('Memory in use: %d%%%' %
                 memory_in_use))
             self._memory_bar.set_fraction(float(memory_in_use) / 100)
 

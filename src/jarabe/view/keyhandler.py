@@ -199,10 +199,22 @@ class KeyHandler(object):
 
         active_window.resize(screen_width, screen_height * factor)
 
+        from jarabe.view.buddymenu import get_control_panel
+        control_panel = get_control_panel()
+        if control_panel is not None:
+            if control_panel._section_view is not None:
+                control_panel._section_view.perform_actions_upon_osk_appearence()
+
     def handle_unaccumulate_osk(self, event_time):
         screen = Gdk.Screen.get_default()
         active_window = screen.get_active_window()
         active_window.resize(screen.get_width(), screen.get_height())
+
+        from jarabe.view.buddymenu import get_control_panel
+        control_panel = get_control_panel()
+        if control_panel is not None:
+            if control_panel._section_view is not None:
+                control_panel._section_view.perform_actions_upon_osk_disappearence()
 
     def _key_pressed_cb(self, grabber, keycode, state, event_time):
         key = grabber.get_key(keycode, state)

@@ -213,6 +213,13 @@ class ListModel(Gtk.TreeModelSort):
         registry.connect('bundle-changed', self.__activity_changed_cb)
         registry.connect('bundle-removed', self.__activity_removed_cb)
 
+    def refresh_model(self):
+        self._model.clear()
+
+        registry = bundleregistry.get_registry()
+        for info in registry:
+            self._add_activity(info)
+
     def __activity_added_cb(self, activity_registry, activity_info):
         self._add_activity(activity_info)
 
@@ -248,7 +255,7 @@ class ListModel(Gtk.TreeModelSort):
         if activity_info.get_bundle_id() == 'org.laptop.JournalActivity':
             return
 
-        timestamp = activity_info.get_installation_time()
+        timestamp = os.stat(activity_info._path).st_mtime
         version = activity_info.get_activity_version()
 
         registry = bundleregistry.get_registry()

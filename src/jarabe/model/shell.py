@@ -17,6 +17,7 @@
 
 import logging
 import time
+import os
 
 from gi.repository import GConf
 from gi.repository import Wnck
@@ -27,6 +28,7 @@ from gi.repository import GdkX11
 import dbus
 
 from sugar3 import dispatch
+from sugar3 import util
 from sugar3.graphics.xocolor import XoColor
 from gi.repository import SugarExt
 
@@ -598,6 +600,21 @@ class ShellModel(GObject.GObject):
             xid = window.get_xid()
             activity = self._get_activity_by_xid(xid)
             if activity is not None:
+
+                # Now, update the modification-time on the filesystem,
+                # and in the activities-list.
+                #
+                bundle_path = activity._activity_info.get_path()
+                current_timestamp = time.time()
+
+                # 1. On filesystem.
+                os.utime(bundle_path, (os.stat(bundle_path).st_mtime, current_timestamp))
+
+                # 2. On the activities-list.
+                from jarabe.desktop.homewindow import get_instance
+                activities_model = get_instance()._home_box._list_view._tree_view.get_model()
+                activities_model.refresh_model()
+
                 activity.remove_window_by_xid(xid)
                 if activity.get_window() is None:
                     logging.debug('last window gone - remove activity %s',

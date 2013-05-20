@@ -380,6 +380,9 @@ class ControlPanel(Gtk.Window):
         from jarabe.view.keyhandler import set_key_handlers_active
         set_key_handlers_active(True)
 
+        from jarabe.view.buddymenu import set_control_panel
+        set_control_panel(None)
+
         self.destroy()
 
     def __close_request_cb(self, widget, event=None):
