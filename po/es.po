@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-05-02 01:08+0530\n"
+"POT-Creation-Date: 2013-05-28 10:40+0530\n"
 "PO-Revision-Date: 2012-10-15 21:21+0200\n"
 "Last-Translator: Rafael Ortiz <rafael@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -166,7 +166,7 @@ msgstr "Accesibilidad"
 
 #: extensions/cpsection/accessibility/view.py:68
 #: extensions/cpsection/keyboard/__init__.py:21
-#: extensions/cpsection/keyboard/view.py:32
+#: extensions/cpsection/keyboard/view.py:38
 msgid "Keyboard"
 msgstr "Teclado"
 
@@ -246,6 +246,18 @@ msgstr "Aceleración:"
 msgid "Controller acceleration mouse."
 msgstr "Controla la aceleración del ratón."
 
+#: extensions/cpsection/background/__init__.py:21
+msgid "Background"
+msgstr "Fondo de Pantalla"
+
+#: extensions/cpsection/background/view.py:44
+msgid "Select a background:"
+msgstr "Elija el fondo de pantalla"
+
+#: extensions/cpsection/background/view.py:51
+msgid "Clear background"
+msgstr "Quitar fondo"
+
 #: extensions/cpsection/datetime/__init__.py:21
 msgid "Date & Time"
 msgstr "Fecha y hora"
@@ -296,15 +308,15 @@ msgstr "Esquina"
 msgid "Edge"
 msgstr "Borde"
 
-#: extensions/cpsection/keyboard/view.py:190
+#: extensions/cpsection/keyboard/view.py:240
 msgid "Keyboard Model"
 msgstr "Modelo de teclado"
 
-#: extensions/cpsection/keyboard/view.py:250
+#: extensions/cpsection/keyboard/view.py:301
 msgid "Key(s) to change layout"
 msgstr "Tecla(s) para cambiar el diseño"
 
-#: extensions/cpsection/keyboard/view.py:319
+#: extensions/cpsection/keyboard/view.py:369
 msgid "Keyboard Layout(s)"
 msgstr "Diseño(s) de teclado"
 
@@ -693,12 +705,10 @@ msgid "System resources"
 msgstr "Recursos del sistema"
 
 #: extensions/deviceicon/resources.py:168
-#, fuzzy
 msgid "CPU in use: %d%%%"
 msgstr "CPU en uso: %d%%%"
 
 #: extensions/deviceicon/resources.py:170
-#, fuzzy
 msgid "Memory in use: %d%%%"
 msgstr "Memoria en uso: %d%%%"
 
@@ -874,28 +884,28 @@ msgstr "Hecho"
 msgid "Ok"
 msgstr "Aceptar"
 
-#: src/jarabe/desktop/activitieslist.py:276
+#: src/jarabe/desktop/activitieslist.py:283
 msgid "Not used yet"
 msgstr "¡Actualización no disponible aún!"
 
-#: src/jarabe/desktop/activitieslist.py:283
+#: src/jarabe/desktop/activitieslist.py:290
 #, python-format
 msgid "Version %s"
 msgstr "Versión %s"
 
-#: src/jarabe/desktop/activitieslist.py:384 src/jarabe/journal/listview.py:563
+#: src/jarabe/desktop/activitieslist.py:391 src/jarabe/journal/listview.py:563
 msgid "Clear search"
 msgstr "Limpiar búsqueda"
 
-#: src/jarabe/desktop/activitieslist.py:457
+#: src/jarabe/desktop/activitieslist.py:464
 msgid "No matching activities"
 msgstr "No hay entradas coincidentes"
 
-#: src/jarabe/desktop/activitieslist.py:493
+#: src/jarabe/desktop/activitieslist.py:500
 msgid "Confirm erase"
 msgstr "Confirmar borrado"
 
-#: src/jarabe/desktop/activitieslist.py:495
+#: src/jarabe/desktop/activitieslist.py:502
 #, python-format
 msgid "Confirm erase: Do you want to permanently erase %s?"
 msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
@@ -904,13 +914,13 @@ msgstr "Confirmar el borrado: ¿Quiere borrar %s de forma permanente?"
 # TODO: Implement stopping downloads
 # self._stop_item.connect('activate', self._stop_item_activate_cb)
 # self.append_menu_item(self._stop_item)
-#: src/jarabe/desktop/activitieslist.py:499
+#: src/jarabe/desktop/activitieslist.py:506
 #: src/jarabe/frame/clipboardmenu.py:65 src/jarabe/view/viewsource.py:286
 msgid "Keep"
 msgstr "Guardar"
 
-#: src/jarabe/desktop/activitieslist.py:502
-#: src/jarabe/desktop/activitieslist.py:557
+#: src/jarabe/desktop/activitieslist.py:509
+#: src/jarabe/desktop/activitieslist.py:564
 #: src/jarabe/journal/journaltoolbox.py:404
 #: src/jarabe/journal/journaltoolbox.py:451
 #: src/jarabe/journal/journaltoolbox.py:646
@@ -920,11 +930,11 @@ msgstr "Guardar"
 msgid "Erase"
 msgstr "Borrar"
 
-#: src/jarabe/desktop/activitieslist.py:572
+#: src/jarabe/desktop/activitieslist.py:579
 msgid "Remove favorite"
 msgstr "Remover favorito"
 
-#: src/jarabe/desktop/activitieslist.py:576
+#: src/jarabe/desktop/activitieslist.py:583
 msgid "Make favorite"
 msgstr "Hacer favorito"
 
