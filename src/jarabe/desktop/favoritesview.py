@@ -385,22 +385,16 @@ class FavoritesView(ViewContainer):
                 icon.set_resume_mode(self._resume_mode)
 
 
-class ActivityIcon(CanvasIcon):
-    __gtype_name__ = 'SugarFavoriteActivityIcon'
-
-    _BORDER_WIDTH = style.zoom(9)
+class ActivityIconDatastoreListener(GObject.GObject):
     _MAX_RESUME_ENTRIES = 5
 
-    def __init__(self, activity_info):
-        CanvasIcon.__init__(self, cache=True,
-                            file_name=activity_info.get_icon())
+    def __init__(self, activity_info, container_instance):
+        GObject.GObject.__init__(self)
 
+        self._container_instance = container_instance
         self._activity_info = activity_info
         self._journal_entries = []
         self._resume_mode = True
-
-        self.connect_after('button-release-event',
-                           self.__button_release_event_cb)
 
         datastore.updated.connect(self.__datastore_listener_updated_cb)
         datastore.deleted.connect(self.__datastore_listener_deleted_cb)
@@ -438,23 +432,45 @@ class ActivityIcon(CanvasIcon):
         # related to this activity.
         checked_entries = []
         for entry in entries:
-            if entry['activity'] == self.bundle_id:
+            if entry['activity'] == self._activity_info.get_bundle_id():
                 checked_entries.append(entry)
 
         self._journal_entries = checked_entries
-        self._update()
+        self._update(True)
 
     def __get_last_activity_error_handler_cb(self, error):
         logging.error('Error retrieving most recent activities: %r', error)
 
-    def _update(self):
-        self.palette = None
-        if not self._resume_mode or not self._journal_entries:
-            xo_color = XoColor('%s,%s' % (style.COLOR_DESKTOP_ICON.get_svg(),
-                                          style.COLOR_TRANSPARENT.get_svg()))
+    def _update(self, force=True):
+        self._container_instance._update()
+
+    def _resume(self, journal_entry):
+        if not journal_entry['activity_id']:
+            journal_entry['activity_id'] = activityfactory.create_activity_id()
+        misc.resume(journal_entry, self._activity_info.get_bundle_id())
+
+    def _activate(self):
+        if self.palette is not None:
+            self.palette.popdown(immediate=True)
+
+        if self._resume_mode and self._journal_entries:
+            self._resume(self._journal_entries[0])
         else:
-            xo_color = misc.get_icon_color(self._journal_entries[0])
-        self.props.xo_color = xo_color
+            misc.launch(self._activity_info)
+
+
+class ActivityIcon(CanvasIcon, ActivityIconDatastoreListener):
+    __gtype_name__ = 'SugarFavoriteActivityIcon'
+
+    _BORDER_WIDTH = style.zoom(9)
+
+    def __init__(self, activity_info):
+        CanvasIcon.__init__(self, cache=True,
+                            file_name=activity_info.get_icon())
+        ActivityIconDatastoreListener.__init__(self, activity_info, self)
+
+        self.connect_after('button-release-event',
+                           self.__button_release_event_cb)
 
     def create_palette(self):
         palette = FavoritePalette(self._activity_info, self._journal_entries)
@@ -482,20 +498,6 @@ class ActivityIcon(CanvasIcon):
     def __button_release_event_cb(self, icon, event):
         self._activate()
 
-    def _resume(self, journal_entry):
-        if not journal_entry['activity_id']:
-            journal_entry['activity_id'] = activityfactory.create_activity_id()
-        misc.resume(journal_entry, self._activity_info.get_bundle_id())
-
-    def _activate(self):
-        if self.palette is not None:
-            self.palette.popdown(immediate=True)
-
-        if self._resume_mode and self._journal_entries:
-            self._resume(self._journal_entries[0])
-        else:
-            misc.launch(self._activity_info)
-
     def get_bundle_id(self):
         return self._activity_info.get_bundle_id()
     bundle_id = property(get_bundle_id, None)
@@ -519,6 +521,15 @@ class ActivityIcon(CanvasIcon):
     def set_resume_mode(self, resume_mode):
         self._resume_mode = resume_mode
         self._update()
+
+    def _update(self, force=True):
+        self.palette = None
+        if not self._resume_mode or not self._journal_entries:
+            xo_color = XoColor('%s,%s' % (style.COLOR_DESKTOP_ICON.get_svg(),
+                                          style.COLOR_TRANSPARENT.get_svg()))
+        else:
+            xo_color = misc.get_icon_color(self._journal_entries[0])
+        self.props.xo_color = xo_color
 
 
 class FavoritePalette(ActivityPalette):
@@ -591,7 +602,7 @@ class CurrentActivityIcon(CanvasIcon):
         window = self._home_model.get_active_activity().get_window()
         window.activate(Gtk.get_current_event_time())
 
-    def _update(self):
+    def _update(self, force=True):
         self.props.file_name = self._home_activity.get_icon_path()
         self.props.xo_color = self._home_activity.get_icon_color()
         self.props.pixel_size = style.STANDARD_ICON_SIZE

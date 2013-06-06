@@ -33,11 +33,13 @@ from sugar3.graphics.icon import Icon, CellRendererIcon
 from sugar3.graphics.xocolor import XoColor
 from sugar3.graphics.alert import Alert
 from sugar3.graphics.palettemenu import PaletteMenuItem
+from sugar3.graphics.palettemenu import PaletteMenuItemSeparator
 
 from jarabe.model import bundleregistry
 from jarabe.view.palettes import ActivityPalette
 from jarabe.journal import misc
 from jarabe.util.normalize import normalize_string
+from jarabe.desktop.favoritesview import ActivityIconDatastoreListener
 
 
 gconf_client = GConf.Client.get_default()
@@ -86,6 +88,7 @@ class ActivitiesTreeView(Gtk.TreeView):
 
         column = Gtk.TreeViewColumn()
         column.pack_start(cell_icon, True)
+        column.set_cell_data_func(cell_icon, self.__set_activity_icon_color)
         column.add_attribute(cell_icon, 'file-name', ListModel.COLUMN_ICON)
         self.append_column(column)
 
@@ -137,6 +140,19 @@ class ActivitiesTreeView(Gtk.TreeView):
     def __erase_activated_cb(self, cell_renderer, bundle_id):
         self.emit('erase-activated', bundle_id)
 
+    def __set_activity_icon_color(self, column, cell, model, tree_iter, data):
+        listener = model[tree_iter][ListModel.COLUMN_DATASTORE_LISTENER]
+        if len(listener._journal_entries) > 0:
+            xo_color = misc.get_icon_color(listener._journal_entries[0])
+            stroke_color = xo_color.get_stroke_color()
+            fill_color = xo_color.get_fill_color()
+        else:
+            stroke_color = style.COLOR_DESKTOP_ICON.get_svg()
+            fill_color = style.COLOR_TRANSPARENT.get_svg()
+
+        cell.props.stroke_color = stroke_color
+        cell.props.fill_color = fill_color
+
     def __favorite_set_data_cb(self, column, cell, model, tree_iter, data):
         favorite = model[tree_iter][ListModel.COLUMN_FAVORITE]
         if favorite:
@@ -154,8 +170,20 @@ class ActivitiesTreeView(Gtk.TreeView):
                                      not row[ListModel.COLUMN_FAVORITE],
                                      True)
 
+    def _resume(self, journal_entry, activity_info):
+        if not journal_entry['activity_id']:
+            journal_entry['activity_id'] = activityfactory.create_activity_id()
+        misc.resume(journal_entry, activity_info.get_bundle_id())
+
     def __icon_clicked_cb(self, cell, path):
-        self._start_activity(path)
+        row = self.get_model()[path]
+        listener = row[ListModel.COLUMN_DATASTORE_LISTENER]
+
+        if listener._journal_entries:
+            self._resume(listener._journal_entries[0],
+                         listener._activity_info)
+        else:
+            misc.launch(listener._activity_info)
 
     def _start_activity(self, path):
         row = self.get_model()[path]
@@ -196,9 +224,11 @@ class ListModel(Gtk.TreeModelSort):
     COLUMN_VERSION_TEXT = 5
     COLUMN_DATE = 6
     COLUMN_DATE_TEXT = 7
+    COLUMN_DATASTORE_LISTENER = 8
 
     def __init__(self):
-        self._model = Gtk.ListStore(str, bool, str, str, str, str, int, str)
+        self._model = Gtk.ListStore(str, bool, str, str, str, str, int,
+                                    str, ActivityIconDatastoreListener)
         self._model_filter = self._model.filter_new()
         Gtk.TreeModelSort.__init__(self, model=self._model_filter)
         self.set_sort_column_id(ListModel.COLUMN_TITLE, Gtk.SortType.ASCENDING)
@@ -289,13 +319,18 @@ class ListModel(Gtk.TreeModelSort):
                             version,
                             _('Version %s') % version,
                             int(timestamp),
-                            elapsed_string])
+                            elapsed_string,
+                            ActivityIconDatastoreListener(activity_info, self)])
 
     def set_visible_func(self, func):
         self._model_filter.set_visible_func(func)
 
     def refilter(self):
         self._model_filter.refilter()
+
+    def _update(self, force=False):
+        if force is True:
+            self.refresh_model()
 
 
 class CellRendererFavorite(CellRendererIcon):
@@ -325,6 +360,7 @@ class CellRendererActivityIcon(CellRendererIcon):
 
     def __init__(self, tree_view):
         CellRendererIcon.__init__(self, tree_view)
+        self._tree_view = tree_view
 
         self.props.width = style.GRID_CELL_SIZE
         self.props.height = style.GRID_CELL_SIZE
@@ -346,12 +382,18 @@ class CellRendererActivityIcon(CellRendererIcon):
         bundle_id = row[ListModel.COLUMN_BUNDLE_ID]
 
         registry = bundleregistry.get_registry()
-        palette = ActivityListPalette(registry.get_bundle(bundle_id))
+        palette = ActivityListPalette(registry.get_bundle(bundle_id),
+                                      row[ListModel.COLUMN_DATASTORE_LISTENER]._journal_entries)
         palette.connect('erase-activated', self.__erase_activated_cb)
+        palette.connect('entry-activate', self.__palette_entry_activate_cb)
         return palette
 
     def __erase_activated_cb(self, palette, bundle_id):
         self.emit('erase-activated', bundle_id)
+
+    def __palette_entry_activate_cb(self, palette, metadata, activity_info):
+        self._tree_view._resume(metadata, activity_info)
+
 
 
 class ClearMessageBox(Gtk.EventBox):
@@ -528,13 +570,40 @@ class ActivityListPalette(ActivityPalette):
     __gsignals__ = {
         'erase-activated': (GObject.SignalFlags.RUN_FIRST, None,
                             ([str])),
+        'entry-activate': (GObject.SignalFlags.RUN_FIRST, None, ([object, object])),
+
     }
 
-    def __init__(self, activity_info):
+    def __init__(self, activity_info, journal_entries):
         ActivityPalette.__init__(self, activity_info)
 
         self._bundle_id = activity_info.get_bundle_id()
         self._version = activity_info.get_activity_version()
+
+        if journal_entries:
+            title = journal_entries[0]['title']
+            self.props.secondary_text = GLib.markup_escape_text(title)
+
+            menu_items = []
+            for entry in journal_entries:
+                icon_file_name = misc.get_icon_name(entry)
+                color = misc.get_icon_color(entry)
+
+                menu_item = PaletteMenuItem(text_label=entry['title'],
+                                            file_name=icon_file_name,
+                                            xo_color=color)
+                menu_item.connect('activate', self.__resume_entry_cb,
+                                  entry, activity_info)
+                menu_items.append(menu_item)
+                menu_item.show()
+
+            if journal_entries:
+                separator = PaletteMenuItemSeparator()
+                menu_items.append(separator)
+                separator.show()
+
+            for i in range(0, len(menu_items)):
+                self.menu_box.pack_start(menu_items[i], True, True, 0)
 
         registry = bundleregistry.get_registry()
         self._favorite = registry.is_bundle_favorite(self._bundle_id,
@@ -603,3 +672,7 @@ class ActivityListPalette(ActivityPalette):
 
     def __erase_activate_cb(self, menu_item):
         self.emit('erase-activated', self._bundle_id)
+
+    def __resume_entry_cb(self, menu_item, entry, activity_info):
+        if entry is not None:
+            self.emit('entry-activate', entry, activity_info)
