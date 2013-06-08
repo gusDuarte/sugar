@@ -34,6 +34,8 @@ import dbus
 from gi.repository import Gio
 from gi.repository import GConf
 
+from gi.repository import SugarExt
+
 from sugar3 import dispatch
 from sugar3 import mime
 from sugar3 import util
@@ -1066,6 +1068,12 @@ def _write_metadata_and_preview_files_and_return_file_paths(metadata,
                                      JOURNAL_METADATA_DIR)
     if not os.path.exists(metadata_dir_path):
         os.mkdir(metadata_dir_path)
+
+    # Set the HIDDEN attrib even when the metadata directory already
+    # exists for backward compatibility.
+    if not SugarExt.fat_set_hidden_attrib(metadata_dir_path):
+        logging.error('Could not set hidden attribute on %s' %
+                      (metadata_dir_path))
 
     preview = None
     if 'preview' in metadata_copy:
