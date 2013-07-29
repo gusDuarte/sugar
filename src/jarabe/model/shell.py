@@ -608,7 +608,10 @@ class ShellModel(GObject.GObject):
                 current_timestamp = time.time()
 
                 # 1. On filesystem.
-                os.utime(bundle_path, (os.stat(bundle_path).st_mtime, current_timestamp))
+                try:
+                    os.utime(bundle_path, (os.stat(bundle_path).st_mtime, current_timestamp))
+                except:
+                    pass
 
                 # 2. On the activities-list.
                 from jarabe.desktop.homewindow import get_instance
