@@ -171,8 +171,11 @@ class KeyboardManager(object):
         # FIXME, gconf_client_set_list not introspectable #681433
         # self._gconf_client.set_list(_OPTIONS_KEY, GConf.ValueType.STRING,
         #                             options)
-        SugarExt.gconf_client_set_string_list(self._gconf_client,
+        try:
+            SugarExt.gconf_client_set_string_list(self._gconf_client,
                                               _OPTIONS_KEY, options)
+        except:
+            logging.error('Could not set the gconf value for the keyboard options key')
         self._configrec.set_options(options)
         self._configrec.activate(self._engine)
 
@@ -183,8 +186,11 @@ class KeyboardManager(object):
         # FIXME, gconf_client_set_list not introspectable #681433
         # self._gconf_client.set_list(_LAYOUTS_KEY, GConf.ValueType.STRING,
         #                             layouts)
-        SugarExt.gconf_client_set_string_list(self._gconf_client,
+        try:
+            SugarExt.gconf_client_set_string_list(self._gconf_client,
                                               _LAYOUTS_KEY, layouts)
+        except:
+            logging.error('Could not set the gconf value for the keyboard layouts key')
         layouts_list = []
         variants_list = []
         for layout in layouts:
