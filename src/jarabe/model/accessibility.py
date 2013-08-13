@@ -20,6 +20,7 @@
 from gi.repository import Gtk
 from gi.repository import GConf
 import subprocess
+import logging
 
 class Keyboard:
 
@@ -72,7 +73,10 @@ class Keyboard:
             cmd += ['+mousekeys', 'mousemaxspeed', '3000', 'mousetimetomax', '1000', '-timeout', '-repeatkeys']
         else:
             cmd += ['-mousekeys', 'mousemaxspeed', '3000', 'mousetimetomax', '1000', '+timeout', '+repeatkeys']
-        subprocess.call(cmd)
+        try:
+            subprocess.call(cmd)
+        except:
+            logging.error('"ax" command not found')
 
 class Screen:
 
