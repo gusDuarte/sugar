@@ -9,18 +9,22 @@ from gi.repository import GObject
 from jarabe.view.viewsource import setup_view_source
 from sugar import env
 
+if os.path.exists('/etc/debian_version'):
+    KEY='F8'
+else:
+    KEY='F13'
 
 PATH_VMG_CONFIG = os.environ['HOME'] + '/.magnifier.ini'
-BOUND_KEYS = ['<shift>F13', 'F13', '<control>F13']
+BOUND_KEYS = ['<shift>'+KEY, KEY, '<control>'+KEY]
 
 def handle_key_press(key):
     logger = logging.getLogger('magnifier')
     logger.setLevel(logging.DEBUG)
     logger.debug("Ejecutando magnifier......" + key)
-    if (key=='<shift>F13'):
+    if (key=='<shift>'+KEY):
         set_ruta_archivo()
         set_GraphicsTools()
-    if (key=='<control>F13'):
+    if (key=='<control>'+KEY):
         set_ruta_archivo()
         set_InvertColors()
     _run_cmd_async('launchVmg')
