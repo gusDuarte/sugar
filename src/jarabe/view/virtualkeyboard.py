@@ -1068,7 +1068,12 @@ class Teclado:
         cb = Gtk.ComboBoxText()
         cb.append_text("CHICO")
         cb.append_text("MEDIANO")
-        cb.append_text("GRANDE")
+        import Xlib
+        import Xlib.display
+        resolution = Xlib.display.Display().screen().root.get_geometry()
+        print resolution.width
+        if resolution.width >= 1200:
+            cb.append_text("GRANDE")
         size="CHICO"
         try:
             size = self.get_size_botones()
@@ -1741,25 +1746,25 @@ class Teclado:
     def get_size_dialog(self, size, teclado_tipo):
         if teclado_tipo == "COMPLETO":
             if size == "CHICO":
-                return 700, 335
+                return 700, 200
             if size == "MEDIANO":
-                return 1000, 400
+                return 1024, 200
             if size == "GRANDE":
-                return 1200, 475
+                return 1200, 200
 
         if teclado_tipo == "NUMERICO":
             if size == "CHICO":
-                return 700, 400
+                return 700, 200
             if size == "MEDIANO":
-                return 900, 400
+                return 900, 200
             if size == "GRANDE":
                 return 1200, 500
 
         if teclado_tipo == "LETRAS":
             if size == "CHICO":
-                return 830, 290
+                return 830, 200
             if size == "MEDIANO":
-                return 1000, 330
+                return 1024, 200
             if size == "GRANDE":
                 return 1200, 550
 
