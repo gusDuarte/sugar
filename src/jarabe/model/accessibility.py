@@ -81,10 +81,10 @@ class Keyboard:
 class Screen:
 
     DEFAULT_THEME = "sugar"
-    DEFAULT_FONT_SIZE = 7
+    DEFAULT_FONT_SIZE = 10
     DEFAULT_FONT_FACE = "Sans Serif"
     CONTRAST_THEME = "sugar-contrast"
-    CONTRAST_FONT_SIZE = 9.5
+    CONTRAST_FONT_SIZE = 11
     CAPITAL_LETTERS_FONT_FACE = "Oracle"
 
     def get_contrast(self):
