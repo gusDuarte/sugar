@@ -171,6 +171,6 @@ class AccessibilityManager:
             keyboard.run_config_keyboard()
             mouse.run_config_mouse()
         else:
-            mouse.set_accel_mouse(mouse.DEFAULT_ACCEL_MOUSE)
-            mouse.set_white_mouse(False)
+            #mouse.set_accel_mouse(mouse.DEFAULT_ACCEL_MOUSE)
+            #mouse.set_white_mouse(False)
             mouse._set_accel_mouse_setting()
