@@ -28,6 +28,9 @@ extensions/cpsection/network/view.py
 extensions/cpsection/power/__init__.py
 extensions/cpsection/power/model.py
 extensions/cpsection/power/view.py
+extensions/cpsection/switchdesktop/__init__.py
+extensions/cpsection/switchdesktop/model.py
+extensions/cpsection/switchdesktop/view.py
 extensions/deviceicon/battery.py
 extensions/deviceicon/frame.py
 extensions/deviceicon/network.py

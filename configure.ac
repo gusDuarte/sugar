@@ -58,6 +58,7 @@ extensions/cpsection/frame/Makefile
 extensions/cpsection/keyboard/Makefile
 extensions/cpsection/language/Makefile
 extensions/cpsection/modemconfiguration/Makefile
+extensions/cpsection/switchdesktop/Makefile
 extensions/cpsection/Makefile
 extensions/cpsection/network/Makefile
 extensions/cpsection/power/Makefile
