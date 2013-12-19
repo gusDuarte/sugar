@@ -365,7 +365,7 @@ class ControlPanel(Gtk.Window):
                 self._section_view.restart_alerts
             self._show_main_view()
         elif response_id is Gtk.ResponseType.APPLY:
-            import subrprocess
+            import subprocess
             subprocess.call(["/usr/bin/switch-session"])
 
     def __select_option_cb(self, button, event, option):
